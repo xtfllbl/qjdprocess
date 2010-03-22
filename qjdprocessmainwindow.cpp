@@ -2070,75 +2070,75 @@ void qjdProcessMainWindow::keyPress(QKeyEvent *event)
 
 void qjdProcessMainWindow::setTable()
 {
-    qjdtable->move(10,100);
-    qjdtable->resize(640,200);
-    qjdtable->setFocusPolicy(Qt::StrongFocus);
-    qjdtable->setSelectionBehavior(QAbstractItemView::SelectRows);
-    qjdtable->setSelectionMode(QAbstractItemView::SingleSelection);
-    qjdtable->setEditTriggers(QAbstractItemView::NoEditTriggers);
-    qjdtable->setAlternatingRowColors(true);
-    qjdtable->verticalHeader()->setVisible(false);
-
-    QPalette palette;
-    QLinearGradient gradient(1, 0, 0.623398, 0.983);
-    gradient.setSpread(QGradient::PadSpread);
-    gradient.setCoordinateMode(QGradient::ObjectBoundingMode);
-    gradient.setColorAt(0, QColor(80, 170, 255, 255));
-    gradient.setColorAt(1, QColor(85, 85, 255, 255));
-    QBrush brush(gradient);
-    palette.setBrush(QPalette::Active, QPalette::Highlight, brush);
-    QBrush brush1(QColor(255, 255, 255, 255));
-    brush1.setStyle(Qt::SolidPattern);
-    palette.setBrush(QPalette::Active, QPalette::HighlightedText, brush1);
-    QBrush brush2(QColor(255, 255, 220, 255));
-    brush2.setStyle(Qt::SolidPattern);
-    palette.setBrush(QPalette::Active, QPalette::AlternateBase, brush2);
-    QLinearGradient gradient1(1, 0, 0.623398, 0.983);
-    gradient1.setSpread(QGradient::PadSpread);
-    gradient1.setCoordinateMode(QGradient::ObjectBoundingMode);
-    gradient1.setColorAt(0, QColor(80, 170, 255, 255));
-    gradient1.setColorAt(1, QColor(85, 85, 255, 255));
-    QBrush brush3(gradient1);
-    palette.setBrush(QPalette::Inactive, QPalette::Highlight, brush3);
-    palette.setBrush(QPalette::Inactive, QPalette::HighlightedText, brush1);
-    palette.setBrush(QPalette::Inactive, QPalette::AlternateBase, brush2);
-    QLinearGradient gradient2(1, 0, 0.623398, 0.983);
-    gradient2.setSpread(QGradient::PadSpread);
-    gradient2.setCoordinateMode(QGradient::ObjectBoundingMode);
-    gradient2.setColorAt(0, QColor(80, 170, 255, 255));
-    gradient2.setColorAt(1, QColor(85, 85, 255, 255));
-    QBrush brush4(gradient2);
-    palette.setBrush(QPalette::Disabled, QPalette::Highlight, brush4);
-    palette.setBrush(QPalette::Disabled, QPalette::HighlightedText, brush1);
-    palette.setBrush(QPalette::Disabled, QPalette::AlternateBase, brush2);
-    qjdtable->setPalette(palette);
-
-    qjdtable->setStyleSheet(QString::fromUtf8("gridline-color: rgb(200, 200, 200);\n"
-"selection-color: rgb(255, 255, 255);\n"
-"font: 10pt \"\346\226\207\346\263\211\351\251\277\346\255\243\351\273\221\";\n"
-"selection-background-color: qlineargradient(spread:pad, x1:1, y1:0, x2:0.623398, y2:0.983, stop:0 rgba(80, 170, 255, 255), stop:1 rgba(85, 85, 255, 255));"));
-
-    /// 排序功能
-    qjdtable->setSortingEnabled(false);       //自动排序关闭
-    qjdtable->horizontalHeader()->setSortIndicatorShown(true);
-    qjdtable->horizontalHeader()->setClickable(true);
-    connect(qjdtable->horizontalHeader(),SIGNAL(sectionClicked(int)),this,SLOT(headerHandle(int)));
-
-    /// 设置右键弹出菜单
-    menu=NULL;
-    qjdtable->setContextMenuPolicy(Qt::CustomContextMenu);
-    connect(qjdtable, SIGNAL(customContextMenuRequested(const QPoint&)),
-            this, SLOT(showContextMenu(const QPoint&)));//this是datatable所在窗口
-
-    menu = new QMenu(qjdtable);
-    actStop = menu->addAction("Stop");
-    actCon = menu->addAction("Continue");
-    actTer = menu->addAction("Terminate");
-    actKill = menu->addAction("Kill");
-    actHan = menu->addAction("Hang Up");
-    connect(actTer, SIGNAL(triggered()), this, SLOT(terProcess()));
-    connect(actKill, SIGNAL(triggered()), this, SLOT(killProcess()));
-    connect(actHan, SIGNAL(triggered()), this, SLOT(hanProcess()));
-    connect(actStop, SIGNAL(triggered()), this, SLOT(stopProcess()));
-    connect(actCon, SIGNAL(triggered()), this, SLOT(conProcess()));
+//    qjdtable->move(10,100);
+//    qjdtable->resize(640,200);
+//    qjdtable->setFocusPolicy(Qt::StrongFocus);
+//    qjdtable->setSelectionBehavior(QAbstractItemView::SelectRows);
+//    qjdtable->setSelectionMode(QAbstractItemView::SingleSelection);
+//    qjdtable->setEditTriggers(QAbstractItemView::NoEditTriggers);
+//    qjdtable->setAlternatingRowColors(true);
+//    qjdtable->verticalHeader()->setVisible(false);
+//
+//    QPalette palette;
+//    QLinearGradient gradient(1, 0, 0.623398, 0.983);
+//    gradient.setSpread(QGradient::PadSpread);
+//    gradient.setCoordinateMode(QGradient::ObjectBoundingMode);
+//    gradient.setColorAt(0, QColor(80, 170, 255, 255));
+//    gradient.setColorAt(1, QColor(85, 85, 255, 255));
+//    QBrush brush(gradient);
+//    palette.setBrush(QPalette::Active, QPalette::Highlight, brush);
+//    QBrush brush1(QColor(255, 255, 255, 255));
+//    brush1.setStyle(Qt::SolidPattern);
+//    palette.setBrush(QPalette::Active, QPalette::HighlightedText, brush1);
+//    QBrush brush2(QColor(255, 255, 220, 255));
+//    brush2.setStyle(Qt::SolidPattern);
+//    palette.setBrush(QPalette::Active, QPalette::AlternateBase, brush2);
+//    QLinearGradient gradient1(1, 0, 0.623398, 0.983);
+//    gradient1.setSpread(QGradient::PadSpread);
+//    gradient1.setCoordinateMode(QGradient::ObjectBoundingMode);
+//    gradient1.setColorAt(0, QColor(80, 170, 255, 255));
+//    gradient1.setColorAt(1, QColor(85, 85, 255, 255));
+//    QBrush brush3(gradient1);
+//    palette.setBrush(QPalette::Inactive, QPalette::Highlight, brush3);
+//    palette.setBrush(QPalette::Inactive, QPalette::HighlightedText, brush1);
+//    palette.setBrush(QPalette::Inactive, QPalette::AlternateBase, brush2);
+//    QLinearGradient gradient2(1, 0, 0.623398, 0.983);
+//    gradient2.setSpread(QGradient::PadSpread);
+//    gradient2.setCoordinateMode(QGradient::ObjectBoundingMode);
+//    gradient2.setColorAt(0, QColor(80, 170, 255, 255));
+//    gradient2.setColorAt(1, QColor(85, 85, 255, 255));
+//    QBrush brush4(gradient2);
+//    palette.setBrush(QPalette::Disabled, QPalette::Highlight, brush4);
+//    palette.setBrush(QPalette::Disabled, QPalette::HighlightedText, brush1);
+//    palette.setBrush(QPalette::Disabled, QPalette::AlternateBase, brush2);
+//    qjdtable->setPalette(palette);
+//
+//    qjdtable->setStyleSheet(QString::fromUtf8("gridline-color: rgb(200, 200, 200);\n"
+//"selection-color: rgb(255, 255, 255);\n"
+//"font: 10pt \"\346\226\207\346\263\211\351\251\277\346\255\243\351\273\221\";\n"
+//"selection-background-color: qlineargradient(spread:pad, x1:1, y1:0, x2:0.623398, y2:0.983, stop:0 rgba(80, 170, 255, 255), stop:1 rgba(85, 85, 255, 255));"));
+//
+//    /// 排序功能
+//    qjdtable->setSortingEnabled(false);       //自动排序关闭
+//    qjdtable->horizontalHeader()->setSortIndicatorShown(true);
+//    qjdtable->horizontalHeader()->setClickable(true);
+//    connect(qjdtable->horizontalHeader(),SIGNAL(sectionClicked(int)),this,SLOT(headerHandle(int)));
+//
+//    /// 设置右键弹出菜单
+//    menu=NULL;
+//    qjdtable->setContextMenuPolicy(Qt::CustomContextMenu);
+//    connect(qjdtable, SIGNAL(customContextMenuRequested(const QPoint&)),
+//            this, SLOT(showContextMenu(const QPoint&)));//this是datatable所在窗口
+//
+//    menu = new QMenu(qjdtable);
+//    actStop = menu->addAction("Stop");
+//    actCon = menu->addAction("Continue");
+//    actTer = menu->addAction("Terminate");
+//    actKill = menu->addAction("Kill");
+//    actHan = menu->addAction("Hang Up");
+//    connect(actTer, SIGNAL(triggered()), this, SLOT(terProcess()));
+//    connect(actKill, SIGNAL(triggered()), this, SLOT(killProcess()));
+//    connect(actHan, SIGNAL(triggered()), this, SLOT(hanProcess()));
+//    connect(actStop, SIGNAL(triggered()), this, SLOT(stopProcess()));
+//    connect(actCon, SIGNAL(triggered()), this, SLOT(conProcess()));
 }
