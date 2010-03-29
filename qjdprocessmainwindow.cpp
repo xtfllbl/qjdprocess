@@ -273,24 +273,25 @@ void qjdProcessMainWindow::setData()
         aUid=QString::number(procview->uidVector.at(i),10);
         aUsrName=procview->usernameVector.at(i);
 
-        /// 此处的不用delete, 只要delete model 这些自动回收  valgrind 判断此处问题多多
+        /// 此处的不用delete, 只要delete model 这些自动回收
+        // valgrind 判断此处问题多多，真的会回收么,有一小部分泄漏
         itemPid=new QStandardItem(aPid);
         itemCmd=new QStandardItem(aCmd);
         itemStat=new QStandardItem(aStat);
         itemNice=new QStandardItem(aNice);
         itemStartTime=new QStandardItem(aStartTime);
-        itemWchan=new QStandardItem(aWchan);//
+        itemWchan=new QStandardItem(aWchan);
         itemWhichCpu=new QStandardItem(aWhichCpu);
         itemMem=new QStandardItem(aMem);
-        itemPmem=new QStandardItem(aPmem);//
-        itemSleepAvg=new QStandardItem(aSleepAvg);//
+        itemPmem=new QStandardItem(aPmem);
+        itemSleepAvg=new QStandardItem(aSleepAvg);
         itemStack=new QStandardItem(aStack);
-        itemIoread=new QStandardItem(aIoread);//
-        itemIowrite=new QStandardItem(aIowrite);//
+        itemIoread=new QStandardItem(aIoread);
+        itemIowrite=new QStandardItem(aIowrite);
         itemPcpu=new QStandardItem(aPcpu);
-        itemWcpu=new QStandardItem(aWcpu);//
-        itemCmdLine=new QStandardItem(aCmdLine);//
-        itemUid=new QStandardItem(aUid);//
+        itemWcpu=new QStandardItem(aWcpu);
+        itemCmdLine=new QStandardItem(aCmdLine);
+        itemUid=new QStandardItem(aUid);
         itemUsrName=new QStandardItem(aUsrName);
 
         /// 插入中间判断，符合要求，则插入数据

@@ -580,18 +580,6 @@ int Proc::read_system()
             p+=6;
             sscanf(p, "%d", &boot_time);
         }
-
-        int max_cpus=512;
-//        cpu_times_vec = new unsigned[CPUTIMES * max_cpus];
-//        old_cpu_times_vec = new unsigned[CPUTIMES * max_cpus];
-
-        //init
-//        for(int cpu = 0; cpu < max_cpus ; cpu++)
-//            for(int i = 0; i < CPUTIMES; i++)
-//            {
-//            cpu_times(cpu, i)=0;
-//            old_cpu_times(cpu, i) =0;
-//        }
     }
 
     // read system status  /proc/stat
@@ -625,22 +613,6 @@ int Proc::read_system()
         num_cpus=vals[r];
     }
 
-    // Hotplugging Detection : save total_cpu
-//    if(Proc::num_cpus != Proc::old_num_cpus) {
-//        for(int i = 0; i < CPUTIMES; i++)
-//            cpu_times(num_cpus, i) = cpu_times(Proc::old_num_cpus, i);
-//
-//        Proc::old_num_cpus=Proc::num_cpus;
-//    }
-
-
-    // backup old values :  important*******
-//    for(int cpu = 0; cpu < Proc::num_cpus+1; cpu++)
-//    {
-//        for(int i = 0; i < CPUTIMES; i++)
-//            old_cpu_times(cpu, i) = cpu_times(cpu, i);
-//    }
-
     /*
                 /proc/stat
                 cpu#	user	nice	system	idle		iowait(2.6)	irq(2.6)	sft(2.6)	steal(2.6.11) 	guest(2.6.24)
@@ -665,85 +637,7 @@ int Proc::read_system()
         system+=steal;
         system+=guest;
     }
-//    cpu_times(Proc::num_cpus, CPUTIME_USER)=user;           //赋值给cpu的相关参数
-//    cpu_times(Proc::num_cpus, CPUTIME_NICE)=nice;
-//    cpu_times(Proc::num_cpus, CPUTIME_SYSTEM)=system;
-//    cpu_times(Proc::num_cpus, CPUTIME_IDLE)=idle;
 
-    // infobar uses this value, so this ga
-//    Proc::dt_used=user - old_cpu_times(Proc::num_cpus, CPUTIME_USER);
-//    Proc::dt_used+=system - old_cpu_times(Proc::num_cpus, CPUTIME_SYSTEM);
-//    Proc::dt_total= dt_used +
-//                    nice - old_cpu_times(Proc::num_cpus, CPUTIME_NICE)+
-//                    idle - old_cpu_times(Proc::num_cpus, CPUTIME_IDLE);
-
-    if(first_time)
-    {
-        //	printf("\n==================== tooo fast =================================\n");
-        //	printf("DEBUG:dt_total=%d dt_used=%d\n",Proc::dt_total,Proc::dt_used);
-        //	return -1; // too early refresh again  !! 不在第一次的时候刷新的意思
-    }
-//    if(Proc::dt_total==0)
-//    {
-//        //?????
-//        printf("Error: dt_total=0 , dt_used=%ld(ld) \n",Proc::dt_used,old_cpu_times(Proc::num_cpus,CPUTIME_IDLE));
-//        dt_total=500; //more tolerable?
-//        //abort(); // stdlib.h
-//    }
-
-    //	void watchdog_syscpu(int );
-    //	watchdog_syscpu((user-old_cpu_times(num_cpus,CPUTIME_USER))*100/dt_total); // test
-
-    if(flag_devel and flag_SMPsim )     //这2个flag从未被赋真值，不会被执行
-    {
-//        // for Developer only !!! ～～～～原来如此
-//        // printf("user%d nuce%d system%d idle%d\n",user,nice,system,idle);
-//        for(int cpu = 0; cpu < num_cpus ; cpu++) {
-//            //stdlib.h, int rand();
-//            if(dt_used!=0) cpu_times(cpu, CPUTIME_USER)=old_cpu_times(cpu, CPUTIME_USER ) + rand()%dt_used;
-//            else 	cpu_times(cpu, CPUTIME_USER)=0;
-//            cpu_times(cpu, CPUTIME_NICE)=nice;
-//            cpu_times(cpu, CPUTIME_SYSTEM)=system;
-//            cpu_times(cpu, CPUTIME_IDLE)=idle;
-//
-//        }
-    }
-//    else
-//    {
-//        // SMP(Multi-CPU)
-//        for(int cpu = 0; cpu < num_cpus ; cpu++)
-//        {
-//            char cpu_buf[10];
-//            sprintf(cpu_buf, "cpu%d", cpu);
-//            if((p = strstr(buf, cpu_buf)) != 0)
-//            {
-//                //将那些读进来再次进行转存
-//                nflds = sscanf(p, "%*s %u %u %u %u %u %u %u %u %u",
-//                               &cpu_times(cpu, CPUTIME_USER), &cpu_times(cpu, CPUTIME_NICE),
-//                               &cpu_times(cpu, CPUTIME_SYSTEM), &cpu_times(cpu, CPUTIME_IDLE),
-//                               &iowait, &irq, &sftirq,&steal,&guest);
-//                //cpu_times(cpu, CPUTIME_USER),cpu_times(cpu, CPUTIME_NICE),
-//                if( nflds > 4 )
-//                {
-//                    // kernel 2.6.x
-//                    cpu_times(cpu, CPUTIME_SYSTEM)+=(irq+sftirq);
-//                    cpu_times(cpu, CPUTIME_IDLE)+=iowait;
-//                }
-//                if( nflds == 9 )
-//                {
-//                    cpu_times(cpu, CPUTIME_SYSTEM)+=(steal+guest);
-//                }
-//
-//                // 2.4.27-SMP bug
-//
-//            }
-//            else
-//            {
-//                fprintf(stderr, "Qps: Error reading info for cpu%d (/proc/stat)\n", cpu);
-//                abort();
-//            }
-//        }
-//    }
 
     // read memory info
     strcpy(path, PROCDIR);
@@ -778,15 +672,14 @@ Proc::Proc()
 Proc::~Proc()
 {}
 
-// COMMON for LINUX,SOLARIS
 // Polling /proc/PID/*
 // 在proc_common的refresh中刷新
 void Proc::read_proc_all()
 {
+    qDebug()<<"read all";
     DIR *d = opendir("/proc");
     struct dirent *e;
 
-    //    int loop=0;
     while((e = readdir(d)) != 0)
     {
         if(e->d_name[0] >= '0' and e->d_name[0] <= '9')
@@ -808,6 +701,7 @@ void Proc::read_proc_all()
                 pi->generation = current_gen; // this process is alive
                 cmdVector<<pi->command;
             }
+
         }
     }
     closedir(d);
@@ -858,6 +752,7 @@ void Proc::refresh()
     //init
     if(Proc::read_system()<0) return; // **** should be every refresh !!
 
+    qDebug()<<"refresh";
     read_proc_all();
 
 }
