@@ -45,7 +45,7 @@ public:
     char state;
     int ppid;			// Parent's PID
     int pgrp;
-    dev_t tty;			// tty major:minor device
+//    dev_t tty;			// tty major:minor device
 
     int nthreads;		// number of threads : LWP(Solaris), task(Linux)
     int tgid;			// thread leader's id
@@ -77,6 +77,7 @@ public:
     unsigned long starttime;// start time since run in epoch? Linux : jiffies since boot , solaris
     unsigned long wchan;
     QString wchan_str;
+    QString strName;
 
     // Memory
     unsigned long mem;		// user Memory define
@@ -166,14 +167,14 @@ public:
     int mem_buffers, mem_cached; // Linux
 
     // the following are pointers to matrices indexed by kind (above) and cpu
-    unsigned *cpu_times_vec;
-    unsigned *old_cpu_times_vec;
+//    unsigned *cpu_times_vec;
+//    unsigned *old_cpu_times_vec;
 
     // accessors for (old_)cpu_times_vec
-    unsigned &cpu_times(int cpu, int kind)
-    { return cpu_times_vec[cpu * CPUTIMES + kind]; }
-    unsigned &old_cpu_times(int cpu, int kind)
-    { return old_cpu_times_vec[cpu * CPUTIMES + kind]; }
+//    unsigned &cpu_times(int cpu, int kind)
+//    { return cpu_times_vec[cpu * CPUTIMES + kind]; }
+//    unsigned &old_cpu_times(int cpu, int kind)
+//    { return old_cpu_times_vec[cpu * CPUTIMES + kind]; }
 
     enum { CPUTIME_USER,
            CPUTIME_NICE,

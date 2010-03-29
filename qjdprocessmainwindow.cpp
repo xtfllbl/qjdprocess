@@ -111,6 +111,9 @@ qjdProcessMainWindow::qjdProcessMainWindow(QWidget *parent) :
 qjdProcessMainWindow::~qjdProcessMainWindow()
 {
     delete ui;
+    delete proc;
+    delete procview;
+    delete options;
 }
 
 void qjdProcessMainWindow::changeEvent(QEvent *e)
@@ -276,18 +279,18 @@ void qjdProcessMainWindow::setData()
         itemStat=new QStandardItem(aStat);
         itemNice=new QStandardItem(aNice);
         itemStartTime=new QStandardItem(aStartTime);
-        itemWchan=new QStandardItem(aWchan);
+        itemWchan=new QStandardItem(aWchan);//
         itemWhichCpu=new QStandardItem(aWhichCpu);
         itemMem=new QStandardItem(aMem);
-        itemPmem=new QStandardItem(aPmem);
-        itemSleepAvg=new QStandardItem(aSleepAvg);
+        itemPmem=new QStandardItem(aPmem);//
+        itemSleepAvg=new QStandardItem(aSleepAvg);//
         itemStack=new QStandardItem(aStack);
-        itemIoread=new QStandardItem(aIoread);
-        itemIowrite=new QStandardItem(aIowrite);
+        itemIoread=new QStandardItem(aIoread);//
+        itemIowrite=new QStandardItem(aIowrite);//
         itemPcpu=new QStandardItem(aPcpu);
-        itemWcpu=new QStandardItem(aWcpu);
-        itemCmdLine=new QStandardItem(aCmdLine);
-        itemUid=new QStandardItem(aUid);
+        itemWcpu=new QStandardItem(aWcpu);//
+        itemCmdLine=new QStandardItem(aCmdLine);//
+        itemUid=new QStandardItem(aUid);//
         itemUsrName=new QStandardItem(aUsrName);
 
         /// 插入中间判断，符合要求，则插入数据
