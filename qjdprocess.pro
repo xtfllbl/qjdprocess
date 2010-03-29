@@ -3,6 +3,7 @@
 # -------------------------------------------------
 TARGET = qjdprocess
 TEMPLATE = app
+QMAKE_LFAGS+= -static
 CONFIG += warn_off \
     qt \
     precompile_header \

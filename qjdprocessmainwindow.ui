@@ -181,13 +181,21 @@
         </disabled>
        </palette>
       </property>
+      <property name="font">
+       <font>
+        <family>微软雅黑</family>
+        <pointsize>10</pointsize>
+        <weight>50</weight>
+        <italic>false</italic>
+        <bold>false</bold>
+       </font>
+      </property>
       <property name="focusPolicy">
        <enum>Qt::StrongFocus</enum>
       </property>
       <property name="styleSheet">
        <string notr="true">gridline-color: rgb(200, 200, 200);
 selection-color: rgb(255, 255, 255);
-font: 10pt &quot;文泉驿正黑&quot;;
 selection-background-color: qlineargradient(spread:pad, x1:1, y1:0, x2:0.623398, y2:0.983, stop:0 rgba(80, 170, 255, 255), stop:1 rgba(85, 85, 255, 255));</string>
       </property>
       <property name="frameShape">
@@ -263,7 +271,7 @@ selection-background-color: qlineargradient(spread:pad, x1:1, y1:0, x2:0.623398,
      <x>0</x>
      <y>0</y>
      <width>818</width>
-     <height>25</height>
+     <height>27</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">

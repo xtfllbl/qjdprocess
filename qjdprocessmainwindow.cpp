@@ -103,6 +103,7 @@ qjdProcessMainWindow::qjdProcessMainWindow(QWidget *parent) :
     connect(actStop, SIGNAL(triggered()), this, SLOT(stopProcess()));
     connect(actCon, SIGNAL(triggered()), this, SLOT(conProcess()));
 
+    // 按要求显示进程名称
     connect(ui->comboProcess,SIGNAL(currentIndexChanged(int)),this,SLOT(autoRefresh()));
     setData();
 }
@@ -130,7 +131,7 @@ void qjdProcessMainWindow::setData()
     int colNum=options->countCol;
     /// 警示可能的内存泄漏
 
-    /// 已经delete, 仍然有0.3Mb的泄漏
+//    已经delete, 仍然有0.3Mb的泄漏, 不同版本的qt有着不同程度的泄漏
     model = new QStandardItemModel(0, colNum, this);
 
     int countField=0;
@@ -231,7 +232,7 @@ void qjdProcessMainWindow::setData()
     int countRow=0;
     for(int i=0;i<procview->pidVector.size();i++)
     {
-        aPid=QString::number(procview->pidVector.at(i));
+        aPid=QString::number(procview->pidVector.at(i),10);
         aCmd=procview->cmdVector.at(i);
         if(procview->statVector.at(i)=="S")
         {
@@ -253,20 +254,20 @@ void qjdProcessMainWindow::setData()
         {
             aStat="Uninterruptible";
         }
-        aNice=QString::number(procview->niceVector.at(i));
+        aNice=QString::number(procview->niceVector.at(i),10);
         aStartTime=procview->starttimeVector.at(i);
         aWchan=procview->wchanVector.at(i);
-        aWhichCpu=QString::number(procview->whichcpuVector.at(i));
+        aWhichCpu=QString::number(procview->whichcpuVector.at(i),10);
         aMem=procview->memVector.at(i);
         aPmem.sprintf("%f",procview->pmemVector.at(i));
-        aSleepAvg=QString::number(procview->slpavgVector.at(i));
-        aStack=QString::number(procview->stackVector.at(i));
+        aSleepAvg=QString::number(procview->slpavgVector.at(i),10);
+        aStack=QString::number(procview->stackVector.at(i),10);
         aIoread=procview->ioreadVector.at(i);
         aIowrite=procview->iowriteVector.at(i);
-        aPcpu=QString::number(procview->pcpuVector.at(i));
+        aPcpu=QString::number(procview->pcpuVector.at(i),10);
         aWcpu.sprintf("%f",procview->wcpuVector.at(i));
         aCmdLine=procview->cmdlineVector.at(i);  //cmdlineVector
-        aUid=QString::number(procview->uidVector.at(i));
+        aUid=QString::number(procview->uidVector.at(i),10);
         aUsrName=procview->usernameVector.at(i);
 
         /// 此处的不用delete, 只要delete model 这些自动回收  valgrind 判断此处问题多多
@@ -436,7 +437,7 @@ void qjdProcessMainWindow::setData()
 
 void qjdProcessMainWindow::vectorClear()
 {
-    delete model;       //减少一半的内存泄露
+    delete model;       //减少一大半的内存泄露
     model=NULL;
 
     procview->pidVector.clear();            //pid
@@ -499,7 +500,7 @@ void qjdProcessMainWindow::on_tblMain_pressed(QModelIndex index)
     //获取所在行的pid
     processID=ui->tblMain->model()->index(selectRow,0).data().toInt();
 //    processID=qjdtable->model()->index(selectRow,0).data().toInt();
-    qDebug()<<processID;
+//    qDebug()<<processID;
 }
 
 void qjdProcessMainWindow::showContextMenu(QPoint point)

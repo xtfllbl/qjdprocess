@@ -2,6 +2,7 @@
 #include <QTableView>
 #include <QDebug>
 
+// 以备不时之需
 qjdTable::qjdTable(QWidget *parent) :
     QTableView(parent)
 {
@@ -10,6 +11,4 @@ qjdTable::qjdTable(QWidget *parent) :
 void qjdTable::wheelEvent(QWheelEvent *wheelEvent)
 {
     qDebug()<<wheelEvent;
-
-
 }

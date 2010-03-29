@@ -159,7 +159,8 @@ Procinfo::Procinfo(Proc *system_proc,int process_id, int thread_id) : refcnt(1)
 
     hashstr[0]=0;
     hashlen=0;
-
+    io_read=0;
+    io_write=0;
 }
 
 Procinfo::~Procinfo()
@@ -210,6 +211,7 @@ int Procinfo::readproc()
     char *buf;
     int	i_tty;
     long stime, cstime;
+
 
     if(isThread())// flag_thread_ok, 是线程
     {
@@ -366,13 +368,13 @@ int Procinfo::readproc()
     /// 计算程序运行时间
     long u=(long)time(NULL)-(long)starttime;    //神奇的一句话
     proc->originStarttimeVector<<u;
-    QString runtime=QString::number(u)+"Sec";
+    QString runtime=QString::number(u,10)+"Sec";
     int a=0,b=0,c=0,d=0,e=0,f=0;
     if(u>=60 && u<3600)
     {
         c=u/60;
         d=u%60;
-        runtime=QString::number(c)+"Min "+QString::number(d)+"Sec";
+        runtime=QString::number(c,10)+"Min "+QString::number(d,10)+"Sec";
     }
     if(u>=3600 && u<86400)
     {
@@ -387,7 +389,7 @@ int Procinfo::readproc()
         {
             d=b;
         }
-        runtime=QString::number(a)+"Hour "+QString::number(c)+"Min "+QString::number(d)+"Sec";
+        runtime=QString::number(a,10)+"Hour "+QString::number(c,10)+"Min "+QString::number(d,10)+"Sec";
     }
     if(u>86400)
     {
@@ -412,7 +414,7 @@ int Procinfo::readproc()
             e=b/60;
             f=b%60;
         }
-        runtime=QString::number(a)+"Day "+QString::number(c)+"Hour "+QString::number(e)+"Min "+QString::number(f)+"Sec";
+        runtime=QString::number(a,10)+"Day "+QString::number(c,10)+"Hour "+QString::number(e,10)+"Min "+QString::number(f,10)+"Sec";
     }
     proc->starttimeVector<<runtime;
     ///    qDebug()<<(long)time(NULL)-(long)starttime;      //进程启动时间
@@ -471,13 +473,13 @@ int Procinfo::readproc()
     mem= resident-share;            //内存使用量
     proc->originMemVector<<mem;
     pmem = 100.0 * mem / proc->mem_total;       //内存使用的百分比
-    QString memT=QString::number(mem)+"K";
+    QString memT=QString::number(mem,10)+"K";
     int memTemp;
     memTemp=mem;
     if(mem>1024)
     {
         memTemp=mem/1024;
-        memT=QString::number(memTemp)+"M";
+        memT=QString::number(memTemp,10)+"M";
     }
     proc->memVector<<memT;
 
@@ -515,19 +517,19 @@ int Procinfo::readproc()
         proc->originIoreadVector<<io_read;
         proc->originIowriteVector<<io_write;
         /// 将io使用情况转换为相应单位准备显示
-        read=QString::number(io_read)+"K";
-        write=QString::number(io_write)+"K";
+        read=QString::number(io_read,10)+"K";
+        write=QString::number(io_write,10)+"K";
 
         if(io_read>1024)
         {
             readTemp=io_read/1024;
-            read=QString::number(readTemp)+"M";
+            read=QString::number(readTemp,10)+"M";
 
         }
         if(io_write>1024)
         {
             writeTemp=io_write/1024;
-            write=QString::number(writeTemp)+"M";
+            write=QString::number(writeTemp,10)+"M";
         }
         proc->ioreadVector<<read;
         proc->iowriteVector<<write;
