@@ -136,7 +136,6 @@ Procinfo::Procinfo(Proc *system_proc,int process_id, int thread_id) : refcnt(1)
     share=0;
     mem=0;
 
-    //tgid=0;
     pcpu=0;
     pmem=0;
 
@@ -144,7 +143,6 @@ Procinfo::Procinfo(Proc *system_proc,int process_id, int thread_id) : refcnt(1)
     old_wcpu=0;
 
     command="noname";
-//    tty=0;
     nice=0;
     starttime=0;
     state='Z';
@@ -350,7 +348,8 @@ int Procinfo::readproc()
                        &nthreads,&starttime, &wchan,&which_cpu,
                        &guest_utime,&cguest_utime);
 
-    strName.clear();  strName.append(state);
+    strName.clear();
+    strName.append(state);
     proc->statVector<<strName;
     proc->niceVector<<nice;
     proc->whichcpuVector<<which_cpu;
@@ -411,7 +410,6 @@ int Procinfo::readproc()
     }
     proc->starttimeVector<<runtime;
     ///    qDebug()<<(long)time(NULL)-(long)starttime;      //进程启动时间
-//    tty = (dev_t)i_tty; // hmmm
     utime += stime;		// we make no user/system time distinction
     cutime += cstime;
 

@@ -8,7 +8,53 @@
 #include <QStringList>
 #include <QDir>
 
-class Proc;
+class Proc
+{
+public:
+    Proc();
+    ~Proc();
+    void read_proc_all(); // test
+    void refresh();
+    int read_system();
+
+    /// 自定义的用于显示的容器
+    QList<int> pidVector;                 //pid
+    QList<QString> cmdVector;        //进程名
+    QList<QString> statVector;        // 状态
+    QList<int> niceVector;
+    QList<QString> starttimeVector;
+    QList<QString> wchanVector;
+    QList<int> whichcpuVector;
+    QList<QString> memVector;       //内存使用量
+    QList<float> pmemVector;                    //内存使用百分比
+    QList<int> slpavgVector;       //睡眠百分比
+    QList<unsigned long> stackVector;       //栈空间
+    QList<QString> ioreadVector;
+    QList<QString> iowriteVector;
+    QList<int> pcpuVector;                    //cpu使用百分比
+    QList<float> wcpuVector;                    //cpu使用30s内百分比
+    QList<QString> cmdlineVector;
+    QList<int> uidVector;
+    QList<QString> usernameVector;
+
+    /// 原始数据容器，用来排序
+    QList<long> originStarttimeVector;
+    QList<long> originMemVector;       //内存使用量
+    QList<long> originIoreadVector;
+    QList<long> originIowriteVector;
+
+    // class
+    int 	num_cpus;			// current number of CPUs
+
+    unsigned int clk_tick;		// the  number  of  clock ticks per second.
+    unsigned int boot_time;		// boot time in seconds since the Epoch
+
+    int mem_total, mem_free;		// (Kb)
+    int swap_total, swap_free;		// in kB
+
+    int mem_buffers, mem_cached; // Linux
+};
+
 
 class Procinfo	// Process Infomation
 {
@@ -23,7 +69,7 @@ public:
     int pid;
 
     char 	hashstr[128*3];	// cache
-    int		hashlen;
+    int	hashlen;
     int 	hashcmp(char *str);
 
     QString command;	//COMMAND
@@ -43,7 +89,6 @@ public:
     char state;
     int ppid;			// Parent's PID
     int pgrp;
-//    dev_t tty;			// tty major:minor device
 
     int nthreads;		// number of threads : LWP(Solaris), task(Linux)
     int tgid;			// thread leader's id
@@ -99,51 +144,5 @@ public:
     char refcnt;
 };
 
-class Proc
-{
-public:
-    Proc();
-    ~Proc();
-    void read_proc_all(); // test
-    void refresh();
-    int read_system();
-
-    /// 自定义的用于显示的容器
-    QList<int> pidVector;                 //pid
-    QList<QString> cmdVector;        //进程名
-    QList<QString> statVector;        // 状态
-    QList<int> niceVector;
-    QList<QString> starttimeVector;
-    QList<QString> wchanVector;
-    QList<int> whichcpuVector;
-    QList<QString> memVector;       //内存使用量
-    QList<float> pmemVector;                    //内存使用百分比
-    QList<int> slpavgVector;       //睡眠百分比
-    QList<unsigned long> stackVector;       //栈空间
-    QList<QString> ioreadVector;
-    QList<QString> iowriteVector;
-    QList<int> pcpuVector;                    //cpu使用百分比
-    QList<float> wcpuVector;                    //cpu使用30s内百分比
-    QList<QString> cmdlineVector;
-    QList<int> uidVector;
-    QList<QString> usernameVector;
-
-    /// 原始数据容器
-    QList<long> originStarttimeVector;
-    QList<long> originMemVector;       //内存使用量
-    QList<long> originIoreadVector;
-    QList<long> originIowriteVector;
-
-    // class
-    int 	num_cpus;			// current number of CPUs
-
-    unsigned int clk_tick;		// the  number  of  clock ticks per second.
-    unsigned int boot_time;		// boot time in seconds since the Epoch
-
-    int mem_total, mem_free;		// (Kb)
-    int swap_total, swap_free;		// in kB
-
-    int mem_buffers, mem_cached; // Linux
-};
 
 #endif	// PROC_H

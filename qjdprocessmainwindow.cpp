@@ -271,27 +271,27 @@ void qjdProcessMainWindow::setData()
         aUid=QString::number(proc->uidVector.at(i),10);//
         aUsrName=proc->usernameVector.at(i);
 
-        /// 此处的不用delete, 只要delete model 这些自动回收
         // valgrind 判断此处问题多多，真的会回收么,有一小部分泄漏
-        QStandardItem *itemPid=new QStandardItem(aPid);
-        QStandardItem *itemCmd=new QStandardItem(aCmd);
-        QStandardItem *itemStat=new QStandardItem(aStat);
-        QStandardItem *itemNice=new QStandardItem(aNice);
-        QStandardItem *itemStartTime=new QStandardItem(aStartTime);
-        QStandardItem *itemWchan=new QStandardItem(aWchan);//
-        QStandardItem *itemWhichCpu=new QStandardItem(aWhichCpu);
-        QStandardItem *itemMem=new QStandardItem(aMem);
-        QStandardItem *itemPmem=new QStandardItem(aPmem);//
-        QStandardItem *itemSleepAvg=new QStandardItem(aSleepAvg);//
-        QStandardItem *itemStack=new QStandardItem(aStack);
-        QStandardItem *itemIoread=new QStandardItem(aIoread);//
-        QStandardItem *itemIowrite=new QStandardItem(aIowrite);//
-        QStandardItem *itemPcpu=new QStandardItem(aPcpu);
-        QStandardItem *itemWcpu=new QStandardItem(aWcpu);//
-        QStandardItem *itemCmdLine=new QStandardItem(aCmdLine);//
-        QStandardItem *itemUid=new QStandardItem(aUid);//
-        QStandardItem *itemUsrName=new QStandardItem(aUsrName);
+        itemPid=new QStandardItem(aPid);
+        itemCmd=new QStandardItem(aCmd);
+        itemStat=new QStandardItem(aStat);
+        itemNice=new QStandardItem(aNice);
+        itemStartTime=new QStandardItem(aStartTime);
+        itemWchan=new QStandardItem(aWchan);//
+        itemWhichCpu=new QStandardItem(aWhichCpu);
+        itemMem=new QStandardItem(aMem);
+        itemPmem=new QStandardItem(aPmem);//
+        itemSleepAvg=new QStandardItem(aSleepAvg);//
+        itemStack=new QStandardItem(aStack);
+        itemIoread=new QStandardItem(aIoread);//
+        itemIowrite=new QStandardItem(aIowrite);//
+        itemPcpu=new QStandardItem(aPcpu);
+        itemWcpu=new QStandardItem(aWcpu);//
+        itemCmdLine=new QStandardItem(aCmdLine);//
+        itemUid=new QStandardItem(aUid);//
+        itemUsrName=new QStandardItem(aUsrName);
 
+        qDebug()<<itemPid->text()<<itemPid->data();
         /// 插入中间判断，符合要求，则插入数据
         if(ui->comboProcess->currentIndex()==0)
         {
@@ -419,24 +419,6 @@ void qjdProcessMainWindow::setData()
             }
             countRow++;
         }
-//         aPid.clear();
-//         aCmd.clear();
-//         aStat.clear();
-//         aNice.clear();
-//         aStartTime.clear();
-//         aWchan.clear();
-//         aWhichCpu.clear();
-//         aMem.clear();
-//         aPmem.clear();
-//         aSleepAvg.clear();
-//         aStack.clear();
-//         aIoread.clear();
-//         aIowrite.clear();
-//         aPcpu.clear();
-//         aWcpu.clear();
-//         aCmdLine.clear();
-//         aUid.clear();
-//         aUsrName.clear();
     }
 //    qDebug()<<countRow<<"setItemTime"<<model->rowCount();
     ui->tblMain->setModel(model);
@@ -459,7 +441,6 @@ void qjdProcessMainWindow::setData()
 void qjdProcessMainWindow::vectorClear()
 {
     delete model;       //减少一大半的内存泄露
-    model=NULL;
 
     proc->pidVector.clear();            //pid
     proc->cmdVector.clear();        //进程名
