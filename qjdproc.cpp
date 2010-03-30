@@ -128,11 +128,6 @@ Procinfo::Procinfo(Proc *system_proc,int process_id, int thread_id) : refcnt(1)
 
     ppid=0;   // no parent
 
-    generation=-1;
-    //    detail = 0;  //暂时注释
-
-    /// per_cpu_times = 0; not yet
-
     size=0;
     resident=0;
     trs=0;
@@ -166,12 +161,10 @@ Procinfo::Procinfo(Proc *system_proc,int process_id, int thread_id) : refcnt(1)
 Procinfo::~Procinfo()
 {}
 
-// miscellaneous static initializations
-void Proc::init_static()
+bool Procinfo::isThread()
 {
-    pagesize=sysconf(_SC_PAGESIZE); // same getpagesize()  in <unistd.h>
+    return pid!=tgid; // how to check
 }
-
 
 // using cache
 int  Procinfo::hashcmp(char *sbuf)
@@ -437,19 +430,7 @@ int Procinfo::readproc()
             return 1;
         }
 
-        if(proc->dt_total>0)	// move to Proc ??
-        {
-            pcpu = 100.0 * dcpu / proc->dt_total;
-        }
-
-        if(flag_devel and pcpu>100) //DEBUG CODE
-        {
-            printf("Qps pcpu error: %0.0f%% [%d,%s] dt_total=%ld dcpu=%d utime=%ld old_utime=%ld \n"
-                   ,pcpu,pid,qPrintable(command), proc->dt_total,dcpu,utime,old_utime);
-            pcpu=99.99;
-        }
-
-        const float a = Procview::avg_factor;
+        const float a = 1.0;
         wcpu = a * old_wcpu + (1 - a) * pcpu;
     }
     proc->pcpuVector<<pcpu;
@@ -545,9 +526,6 @@ int Procinfo::readproc()
     return 2; // return ok.
 }
 
-// Description:  read common information  for all processes
-// return value
-// 		-1 : too fast refresh !
 int Proc::read_system()
 {
     static bool first_time=true;
@@ -623,7 +601,6 @@ int Proc::read_system()
         */
 
     // Total_cpu
-//    int total_cpu=Proc::num_cpus;
     unsigned user,nice,system,idle,iowait, irq, sftirq, steal,guest, nflds;
     //将这些信息通通读进到buf中去，读一个nflds＋1
     nflds = sscanf(buf, "cpu %u %u %u %u %u %u %u %u %u", &user, &nice, &system, &idle, &iowait, &irq, &sftirq, &steal,&guest);
@@ -645,8 +622,6 @@ int Proc::read_system()
     if((n = read_file(path, buf, sizeof(buf) - 1)) <= 0) return 0;
     buf[n] = '\0';
 
-    // Skip the old /meminfo cruft, making this work in post-2.1.42 kernels
-    // as well.  (values are now in kB)
     //匹配，则给予赋值
     if( p = strstr(buf, "MemTotal:"))
         sscanf(p, "MemTotal: %d kB\n", &mem_total);
@@ -666,8 +641,17 @@ int Proc::read_system()
 
 Proc::Proc()
 {
-    commonPostInit();
-    Proc::init_static();
+    Proc::num_cpus = 0;
+    Proc::mem_total = 0;
+    Proc::mem_free = 0;
+    Proc::mem_buffers = 0;
+    Proc::mem_cached = 0;
+    Proc::swap_total = 0;
+    Proc::swap_free = 0;
+    Proc::boot_time = 0;
+    Proc::clk_tick = 100; //for most system
+    clk_tick=sysconf(_SC_CLK_TCK); //The  number  of  clock ticks per second.
+    pagesize=sysconf(_SC_PAGESIZE); // same getpagesize()  in <unistd.h>
 }
 Proc::~Proc()
 {}
@@ -676,7 +660,7 @@ Proc::~Proc()
 // 在proc_common的refresh中刷新
 void Proc::read_proc_all()
 {
-    qDebug()<<"read all";
+//    qDebug()<<"read all";
     DIR *d = opendir("/proc");
     struct dirent *e;
 
@@ -685,83 +669,33 @@ void Proc::read_proc_all()
         if(e->d_name[0] >= '0' and e->d_name[0] <= '9')
         {
             int pid;
-            Procinfo *pi=NULL;
+            Procinfo *pif=NULL;
             pid=atoi(e->d_name);
             pidVector<<pid;         //取出所有pid，自定义
-            pi=procs.value(pid,NULL);
 
-            if (pi==NULL)   // new process
+            if (pif==NULL)   // new process
             {
-                pi = new Procinfo(this,pid);
-                procs.insert(pid,pi);
+                pif = new Procinfo(this,pid);
             }
-            int ret=pi->readproc();     //CALL readproc();
+            int ret=pif->readproc();     //CALL readproc();  有几个线程就要读几遍
             if(ret>0)
             {
-                pi->generation = current_gen; // this process is alive
-                cmdVector<<pi->command;
+                cmdVector<<pif->command;
             }
-
         }
     }
+
     closedir(d);
-}
-
-bool Procinfo::isThread()
-{
-    return pid!=tgid; // how to check
-}
-
-/* ========================  Procview ============================  */
-float Procview::avg_factor = 1.0;
-
-Procview::Procview()
-{
-    enable=true;
-    refresh(); // before reading Watchdog list
-}
-
-void Proc::commonPostInit()
-{
-    dt_total = 0; // diff system tick
-    dt_used = 0; // for infobar
-    Proc::num_cpus = 0;
-    Proc::old_num_cpus = 0;
-    Proc::mem_total = 0;
-    Proc::mem_free = 0;
-    Proc::mem_buffers = 0;
-    Proc::mem_cached = 0;
-    Proc::swap_total = 0;
-    Proc::swap_free = 0;
-//    Proc::cpu_times_vec = 0;	// array.
-//    Proc::old_cpu_times_vec = 0;
-    Proc::boot_time = 0;
-    Proc::clk_tick = 100; //for most system
-
-    current_gen=0; // !
-    clk_tick=sysconf(_SC_CLK_TCK); //The  number  of  clock ticks per second.
 }
 
 // Description: update the process list      BottleNeck 1.5%    有瓶颈
 // 		read /proc/*
-// 		called by Procview::refresh(), every UPDATE .
 void Proc::refresh()
 {
-    current_gen++;
-
     //init
-    if(Proc::read_system()<0) return; // **** should be every refresh !!
+    if(Proc::read_system()<0)
+        return; // **** should be every refresh !!
 
-    qDebug()<<"refresh";
     read_proc_all();
 
-}
-
-// read new process info
-void Procview::refresh()
-{
-    if(enable)
-    {
-        Proc::refresh(); 	// read "/proc/*", then update the process list
-    }
 }

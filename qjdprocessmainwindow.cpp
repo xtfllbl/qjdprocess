@@ -24,7 +24,6 @@ qjdProcessMainWindow::qjdProcessMainWindow(QWidget *parent) :
     ui->tblMain->horizontalHeader()->setClickable(true);
     connect(ui->tblMain->horizontalHeader(),SIGNAL(sectionClicked(int)),this,SLOT(headerHandle(int)));
 
-    procview =new Procview();       //此地开始refresh
     proc=new Proc();
 
     options=new qjdoptions();
@@ -105,15 +104,14 @@ qjdProcessMainWindow::qjdProcessMainWindow(QWidget *parent) :
 
     // 按要求显示进程名称
     connect(ui->comboProcess,SIGNAL(currentIndexChanged(int)),this,SLOT(autoRefresh()));
+
+    proc->refresh();
     setData();
 }
 
 qjdProcessMainWindow::~qjdProcessMainWindow()
 {
     delete ui;
-    delete proc;
-    delete procview;
-    delete options;
 }
 
 void qjdProcessMainWindow::changeEvent(QEvent *e)
@@ -233,66 +231,66 @@ void qjdProcessMainWindow::setData()
     // 向表格中输入数据
     /// 在此筛选?
     int countRow=0;
-    for(int i=0;i<procview->pidVector.size();i++)
+    for(int i=0;i<proc->pidVector.size();i++)
     {
-        aPid=QString::number(procview->pidVector.at(i),10);
-        aCmd=procview->cmdVector.at(i);
-        if(procview->statVector.at(i)=="S")
+        aPid=QString::number(proc->pidVector.at(i),10);
+        aCmd=proc->cmdVector.at(i);
+        if(proc->statVector.at(i)=="S")
         {
             aStat="Sleep";
         }
-        if(procview->statVector.at(i)=="R")
+        if(proc->statVector.at(i)=="R")
         {
             aStat="Running";
         }
-        if(procview->statVector.at(i)=="Z")
+        if(proc->statVector.at(i)=="Z")
         {
             aStat="Zombie";
         }
-        if(procview->statVector.at(i)=="T")
+        if(proc->statVector.at(i)=="T")
         {
             aStat="Stoped";
         }
-        if(procview->statVector.at(i)=="D")
+        if(proc->statVector.at(i)=="D")
         {
             aStat="Uninterruptible";
         }
-        aNice=QString::number(procview->niceVector.at(i),10);
-        aStartTime=procview->starttimeVector.at(i);
-        aWchan=procview->wchanVector.at(i);
-        aWhichCpu=QString::number(procview->whichcpuVector.at(i),10);
-        aMem=procview->memVector.at(i);
-        aPmem.sprintf("%f",procview->pmemVector.at(i));
-        aSleepAvg=QString::number(procview->slpavgVector.at(i),10);
-        aStack=QString::number(procview->stackVector.at(i),10);
-        aIoread=procview->ioreadVector.at(i);
-        aIowrite=procview->iowriteVector.at(i);
-        aPcpu=QString::number(procview->pcpuVector.at(i),10);
-        aWcpu.sprintf("%f",procview->wcpuVector.at(i));
-        aCmdLine=procview->cmdlineVector.at(i);  //cmdlineVector
-        aUid=QString::number(procview->uidVector.at(i),10);
-        aUsrName=procview->usernameVector.at(i);
+        aNice=QString::number(proc->niceVector.at(i),10);
+        aStartTime=proc->starttimeVector.at(i);
+        aWchan=proc->wchanVector.at(i);//
+        aWhichCpu=QString::number(proc->whichcpuVector.at(i),10);
+        aMem=proc->memVector.at(i);
+        aPmem.sprintf("%f",proc->pmemVector.at(i));//
+        aSleepAvg=QString::number(proc->slpavgVector.at(i),10);//
+        aStack=QString::number(proc->stackVector.at(i),10);
+        aIoread=proc->ioreadVector.at(i);//
+        aIowrite=proc->iowriteVector.at(i);//
+        aPcpu=QString::number(proc->pcpuVector.at(i),10);
+        aWcpu.sprintf("%f",proc->wcpuVector.at(i));//
+        aCmdLine=proc->cmdlineVector.at(i);  //
+        aUid=QString::number(proc->uidVector.at(i),10);//
+        aUsrName=proc->usernameVector.at(i);
 
         /// 此处的不用delete, 只要delete model 这些自动回收
         // valgrind 判断此处问题多多，真的会回收么,有一小部分泄漏
-        itemPid=new QStandardItem(aPid);
-        itemCmd=new QStandardItem(aCmd);
-        itemStat=new QStandardItem(aStat);
-        itemNice=new QStandardItem(aNice);
-        itemStartTime=new QStandardItem(aStartTime);
-        itemWchan=new QStandardItem(aWchan);
-        itemWhichCpu=new QStandardItem(aWhichCpu);
-        itemMem=new QStandardItem(aMem);
-        itemPmem=new QStandardItem(aPmem);
-        itemSleepAvg=new QStandardItem(aSleepAvg);
-        itemStack=new QStandardItem(aStack);
-        itemIoread=new QStandardItem(aIoread);
-        itemIowrite=new QStandardItem(aIowrite);
-        itemPcpu=new QStandardItem(aPcpu);
-        itemWcpu=new QStandardItem(aWcpu);
-        itemCmdLine=new QStandardItem(aCmdLine);
-        itemUid=new QStandardItem(aUid);
-        itemUsrName=new QStandardItem(aUsrName);
+        QStandardItem *itemPid=new QStandardItem(aPid);
+        QStandardItem *itemCmd=new QStandardItem(aCmd);
+        QStandardItem *itemStat=new QStandardItem(aStat);
+        QStandardItem *itemNice=new QStandardItem(aNice);
+        QStandardItem *itemStartTime=new QStandardItem(aStartTime);
+        QStandardItem *itemWchan=new QStandardItem(aWchan);//
+        QStandardItem *itemWhichCpu=new QStandardItem(aWhichCpu);
+        QStandardItem *itemMem=new QStandardItem(aMem);
+        QStandardItem *itemPmem=new QStandardItem(aPmem);//
+        QStandardItem *itemSleepAvg=new QStandardItem(aSleepAvg);//
+        QStandardItem *itemStack=new QStandardItem(aStack);
+        QStandardItem *itemIoread=new QStandardItem(aIoread);//
+        QStandardItem *itemIowrite=new QStandardItem(aIowrite);//
+        QStandardItem *itemPcpu=new QStandardItem(aPcpu);
+        QStandardItem *itemWcpu=new QStandardItem(aWcpu);//
+        QStandardItem *itemCmdLine=new QStandardItem(aCmdLine);//
+        QStandardItem *itemUid=new QStandardItem(aUid);//
+        QStandardItem *itemUsrName=new QStandardItem(aUsrName);
 
         /// 插入中间判断，符合要求，则插入数据
         if(ui->comboProcess->currentIndex()==0)
@@ -301,7 +299,7 @@ void qjdProcessMainWindow::setData()
         }
         if(ui->comboProcess->currentIndex()==1)
         {
-            if(procview->uidVector.at(i)>=500)
+            if(proc->uidVector.at(i)>=500)
             {
                 flagUse=true;
             }
@@ -312,7 +310,7 @@ void qjdProcessMainWindow::setData()
         }
         if(ui->comboProcess->currentIndex()==2)
         {
-            if(procview->statVector.at(i)=="R")
+            if(proc->statVector.at(i)=="R")
             {
                 flagUse=true;
             }
@@ -394,7 +392,8 @@ void qjdProcessMainWindow::setData()
                 model->setItem(countRow,countItem,itemIowrite);
                 countItem++;
             }
-            if(options->pcpu==true)            {
+            if(options->pcpu==true)
+            {
                 model->setItem(countRow,countItem,itemPcpu);
                 countItem++;
             }
@@ -420,6 +419,24 @@ void qjdProcessMainWindow::setData()
             }
             countRow++;
         }
+//         aPid.clear();
+//         aCmd.clear();
+//         aStat.clear();
+//         aNice.clear();
+//         aStartTime.clear();
+//         aWchan.clear();
+//         aWhichCpu.clear();
+//         aMem.clear();
+//         aPmem.clear();
+//         aSleepAvg.clear();
+//         aStack.clear();
+//         aIoread.clear();
+//         aIowrite.clear();
+//         aPcpu.clear();
+//         aWcpu.clear();
+//         aCmdLine.clear();
+//         aUid.clear();
+//         aUsrName.clear();
     }
 //    qDebug()<<countRow<<"setItemTime"<<model->rowCount();
     ui->tblMain->setModel(model);
@@ -444,36 +461,36 @@ void qjdProcessMainWindow::vectorClear()
     delete model;       //减少一大半的内存泄露
     model=NULL;
 
-    procview->pidVector.clear();            //pid
-    procview->cmdVector.clear();        //进程名
-    procview->statVector.clear();        // 状态
-    procview->niceVector.clear();
-    procview->starttimeVector.clear();
-    procview->wchanVector.clear();       //与下文wchan_str相匹配
-    procview->whichcpuVector.clear();
-    procview->memVector.clear();       //内存使用量
-    procview->pmemVector.clear();                    //内存使用百分比
-    procview->slpavgVector.clear();       //睡眠百分比
-    procview->stackVector.clear();       //栈空间
-    procview->ioreadVector.clear();
-    procview->iowriteVector.clear();
-    procview->pcpuVector.clear();                    //cpu使用百分比
-    procview->wcpuVector.clear();                    //cpu使用30s内百分比
-    procview->cmdlineVector.clear();
-    procview->uidVector.clear();
-    procview->usernameVector.clear();
+    proc->pidVector.clear();            //pid
+    proc->cmdVector.clear();        //进程名
+    proc->statVector.clear();        // 状态
+    proc->niceVector.clear();
+    proc->starttimeVector.clear();
+    proc->wchanVector.clear();       //与下文wchan_str相匹配
+    proc->whichcpuVector.clear();
+    proc->memVector.clear();       //内存使用量
+    proc->pmemVector.clear();                    //内存使用百分比
+    proc->slpavgVector.clear();       //睡眠百分比
+    proc->stackVector.clear();       //栈空间
+    proc->ioreadVector.clear();
+    proc->iowriteVector.clear();
+    proc->pcpuVector.clear();                    //cpu使用百分比
+    proc->wcpuVector.clear();                    //cpu使用30s内百分比
+    proc->cmdlineVector.clear();
+    proc->uidVector.clear();
+    proc->usernameVector.clear();
 
-    procview->originIoreadVector.clear();
-    procview->originIowriteVector.clear();
-    procview->originMemVector.clear();
-    procview->originStarttimeVector.clear();
+    proc->originIoreadVector.clear();
+    proc->originIowriteVector.clear();
+    proc->originMemVector.clear();
+    proc->originStarttimeVector.clear();
 }
 
 void qjdProcessMainWindow::autoRefresh()
 {
     machineRefresh=true;
     vectorClear();
-    procview->refresh();        //refresh 就开始泄漏了
+    proc->refresh();        //refresh 就开始泄漏了
     if(flagSort==true)
     {
         headerSort();
@@ -858,57 +875,57 @@ void qjdProcessMainWindow::setSortData()
     // pid 排序
     if(flagSortPid==1 || flagSortPid==2)
     {
-        for(int i=0;i<procview->pidVector.size();i++)
+        for(int i=0;i<proc->pidVector.size();i++)
         {
-            t=procview->pidVector.size()-i-1;
+            t=proc->pidVector.size()-i-1;
             for(int j=0;j<t;j++)
             {
                 if(flagSortPid==1)
                 {
-                    if(procview->pidVector[j] < procview->pidVector[j+1])
+                    if(proc->pidVector[j] < proc->pidVector[j+1])
                     {
-                        swapInt(procview->pidVector[j],procview->pidVector[j+1],temp);
-                        swapInt(procview->niceVector[j],procview->niceVector[j+1],temp);
-                        swapInt(procview->whichcpuVector[j],procview->whichcpuVector[j+1],temp);
-                        swapInt(procview->pmemVector[j],procview->pmemVector[j+1],temp);
-                        swapInt(procview->slpavgVector[j],procview->slpavgVector[j+1],temp);
-                        swapInt(procview->stackVector[j],procview->stackVector[j+1],temp);
-                        swapInt(procview->pcpuVector[j],procview->pcpuVector[j+1],temp);
-                        swapInt(procview->wcpuVector[j],procview->wcpuVector[j+1],temp);
-                        swapInt(procview->uidVector[j],procview->uidVector[j+1],temp);
-                        swapString(procview->cmdVector[j],procview->cmdVector[j+1],tempS);
-                        swapString(procview->statVector[j],procview->statVector[j+1],tempS);
-                        swapString(procview->starttimeVector[j],procview->starttimeVector[j+1],tempS);
-                        swapString(procview->wchanVector[j],procview->wchanVector[j+1],tempS);
-                        swapString(procview->memVector[j],procview->memVector[j+1],tempS);
-                        swapString(procview->ioreadVector[j],procview->ioreadVector[j+1],tempS);
-                        swapString(procview->iowriteVector[j],procview->iowriteVector[j+1],tempS);
-                        swapString(procview->cmdlineVector[j],procview->cmdlineVector[j+1],tempS);
-                        swapString(procview->usernameVector[j],procview->usernameVector[j+1],tempS);
+                        swapInt(proc->pidVector[j],proc->pidVector[j+1],temp);
+                        swapInt(proc->niceVector[j],proc->niceVector[j+1],temp);
+                        swapInt(proc->whichcpuVector[j],proc->whichcpuVector[j+1],temp);
+                        swapInt(proc->pmemVector[j],proc->pmemVector[j+1],temp);
+                        swapInt(proc->slpavgVector[j],proc->slpavgVector[j+1],temp);
+                        swapInt(proc->stackVector[j],proc->stackVector[j+1],temp);
+                        swapInt(proc->pcpuVector[j],proc->pcpuVector[j+1],temp);
+                        swapInt(proc->wcpuVector[j],proc->wcpuVector[j+1],temp);
+                        swapInt(proc->uidVector[j],proc->uidVector[j+1],temp);
+                        swapString(proc->cmdVector[j],proc->cmdVector[j+1],tempS);
+                        swapString(proc->statVector[j],proc->statVector[j+1],tempS);
+                        swapString(proc->starttimeVector[j],proc->starttimeVector[j+1],tempS);
+                        swapString(proc->wchanVector[j],proc->wchanVector[j+1],tempS);
+                        swapString(proc->memVector[j],proc->memVector[j+1],tempS);
+                        swapString(proc->ioreadVector[j],proc->ioreadVector[j+1],tempS);
+                        swapString(proc->iowriteVector[j],proc->iowriteVector[j+1],tempS);
+                        swapString(proc->cmdlineVector[j],proc->cmdlineVector[j+1],tempS);
+                        swapString(proc->usernameVector[j],proc->usernameVector[j+1],tempS);
                     }
                 }
                 if(flagSortPid==2)
                 {
-                    if(procview->pidVector[j] > procview->pidVector[j+1])
+                    if(proc->pidVector[j] > proc->pidVector[j+1])
                     {
-                        swapInt(procview->pidVector[j],procview->pidVector[j+1],temp);
-                        swapInt(procview->niceVector[j],procview->niceVector[j+1],temp);
-                        swapInt(procview->whichcpuVector[j],procview->whichcpuVector[j+1],temp);
-                        swapInt(procview->pmemVector[j],procview->pmemVector[j+1],temp);
-                        swapInt(procview->slpavgVector[j],procview->slpavgVector[j+1],temp);
-                        swapInt(procview->stackVector[j],procview->stackVector[j+1],temp);
-                        swapInt(procview->pcpuVector[j],procview->pcpuVector[j+1],temp);
-                        swapInt(procview->wcpuVector[j],procview->wcpuVector[j+1],temp);
-                        swapInt(procview->uidVector[j],procview->uidVector[j+1],temp);
-                        swapString(procview->cmdVector[j],procview->cmdVector[j+1],tempS);
-                        swapString(procview->statVector[j],procview->statVector[j+1],tempS);
-                        swapString(procview->starttimeVector[j],procview->starttimeVector[j+1],tempS);
-                        swapString(procview->wchanVector[j],procview->wchanVector[j+1],tempS);
-                        swapString(procview->memVector[j],procview->memVector[j+1],tempS);
-                        swapString(procview->ioreadVector[j],procview->ioreadVector[j+1],tempS);
-                        swapString(procview->iowriteVector[j],procview->iowriteVector[j+1],tempS);
-                        swapString(procview->cmdlineVector[j],procview->cmdlineVector[j+1],tempS);
-                        swapString(procview->usernameVector[j],procview->usernameVector[j+1],tempS);
+                        swapInt(proc->pidVector[j],proc->pidVector[j+1],temp);
+                        swapInt(proc->niceVector[j],proc->niceVector[j+1],temp);
+                        swapInt(proc->whichcpuVector[j],proc->whichcpuVector[j+1],temp);
+                        swapInt(proc->pmemVector[j],proc->pmemVector[j+1],temp);
+                        swapInt(proc->slpavgVector[j],proc->slpavgVector[j+1],temp);
+                        swapInt(proc->stackVector[j],proc->stackVector[j+1],temp);
+                        swapInt(proc->pcpuVector[j],proc->pcpuVector[j+1],temp);
+                        swapInt(proc->wcpuVector[j],proc->wcpuVector[j+1],temp);
+                        swapInt(proc->uidVector[j],proc->uidVector[j+1],temp);
+                        swapString(proc->cmdVector[j],proc->cmdVector[j+1],tempS);
+                        swapString(proc->statVector[j],proc->statVector[j+1],tempS);
+                        swapString(proc->starttimeVector[j],proc->starttimeVector[j+1],tempS);
+                        swapString(proc->wchanVector[j],proc->wchanVector[j+1],tempS);
+                        swapString(proc->memVector[j],proc->memVector[j+1],tempS);
+                        swapString(proc->ioreadVector[j],proc->ioreadVector[j+1],tempS);
+                        swapString(proc->iowriteVector[j],proc->iowriteVector[j+1],tempS);
+                        swapString(proc->cmdlineVector[j],proc->cmdlineVector[j+1],tempS);
+                        swapString(proc->usernameVector[j],proc->usernameVector[j+1],tempS);
                     }
                 }
             }
@@ -918,57 +935,57 @@ void qjdProcessMainWindow::setSortData()
     // Process Name 排序
     if(flagSortProcessName==1 || flagSortProcessName==2)
     {
-        for(int i=0;i<procview->pidVector.size();i++)
+        for(int i=0;i<proc->pidVector.size();i++)
         {
-            t=procview->pidVector.size()-i-1;
+            t=proc->pidVector.size()-i-1;
             for(int j=0;j<t;j++)
             {
                 if(flagSortProcessName==1)
                 {
-                    if(procview->cmdVector[j] < procview->cmdVector[j+1])
+                    if(proc->cmdVector[j] < proc->cmdVector[j+1])
                     {
-                        swapInt(procview->pidVector[j],procview->pidVector[j+1],temp);
-                        swapInt(procview->niceVector[j],procview->niceVector[j+1],temp);
-                        swapInt(procview->whichcpuVector[j],procview->whichcpuVector[j+1],temp);
-                        swapInt(procview->pmemVector[j],procview->pmemVector[j+1],temp);
-                        swapInt(procview->slpavgVector[j],procview->slpavgVector[j+1],temp);
-                        swapInt(procview->stackVector[j],procview->stackVector[j+1],temp);
-                        swapInt(procview->pcpuVector[j],procview->pcpuVector[j+1],temp);
-                        swapInt(procview->wcpuVector[j],procview->wcpuVector[j+1],temp);
-                        swapInt(procview->uidVector[j],procview->uidVector[j+1],temp);
-                        swapString(procview->cmdVector[j],procview->cmdVector[j+1],tempS);
-                        swapString(procview->statVector[j],procview->statVector[j+1],tempS);
-                        swapString(procview->starttimeVector[j],procview->starttimeVector[j+1],tempS);
-                        swapString(procview->wchanVector[j],procview->wchanVector[j+1],tempS);
-                        swapString(procview->memVector[j],procview->memVector[j+1],tempS);
-                        swapString(procview->ioreadVector[j],procview->ioreadVector[j+1],tempS);
-                        swapString(procview->iowriteVector[j],procview->iowriteVector[j+1],tempS);
-                        swapString(procview->cmdlineVector[j],procview->cmdlineVector[j+1],tempS);
-                        swapString(procview->usernameVector[j],procview->usernameVector[j+1],tempS);
+                        swapInt(proc->pidVector[j],proc->pidVector[j+1],temp);
+                        swapInt(proc->niceVector[j],proc->niceVector[j+1],temp);
+                        swapInt(proc->whichcpuVector[j],proc->whichcpuVector[j+1],temp);
+                        swapInt(proc->pmemVector[j],proc->pmemVector[j+1],temp);
+                        swapInt(proc->slpavgVector[j],proc->slpavgVector[j+1],temp);
+                        swapInt(proc->stackVector[j],proc->stackVector[j+1],temp);
+                        swapInt(proc->pcpuVector[j],proc->pcpuVector[j+1],temp);
+                        swapInt(proc->wcpuVector[j],proc->wcpuVector[j+1],temp);
+                        swapInt(proc->uidVector[j],proc->uidVector[j+1],temp);
+                        swapString(proc->cmdVector[j],proc->cmdVector[j+1],tempS);
+                        swapString(proc->statVector[j],proc->statVector[j+1],tempS);
+                        swapString(proc->starttimeVector[j],proc->starttimeVector[j+1],tempS);
+                        swapString(proc->wchanVector[j],proc->wchanVector[j+1],tempS);
+                        swapString(proc->memVector[j],proc->memVector[j+1],tempS);
+                        swapString(proc->ioreadVector[j],proc->ioreadVector[j+1],tempS);
+                        swapString(proc->iowriteVector[j],proc->iowriteVector[j+1],tempS);
+                        swapString(proc->cmdlineVector[j],proc->cmdlineVector[j+1],tempS);
+                        swapString(proc->usernameVector[j],proc->usernameVector[j+1],tempS);
                     }
                 }
                 if(flagSortProcessName==2)
                 {
-                    if(procview->cmdVector[j] > procview->cmdVector[j+1])
+                    if(proc->cmdVector[j] > proc->cmdVector[j+1])
                     {
-                        swapInt(procview->pidVector[j],procview->pidVector[j+1],temp);
-                        swapInt(procview->niceVector[j],procview->niceVector[j+1],temp);
-                        swapInt(procview->whichcpuVector[j],procview->whichcpuVector[j+1],temp);
-                        swapInt(procview->pmemVector[j],procview->pmemVector[j+1],temp);
-                        swapInt(procview->slpavgVector[j],procview->slpavgVector[j+1],temp);
-                        swapInt(procview->stackVector[j],procview->stackVector[j+1],temp);
-                        swapInt(procview->pcpuVector[j],procview->pcpuVector[j+1],temp);
-                        swapInt(procview->wcpuVector[j],procview->wcpuVector[j+1],temp);
-                        swapInt(procview->uidVector[j],procview->uidVector[j+1],temp);
-                        swapString(procview->cmdVector[j],procview->cmdVector[j+1],tempS);
-                        swapString(procview->statVector[j],procview->statVector[j+1],tempS);
-                        swapString(procview->starttimeVector[j],procview->starttimeVector[j+1],tempS);
-                        swapString(procview->wchanVector[j],procview->wchanVector[j+1],tempS);
-                        swapString(procview->memVector[j],procview->memVector[j+1],tempS);
-                        swapString(procview->ioreadVector[j],procview->ioreadVector[j+1],tempS);
-                        swapString(procview->iowriteVector[j],procview->iowriteVector[j+1],tempS);
-                        swapString(procview->cmdlineVector[j],procview->cmdlineVector[j+1],tempS);
-                        swapString(procview->usernameVector[j],procview->usernameVector[j+1],tempS);
+                        swapInt(proc->pidVector[j],proc->pidVector[j+1],temp);
+                        swapInt(proc->niceVector[j],proc->niceVector[j+1],temp);
+                        swapInt(proc->whichcpuVector[j],proc->whichcpuVector[j+1],temp);
+                        swapInt(proc->pmemVector[j],proc->pmemVector[j+1],temp);
+                        swapInt(proc->slpavgVector[j],proc->slpavgVector[j+1],temp);
+                        swapInt(proc->stackVector[j],proc->stackVector[j+1],temp);
+                        swapInt(proc->pcpuVector[j],proc->pcpuVector[j+1],temp);
+                        swapInt(proc->wcpuVector[j],proc->wcpuVector[j+1],temp);
+                        swapInt(proc->uidVector[j],proc->uidVector[j+1],temp);
+                        swapString(proc->cmdVector[j],proc->cmdVector[j+1],tempS);
+                        swapString(proc->statVector[j],proc->statVector[j+1],tempS);
+                        swapString(proc->starttimeVector[j],proc->starttimeVector[j+1],tempS);
+                        swapString(proc->wchanVector[j],proc->wchanVector[j+1],tempS);
+                        swapString(proc->memVector[j],proc->memVector[j+1],tempS);
+                        swapString(proc->ioreadVector[j],proc->ioreadVector[j+1],tempS);
+                        swapString(proc->iowriteVector[j],proc->iowriteVector[j+1],tempS);
+                        swapString(proc->cmdlineVector[j],proc->cmdlineVector[j+1],tempS);
+                        swapString(proc->usernameVector[j],proc->usernameVector[j+1],tempS);
                     }
                 }
             }
@@ -978,57 +995,57 @@ void qjdProcessMainWindow::setSortData()
     // state 排序
     if(flagSortState==1 || flagSortState==2)
     {
-        for(int i=0;i<procview->pidVector.size();i++)
+        for(int i=0;i<proc->pidVector.size();i++)
         {
-            t=procview->pidVector.size()-i-1;
+            t=proc->pidVector.size()-i-1;
             for(int j=0;j<t;j++)
             {
                 if(flagSortState==1)
                 {
-                    if(procview->statVector[j] < procview->statVector[j+1])
+                    if(proc->statVector[j] < proc->statVector[j+1])
                     {
-                        swapInt(procview->pidVector[j],procview->pidVector[j+1],temp);
-                        swapInt(procview->niceVector[j],procview->niceVector[j+1],temp);
-                        swapInt(procview->whichcpuVector[j],procview->whichcpuVector[j+1],temp);
-                        swapInt(procview->pmemVector[j],procview->pmemVector[j+1],temp);
-                        swapInt(procview->slpavgVector[j],procview->slpavgVector[j+1],temp);
-                        swapInt(procview->stackVector[j],procview->stackVector[j+1],temp);
-                        swapInt(procview->pcpuVector[j],procview->pcpuVector[j+1],temp);
-                        swapInt(procview->wcpuVector[j],procview->wcpuVector[j+1],temp);
-                        swapInt(procview->uidVector[j],procview->uidVector[j+1],temp);
-                        swapString(procview->cmdVector[j],procview->cmdVector[j+1],tempS);
-                        swapString(procview->statVector[j],procview->statVector[j+1],tempS);
-                        swapString(procview->starttimeVector[j],procview->starttimeVector[j+1],tempS);
-                        swapString(procview->wchanVector[j],procview->wchanVector[j+1],tempS);
-                        swapString(procview->memVector[j],procview->memVector[j+1],tempS);
-                        swapString(procview->ioreadVector[j],procview->ioreadVector[j+1],tempS);
-                        swapString(procview->iowriteVector[j],procview->iowriteVector[j+1],tempS);
-                        swapString(procview->cmdlineVector[j],procview->cmdlineVector[j+1],tempS);
-                        swapString(procview->usernameVector[j],procview->usernameVector[j+1],tempS);
+                        swapInt(proc->pidVector[j],proc->pidVector[j+1],temp);
+                        swapInt(proc->niceVector[j],proc->niceVector[j+1],temp);
+                        swapInt(proc->whichcpuVector[j],proc->whichcpuVector[j+1],temp);
+                        swapInt(proc->pmemVector[j],proc->pmemVector[j+1],temp);
+                        swapInt(proc->slpavgVector[j],proc->slpavgVector[j+1],temp);
+                        swapInt(proc->stackVector[j],proc->stackVector[j+1],temp);
+                        swapInt(proc->pcpuVector[j],proc->pcpuVector[j+1],temp);
+                        swapInt(proc->wcpuVector[j],proc->wcpuVector[j+1],temp);
+                        swapInt(proc->uidVector[j],proc->uidVector[j+1],temp);
+                        swapString(proc->cmdVector[j],proc->cmdVector[j+1],tempS);
+                        swapString(proc->statVector[j],proc->statVector[j+1],tempS);
+                        swapString(proc->starttimeVector[j],proc->starttimeVector[j+1],tempS);
+                        swapString(proc->wchanVector[j],proc->wchanVector[j+1],tempS);
+                        swapString(proc->memVector[j],proc->memVector[j+1],tempS);
+                        swapString(proc->ioreadVector[j],proc->ioreadVector[j+1],tempS);
+                        swapString(proc->iowriteVector[j],proc->iowriteVector[j+1],tempS);
+                        swapString(proc->cmdlineVector[j],proc->cmdlineVector[j+1],tempS);
+                        swapString(proc->usernameVector[j],proc->usernameVector[j+1],tempS);
                     }
                 }
                 if(flagSortState==2)
                 {
-                    if(procview->statVector[j] > procview->statVector[j+1])
+                    if(proc->statVector[j] > proc->statVector[j+1])
                     {
-                        swapInt(procview->pidVector[j],procview->pidVector[j+1],temp);
-                        swapInt(procview->niceVector[j],procview->niceVector[j+1],temp);
-                        swapInt(procview->whichcpuVector[j],procview->whichcpuVector[j+1],temp);
-                        swapInt(procview->pmemVector[j],procview->pmemVector[j+1],temp);
-                        swapInt(procview->slpavgVector[j],procview->slpavgVector[j+1],temp);
-                        swapInt(procview->stackVector[j],procview->stackVector[j+1],temp);
-                        swapInt(procview->pcpuVector[j],procview->pcpuVector[j+1],temp);
-                        swapInt(procview->wcpuVector[j],procview->wcpuVector[j+1],temp);
-                        swapInt(procview->uidVector[j],procview->uidVector[j+1],temp);
-                        swapString(procview->cmdVector[j],procview->cmdVector[j+1],tempS);
-                        swapString(procview->statVector[j],procview->statVector[j+1],tempS);
-                        swapString(procview->starttimeVector[j],procview->starttimeVector[j+1],tempS);
-                        swapString(procview->wchanVector[j],procview->wchanVector[j+1],tempS);
-                        swapString(procview->memVector[j],procview->memVector[j+1],tempS);
-                        swapString(procview->ioreadVector[j],procview->ioreadVector[j+1],tempS);
-                        swapString(procview->iowriteVector[j],procview->iowriteVector[j+1],tempS);
-                        swapString(procview->cmdlineVector[j],procview->cmdlineVector[j+1],tempS);
-                        swapString(procview->usernameVector[j],procview->usernameVector[j+1],tempS);
+                        swapInt(proc->pidVector[j],proc->pidVector[j+1],temp);
+                        swapInt(proc->niceVector[j],proc->niceVector[j+1],temp);
+                        swapInt(proc->whichcpuVector[j],proc->whichcpuVector[j+1],temp);
+                        swapInt(proc->pmemVector[j],proc->pmemVector[j+1],temp);
+                        swapInt(proc->slpavgVector[j],proc->slpavgVector[j+1],temp);
+                        swapInt(proc->stackVector[j],proc->stackVector[j+1],temp);
+                        swapInt(proc->pcpuVector[j],proc->pcpuVector[j+1],temp);
+                        swapInt(proc->wcpuVector[j],proc->wcpuVector[j+1],temp);
+                        swapInt(proc->uidVector[j],proc->uidVector[j+1],temp);
+                        swapString(proc->cmdVector[j],proc->cmdVector[j+1],tempS);
+                        swapString(proc->statVector[j],proc->statVector[j+1],tempS);
+                        swapString(proc->starttimeVector[j],proc->starttimeVector[j+1],tempS);
+                        swapString(proc->wchanVector[j],proc->wchanVector[j+1],tempS);
+                        swapString(proc->memVector[j],proc->memVector[j+1],tempS);
+                        swapString(proc->ioreadVector[j],proc->ioreadVector[j+1],tempS);
+                        swapString(proc->iowriteVector[j],proc->iowriteVector[j+1],tempS);
+                        swapString(proc->cmdlineVector[j],proc->cmdlineVector[j+1],tempS);
+                        swapString(proc->usernameVector[j],proc->usernameVector[j+1],tempS);
                     }
                 }
             }
@@ -1038,57 +1055,57 @@ void qjdProcessMainWindow::setSortData()
     // nice 排序
     if(flagSortNice==1 || flagSortNice==2)
     {
-        for(int i=0;i<procview->pidVector.size();i++)
+        for(int i=0;i<proc->pidVector.size();i++)
         {
-            t=procview->pidVector.size()-i-1;
+            t=proc->pidVector.size()-i-1;
             for(int j=0;j<t;j++)
             {
                 if(flagSortNice==1)
                 {
-                    if(procview->niceVector[j] < procview->niceVector[j+1])
+                    if(proc->niceVector[j] < proc->niceVector[j+1])
                     {
-                        swapInt(procview->pidVector[j],procview->pidVector[j+1],temp);
-                        swapInt(procview->niceVector[j],procview->niceVector[j+1],temp);
-                        swapInt(procview->whichcpuVector[j],procview->whichcpuVector[j+1],temp);
-                        swapInt(procview->pmemVector[j],procview->pmemVector[j+1],temp);
-                        swapInt(procview->slpavgVector[j],procview->slpavgVector[j+1],temp);
-                        swapInt(procview->stackVector[j],procview->stackVector[j+1],temp);
-                        swapInt(procview->pcpuVector[j],procview->pcpuVector[j+1],temp);
-                        swapInt(procview->wcpuVector[j],procview->wcpuVector[j+1],temp);
-                        swapInt(procview->uidVector[j],procview->uidVector[j+1],temp);
-                        swapString(procview->cmdVector[j],procview->cmdVector[j+1],tempS);
-                        swapString(procview->statVector[j],procview->statVector[j+1],tempS);
-                        swapString(procview->starttimeVector[j],procview->starttimeVector[j+1],tempS);
-                        swapString(procview->wchanVector[j],procview->wchanVector[j+1],tempS);
-                        swapString(procview->memVector[j],procview->memVector[j+1],tempS);
-                        swapString(procview->ioreadVector[j],procview->ioreadVector[j+1],tempS);
-                        swapString(procview->iowriteVector[j],procview->iowriteVector[j+1],tempS);
-                        swapString(procview->cmdlineVector[j],procview->cmdlineVector[j+1],tempS);
-                        swapString(procview->usernameVector[j],procview->usernameVector[j+1],tempS);
+                        swapInt(proc->pidVector[j],proc->pidVector[j+1],temp);
+                        swapInt(proc->niceVector[j],proc->niceVector[j+1],temp);
+                        swapInt(proc->whichcpuVector[j],proc->whichcpuVector[j+1],temp);
+                        swapInt(proc->pmemVector[j],proc->pmemVector[j+1],temp);
+                        swapInt(proc->slpavgVector[j],proc->slpavgVector[j+1],temp);
+                        swapInt(proc->stackVector[j],proc->stackVector[j+1],temp);
+                        swapInt(proc->pcpuVector[j],proc->pcpuVector[j+1],temp);
+                        swapInt(proc->wcpuVector[j],proc->wcpuVector[j+1],temp);
+                        swapInt(proc->uidVector[j],proc->uidVector[j+1],temp);
+                        swapString(proc->cmdVector[j],proc->cmdVector[j+1],tempS);
+                        swapString(proc->statVector[j],proc->statVector[j+1],tempS);
+                        swapString(proc->starttimeVector[j],proc->starttimeVector[j+1],tempS);
+                        swapString(proc->wchanVector[j],proc->wchanVector[j+1],tempS);
+                        swapString(proc->memVector[j],proc->memVector[j+1],tempS);
+                        swapString(proc->ioreadVector[j],proc->ioreadVector[j+1],tempS);
+                        swapString(proc->iowriteVector[j],proc->iowriteVector[j+1],tempS);
+                        swapString(proc->cmdlineVector[j],proc->cmdlineVector[j+1],tempS);
+                        swapString(proc->usernameVector[j],proc->usernameVector[j+1],tempS);
                     }
                 }
                 if(flagSortNice==2)
                 {
-                    if(procview->niceVector[j] > procview->niceVector[j+1])
+                    if(proc->niceVector[j] > proc->niceVector[j+1])
                     {
-                        swapInt(procview->pidVector[j],procview->pidVector[j+1],temp);
-                        swapInt(procview->niceVector[j],procview->niceVector[j+1],temp);
-                        swapInt(procview->whichcpuVector[j],procview->whichcpuVector[j+1],temp);
-                        swapInt(procview->pmemVector[j],procview->pmemVector[j+1],temp);
-                        swapInt(procview->slpavgVector[j],procview->slpavgVector[j+1],temp);
-                        swapInt(procview->stackVector[j],procview->stackVector[j+1],temp);
-                        swapInt(procview->pcpuVector[j],procview->pcpuVector[j+1],temp);
-                        swapInt(procview->wcpuVector[j],procview->wcpuVector[j+1],temp);
-                        swapInt(procview->uidVector[j],procview->uidVector[j+1],temp);
-                        swapString(procview->cmdVector[j],procview->cmdVector[j+1],tempS);
-                        swapString(procview->statVector[j],procview->statVector[j+1],tempS);
-                        swapString(procview->starttimeVector[j],procview->starttimeVector[j+1],tempS);
-                        swapString(procview->wchanVector[j],procview->wchanVector[j+1],tempS);
-                        swapString(procview->memVector[j],procview->memVector[j+1],tempS);
-                        swapString(procview->ioreadVector[j],procview->ioreadVector[j+1],tempS);
-                        swapString(procview->iowriteVector[j],procview->iowriteVector[j+1],tempS);
-                        swapString(procview->cmdlineVector[j],procview->cmdlineVector[j+1],tempS);
-                        swapString(procview->usernameVector[j],procview->usernameVector[j+1],tempS);
+                        swapInt(proc->pidVector[j],proc->pidVector[j+1],temp);
+                        swapInt(proc->niceVector[j],proc->niceVector[j+1],temp);
+                        swapInt(proc->whichcpuVector[j],proc->whichcpuVector[j+1],temp);
+                        swapInt(proc->pmemVector[j],proc->pmemVector[j+1],temp);
+                        swapInt(proc->slpavgVector[j],proc->slpavgVector[j+1],temp);
+                        swapInt(proc->stackVector[j],proc->stackVector[j+1],temp);
+                        swapInt(proc->pcpuVector[j],proc->pcpuVector[j+1],temp);
+                        swapInt(proc->wcpuVector[j],proc->wcpuVector[j+1],temp);
+                        swapInt(proc->uidVector[j],proc->uidVector[j+1],temp);
+                        swapString(proc->cmdVector[j],proc->cmdVector[j+1],tempS);
+                        swapString(proc->statVector[j],proc->statVector[j+1],tempS);
+                        swapString(proc->starttimeVector[j],proc->starttimeVector[j+1],tempS);
+                        swapString(proc->wchanVector[j],proc->wchanVector[j+1],tempS);
+                        swapString(proc->memVector[j],proc->memVector[j+1],tempS);
+                        swapString(proc->ioreadVector[j],proc->ioreadVector[j+1],tempS);
+                        swapString(proc->iowriteVector[j],proc->iowriteVector[j+1],tempS);
+                        swapString(proc->cmdlineVector[j],proc->cmdlineVector[j+1],tempS);
+                        swapString(proc->usernameVector[j],proc->usernameVector[j+1],tempS);
                     }
                 }
             }
@@ -1098,61 +1115,61 @@ void qjdProcessMainWindow::setSortData()
     // starttime 排序
     if(flagSortStartTime==1 || flagSortStartTime==2)
     {
-        for(int i=0;i<procview->pidVector.size();i++)
+        for(int i=0;i<proc->pidVector.size();i++)
         {
-            t=procview->pidVector.size()-i-1;
+            t=proc->pidVector.size()-i-1;
             for(int j=0;j<t;j++)
             {
                 if(flagSortStartTime==1)
                 {
-                    if(procview->originStarttimeVector[j] < procview->originStarttimeVector[j+1])
+                    if(proc->originStarttimeVector[j] < proc->originStarttimeVector[j+1])
                     {
-                        swapInt(procview->originStarttimeVector[j],procview->originStarttimeVector[j+1],temp);
+                        swapInt(proc->originStarttimeVector[j],proc->originStarttimeVector[j+1],temp);
 
-                        swapInt(procview->pidVector[j],procview->pidVector[j+1],temp);
-                        swapInt(procview->niceVector[j],procview->niceVector[j+1],temp);
-                        swapInt(procview->whichcpuVector[j],procview->whichcpuVector[j+1],temp);
-                        swapInt(procview->pmemVector[j],procview->pmemVector[j+1],temp);
-                        swapInt(procview->slpavgVector[j],procview->slpavgVector[j+1],temp);
-                        swapInt(procview->stackVector[j],procview->stackVector[j+1],temp);
-                        swapInt(procview->pcpuVector[j],procview->pcpuVector[j+1],temp);
-                        swapInt(procview->wcpuVector[j],procview->wcpuVector[j+1],temp);
-                        swapInt(procview->uidVector[j],procview->uidVector[j+1],temp);
-                        swapString(procview->cmdVector[j],procview->cmdVector[j+1],tempS);
-                        swapString(procview->statVector[j],procview->statVector[j+1],tempS);
-                        swapString(procview->starttimeVector[j],procview->starttimeVector[j+1],tempS);
-                        swapString(procview->wchanVector[j],procview->wchanVector[j+1],tempS);
-                        swapString(procview->memVector[j],procview->memVector[j+1],tempS);
-                        swapString(procview->ioreadVector[j],procview->ioreadVector[j+1],tempS);
-                        swapString(procview->iowriteVector[j],procview->iowriteVector[j+1],tempS);
-                        swapString(procview->cmdlineVector[j],procview->cmdlineVector[j+1],tempS);
-                        swapString(procview->usernameVector[j],procview->usernameVector[j+1],tempS);
+                        swapInt(proc->pidVector[j],proc->pidVector[j+1],temp);
+                        swapInt(proc->niceVector[j],proc->niceVector[j+1],temp);
+                        swapInt(proc->whichcpuVector[j],proc->whichcpuVector[j+1],temp);
+                        swapInt(proc->pmemVector[j],proc->pmemVector[j+1],temp);
+                        swapInt(proc->slpavgVector[j],proc->slpavgVector[j+1],temp);
+                        swapInt(proc->stackVector[j],proc->stackVector[j+1],temp);
+                        swapInt(proc->pcpuVector[j],proc->pcpuVector[j+1],temp);
+                        swapInt(proc->wcpuVector[j],proc->wcpuVector[j+1],temp);
+                        swapInt(proc->uidVector[j],proc->uidVector[j+1],temp);
+                        swapString(proc->cmdVector[j],proc->cmdVector[j+1],tempS);
+                        swapString(proc->statVector[j],proc->statVector[j+1],tempS);
+                        swapString(proc->starttimeVector[j],proc->starttimeVector[j+1],tempS);
+                        swapString(proc->wchanVector[j],proc->wchanVector[j+1],tempS);
+                        swapString(proc->memVector[j],proc->memVector[j+1],tempS);
+                        swapString(proc->ioreadVector[j],proc->ioreadVector[j+1],tempS);
+                        swapString(proc->iowriteVector[j],proc->iowriteVector[j+1],tempS);
+                        swapString(proc->cmdlineVector[j],proc->cmdlineVector[j+1],tempS);
+                        swapString(proc->usernameVector[j],proc->usernameVector[j+1],tempS);
                     }
                 }
                 if(flagSortStartTime==2)
                 {
-                    if(procview->originStarttimeVector[j] > procview->originStarttimeVector[j+1])
+                    if(proc->originStarttimeVector[j] > proc->originStarttimeVector[j+1])
                     {
-                        swapInt(procview->originStarttimeVector[j],procview->originStarttimeVector[j+1],temp);
+                        swapInt(proc->originStarttimeVector[j],proc->originStarttimeVector[j+1],temp);
 
-                        swapInt(procview->pidVector[j],procview->pidVector[j+1],temp);
-                        swapInt(procview->niceVector[j],procview->niceVector[j+1],temp);
-                        swapInt(procview->whichcpuVector[j],procview->whichcpuVector[j+1],temp);
-                        swapInt(procview->pmemVector[j],procview->pmemVector[j+1],temp);
-                        swapInt(procview->slpavgVector[j],procview->slpavgVector[j+1],temp);
-                        swapInt(procview->stackVector[j],procview->stackVector[j+1],temp);
-                        swapInt(procview->pcpuVector[j],procview->pcpuVector[j+1],temp);
-                        swapInt(procview->wcpuVector[j],procview->wcpuVector[j+1],temp);
-                        swapInt(procview->uidVector[j],procview->uidVector[j+1],temp);
-                        swapString(procview->cmdVector[j],procview->cmdVector[j+1],tempS);
-                        swapString(procview->statVector[j],procview->statVector[j+1],tempS);
-                        swapString(procview->starttimeVector[j],procview->starttimeVector[j+1],tempS);
-                        swapString(procview->wchanVector[j],procview->wchanVector[j+1],tempS);
-                        swapString(procview->memVector[j],procview->memVector[j+1],tempS);
-                        swapString(procview->ioreadVector[j],procview->ioreadVector[j+1],tempS);
-                        swapString(procview->iowriteVector[j],procview->iowriteVector[j+1],tempS);
-                        swapString(procview->cmdlineVector[j],procview->cmdlineVector[j+1],tempS);
-                        swapString(procview->usernameVector[j],procview->usernameVector[j+1],tempS);
+                        swapInt(proc->pidVector[j],proc->pidVector[j+1],temp);
+                        swapInt(proc->niceVector[j],proc->niceVector[j+1],temp);
+                        swapInt(proc->whichcpuVector[j],proc->whichcpuVector[j+1],temp);
+                        swapInt(proc->pmemVector[j],proc->pmemVector[j+1],temp);
+                        swapInt(proc->slpavgVector[j],proc->slpavgVector[j+1],temp);
+                        swapInt(proc->stackVector[j],proc->stackVector[j+1],temp);
+                        swapInt(proc->pcpuVector[j],proc->pcpuVector[j+1],temp);
+                        swapInt(proc->wcpuVector[j],proc->wcpuVector[j+1],temp);
+                        swapInt(proc->uidVector[j],proc->uidVector[j+1],temp);
+                        swapString(proc->cmdVector[j],proc->cmdVector[j+1],tempS);
+                        swapString(proc->statVector[j],proc->statVector[j+1],tempS);
+                        swapString(proc->starttimeVector[j],proc->starttimeVector[j+1],tempS);
+                        swapString(proc->wchanVector[j],proc->wchanVector[j+1],tempS);
+                        swapString(proc->memVector[j],proc->memVector[j+1],tempS);
+                        swapString(proc->ioreadVector[j],proc->ioreadVector[j+1],tempS);
+                        swapString(proc->iowriteVector[j],proc->iowriteVector[j+1],tempS);
+                        swapString(proc->cmdlineVector[j],proc->cmdlineVector[j+1],tempS);
+                        swapString(proc->usernameVector[j],proc->usernameVector[j+1],tempS);
                     }
                 }
             }
@@ -1162,57 +1179,57 @@ void qjdProcessMainWindow::setSortData()
     // wchan 排序
     if(flagSortWchan==1 || flagSortWchan==2)
     {
-        for(int i=0;i<procview->pidVector.size();i++)
+        for(int i=0;i<proc->pidVector.size();i++)
         {
-            t=procview->pidVector.size()-i-1;
+            t=proc->pidVector.size()-i-1;
             for(int j=0;j<t;j++)
             {
                 if(flagSortWchan==1)
                 {
-                    if(procview->wchanVector[j] < procview->wchanVector[j+1])
+                    if(proc->wchanVector[j] < proc->wchanVector[j+1])
                     {
-                        swapInt(procview->pidVector[j],procview->pidVector[j+1],temp);
-                        swapInt(procview->niceVector[j],procview->niceVector[j+1],temp);
-                        swapInt(procview->whichcpuVector[j],procview->whichcpuVector[j+1],temp);
-                        swapInt(procview->pmemVector[j],procview->pmemVector[j+1],temp);
-                        swapInt(procview->slpavgVector[j],procview->slpavgVector[j+1],temp);
-                        swapInt(procview->stackVector[j],procview->stackVector[j+1],temp);
-                        swapInt(procview->pcpuVector[j],procview->pcpuVector[j+1],temp);
-                        swapInt(procview->wcpuVector[j],procview->wcpuVector[j+1],temp);
-                        swapInt(procview->uidVector[j],procview->uidVector[j+1],temp);
-                        swapString(procview->cmdVector[j],procview->cmdVector[j+1],tempS);
-                        swapString(procview->statVector[j],procview->statVector[j+1],tempS);
-                        swapString(procview->starttimeVector[j],procview->starttimeVector[j+1],tempS);
-                        swapString(procview->wchanVector[j],procview->wchanVector[j+1],tempS);
-                        swapString(procview->memVector[j],procview->memVector[j+1],tempS);
-                        swapString(procview->ioreadVector[j],procview->ioreadVector[j+1],tempS);
-                        swapString(procview->iowriteVector[j],procview->iowriteVector[j+1],tempS);
-                        swapString(procview->cmdlineVector[j],procview->cmdlineVector[j+1],tempS);
-                        swapString(procview->usernameVector[j],procview->usernameVector[j+1],tempS);
+                        swapInt(proc->pidVector[j],proc->pidVector[j+1],temp);
+                        swapInt(proc->niceVector[j],proc->niceVector[j+1],temp);
+                        swapInt(proc->whichcpuVector[j],proc->whichcpuVector[j+1],temp);
+                        swapInt(proc->pmemVector[j],proc->pmemVector[j+1],temp);
+                        swapInt(proc->slpavgVector[j],proc->slpavgVector[j+1],temp);
+                        swapInt(proc->stackVector[j],proc->stackVector[j+1],temp);
+                        swapInt(proc->pcpuVector[j],proc->pcpuVector[j+1],temp);
+                        swapInt(proc->wcpuVector[j],proc->wcpuVector[j+1],temp);
+                        swapInt(proc->uidVector[j],proc->uidVector[j+1],temp);
+                        swapString(proc->cmdVector[j],proc->cmdVector[j+1],tempS);
+                        swapString(proc->statVector[j],proc->statVector[j+1],tempS);
+                        swapString(proc->starttimeVector[j],proc->starttimeVector[j+1],tempS);
+                        swapString(proc->wchanVector[j],proc->wchanVector[j+1],tempS);
+                        swapString(proc->memVector[j],proc->memVector[j+1],tempS);
+                        swapString(proc->ioreadVector[j],proc->ioreadVector[j+1],tempS);
+                        swapString(proc->iowriteVector[j],proc->iowriteVector[j+1],tempS);
+                        swapString(proc->cmdlineVector[j],proc->cmdlineVector[j+1],tempS);
+                        swapString(proc->usernameVector[j],proc->usernameVector[j+1],tempS);
                     }
                 }
                 if(flagSortWchan==2)
                 {
-                    if(procview->wchanVector[j] > procview->wchanVector[j+1])
+                    if(proc->wchanVector[j] > proc->wchanVector[j+1])
                     {
-                        swapInt(procview->pidVector[j],procview->pidVector[j+1],temp);
-                        swapInt(procview->niceVector[j],procview->niceVector[j+1],temp);
-                        swapInt(procview->whichcpuVector[j],procview->whichcpuVector[j+1],temp);
-                        swapInt(procview->pmemVector[j],procview->pmemVector[j+1],temp);
-                        swapInt(procview->slpavgVector[j],procview->slpavgVector[j+1],temp);
-                        swapInt(procview->stackVector[j],procview->stackVector[j+1],temp);
-                        swapInt(procview->pcpuVector[j],procview->pcpuVector[j+1],temp);
-                        swapInt(procview->wcpuVector[j],procview->wcpuVector[j+1],temp);
-                        swapInt(procview->uidVector[j],procview->uidVector[j+1],temp);
-                        swapString(procview->cmdVector[j],procview->cmdVector[j+1],tempS);
-                        swapString(procview->statVector[j],procview->statVector[j+1],tempS);
-                        swapString(procview->starttimeVector[j],procview->starttimeVector[j+1],tempS);
-                        swapString(procview->wchanVector[j],procview->wchanVector[j+1],tempS);
-                        swapString(procview->memVector[j],procview->memVector[j+1],tempS);
-                        swapString(procview->ioreadVector[j],procview->ioreadVector[j+1],tempS);
-                        swapString(procview->iowriteVector[j],procview->iowriteVector[j+1],tempS);
-                        swapString(procview->cmdlineVector[j],procview->cmdlineVector[j+1],tempS);
-                        swapString(procview->usernameVector[j],procview->usernameVector[j+1],tempS);
+                        swapInt(proc->pidVector[j],proc->pidVector[j+1],temp);
+                        swapInt(proc->niceVector[j],proc->niceVector[j+1],temp);
+                        swapInt(proc->whichcpuVector[j],proc->whichcpuVector[j+1],temp);
+                        swapInt(proc->pmemVector[j],proc->pmemVector[j+1],temp);
+                        swapInt(proc->slpavgVector[j],proc->slpavgVector[j+1],temp);
+                        swapInt(proc->stackVector[j],proc->stackVector[j+1],temp);
+                        swapInt(proc->pcpuVector[j],proc->pcpuVector[j+1],temp);
+                        swapInt(proc->wcpuVector[j],proc->wcpuVector[j+1],temp);
+                        swapInt(proc->uidVector[j],proc->uidVector[j+1],temp);
+                        swapString(proc->cmdVector[j],proc->cmdVector[j+1],tempS);
+                        swapString(proc->statVector[j],proc->statVector[j+1],tempS);
+                        swapString(proc->starttimeVector[j],proc->starttimeVector[j+1],tempS);
+                        swapString(proc->wchanVector[j],proc->wchanVector[j+1],tempS);
+                        swapString(proc->memVector[j],proc->memVector[j+1],tempS);
+                        swapString(proc->ioreadVector[j],proc->ioreadVector[j+1],tempS);
+                        swapString(proc->iowriteVector[j],proc->iowriteVector[j+1],tempS);
+                        swapString(proc->cmdlineVector[j],proc->cmdlineVector[j+1],tempS);
+                        swapString(proc->usernameVector[j],proc->usernameVector[j+1],tempS);
                     }
                 }
             }
@@ -1222,57 +1239,57 @@ void qjdProcessMainWindow::setSortData()
     // which cpu 排序
     if(flagSortCpu==1 || flagSortCpu==2)
     {
-        for(int i=0;i<procview->pidVector.size();i++)
+        for(int i=0;i<proc->pidVector.size();i++)
         {
-            t=procview->pidVector.size()-i-1;
+            t=proc->pidVector.size()-i-1;
             for(int j=0;j<t;j++)
             {
                 if(flagSortCpu==1)
                 {
-                    if(procview->whichcpuVector[j] < procview->whichcpuVector[j+1])
+                    if(proc->whichcpuVector[j] < proc->whichcpuVector[j+1])
                     {
-                        swapInt(procview->pidVector[j],procview->pidVector[j+1],temp);
-                        swapInt(procview->niceVector[j],procview->niceVector[j+1],temp);
-                        swapInt(procview->whichcpuVector[j],procview->whichcpuVector[j+1],temp);
-                        swapInt(procview->pmemVector[j],procview->pmemVector[j+1],temp);
-                        swapInt(procview->slpavgVector[j],procview->slpavgVector[j+1],temp);
-                        swapInt(procview->stackVector[j],procview->stackVector[j+1],temp);
-                        swapInt(procview->pcpuVector[j],procview->pcpuVector[j+1],temp);
-                        swapInt(procview->wcpuVector[j],procview->wcpuVector[j+1],temp);
-                        swapInt(procview->uidVector[j],procview->uidVector[j+1],temp);
-                        swapString(procview->cmdVector[j],procview->cmdVector[j+1],tempS);
-                        swapString(procview->statVector[j],procview->statVector[j+1],tempS);
-                        swapString(procview->starttimeVector[j],procview->starttimeVector[j+1],tempS);
-                        swapString(procview->wchanVector[j],procview->wchanVector[j+1],tempS);
-                        swapString(procview->memVector[j],procview->memVector[j+1],tempS);
-                        swapString(procview->ioreadVector[j],procview->ioreadVector[j+1],tempS);
-                        swapString(procview->iowriteVector[j],procview->iowriteVector[j+1],tempS);
-                        swapString(procview->cmdlineVector[j],procview->cmdlineVector[j+1],tempS);
-                        swapString(procview->usernameVector[j],procview->usernameVector[j+1],tempS);
+                        swapInt(proc->pidVector[j],proc->pidVector[j+1],temp);
+                        swapInt(proc->niceVector[j],proc->niceVector[j+1],temp);
+                        swapInt(proc->whichcpuVector[j],proc->whichcpuVector[j+1],temp);
+                        swapInt(proc->pmemVector[j],proc->pmemVector[j+1],temp);
+                        swapInt(proc->slpavgVector[j],proc->slpavgVector[j+1],temp);
+                        swapInt(proc->stackVector[j],proc->stackVector[j+1],temp);
+                        swapInt(proc->pcpuVector[j],proc->pcpuVector[j+1],temp);
+                        swapInt(proc->wcpuVector[j],proc->wcpuVector[j+1],temp);
+                        swapInt(proc->uidVector[j],proc->uidVector[j+1],temp);
+                        swapString(proc->cmdVector[j],proc->cmdVector[j+1],tempS);
+                        swapString(proc->statVector[j],proc->statVector[j+1],tempS);
+                        swapString(proc->starttimeVector[j],proc->starttimeVector[j+1],tempS);
+                        swapString(proc->wchanVector[j],proc->wchanVector[j+1],tempS);
+                        swapString(proc->memVector[j],proc->memVector[j+1],tempS);
+                        swapString(proc->ioreadVector[j],proc->ioreadVector[j+1],tempS);
+                        swapString(proc->iowriteVector[j],proc->iowriteVector[j+1],tempS);
+                        swapString(proc->cmdlineVector[j],proc->cmdlineVector[j+1],tempS);
+                        swapString(proc->usernameVector[j],proc->usernameVector[j+1],tempS);
                     }
                 }
                 if(flagSortCpu==2)
                 {
-                    if(procview->whichcpuVector[j] > procview->whichcpuVector[j+1])
+                    if(proc->whichcpuVector[j] > proc->whichcpuVector[j+1])
                     {
-                        swapInt(procview->pidVector[j],procview->pidVector[j+1],temp);
-                        swapInt(procview->niceVector[j],procview->niceVector[j+1],temp);
-                        swapInt(procview->whichcpuVector[j],procview->whichcpuVector[j+1],temp);
-                        swapInt(procview->pmemVector[j],procview->pmemVector[j+1],temp);
-                        swapInt(procview->slpavgVector[j],procview->slpavgVector[j+1],temp);
-                        swapInt(procview->stackVector[j],procview->stackVector[j+1],temp);
-                        swapInt(procview->pcpuVector[j],procview->pcpuVector[j+1],temp);
-                        swapInt(procview->wcpuVector[j],procview->wcpuVector[j+1],temp);
-                        swapInt(procview->uidVector[j],procview->uidVector[j+1],temp);
-                        swapString(procview->cmdVector[j],procview->cmdVector[j+1],tempS);
-                        swapString(procview->statVector[j],procview->statVector[j+1],tempS);
-                        swapString(procview->starttimeVector[j],procview->starttimeVector[j+1],tempS);
-                        swapString(procview->wchanVector[j],procview->wchanVector[j+1],tempS);
-                        swapString(procview->memVector[j],procview->memVector[j+1],tempS);
-                        swapString(procview->ioreadVector[j],procview->ioreadVector[j+1],tempS);
-                        swapString(procview->iowriteVector[j],procview->iowriteVector[j+1],tempS);
-                        swapString(procview->cmdlineVector[j],procview->cmdlineVector[j+1],tempS);
-                        swapString(procview->usernameVector[j],procview->usernameVector[j+1],tempS);
+                        swapInt(proc->pidVector[j],proc->pidVector[j+1],temp);
+                        swapInt(proc->niceVector[j],proc->niceVector[j+1],temp);
+                        swapInt(proc->whichcpuVector[j],proc->whichcpuVector[j+1],temp);
+                        swapInt(proc->pmemVector[j],proc->pmemVector[j+1],temp);
+                        swapInt(proc->slpavgVector[j],proc->slpavgVector[j+1],temp);
+                        swapInt(proc->stackVector[j],proc->stackVector[j+1],temp);
+                        swapInt(proc->pcpuVector[j],proc->pcpuVector[j+1],temp);
+                        swapInt(proc->wcpuVector[j],proc->wcpuVector[j+1],temp);
+                        swapInt(proc->uidVector[j],proc->uidVector[j+1],temp);
+                        swapString(proc->cmdVector[j],proc->cmdVector[j+1],tempS);
+                        swapString(proc->statVector[j],proc->statVector[j+1],tempS);
+                        swapString(proc->starttimeVector[j],proc->starttimeVector[j+1],tempS);
+                        swapString(proc->wchanVector[j],proc->wchanVector[j+1],tempS);
+                        swapString(proc->memVector[j],proc->memVector[j+1],tempS);
+                        swapString(proc->ioreadVector[j],proc->ioreadVector[j+1],tempS);
+                        swapString(proc->iowriteVector[j],proc->iowriteVector[j+1],tempS);
+                        swapString(proc->cmdlineVector[j],proc->cmdlineVector[j+1],tempS);
+                        swapString(proc->usernameVector[j],proc->usernameVector[j+1],tempS);
                     }
                 }
             }
@@ -1282,61 +1299,61 @@ void qjdProcessMainWindow::setSortData()
     // memory 排序
     if(flagSortMemory==1 || flagSortMemory==2)
     {
-        for(int i=0;i<procview->pidVector.size();i++)
+        for(int i=0;i<proc->pidVector.size();i++)
         {
-            t=procview->pidVector.size()-i-1;
+            t=proc->pidVector.size()-i-1;
             for(int j=0;j<t;j++)
             {
                 if(flagSortMemory==1)
                 {
-                    if(procview->originMemVector[j] < procview->originMemVector[j+1])
+                    if(proc->originMemVector[j] < proc->originMemVector[j+1])
                     {
-                        swapInt(procview->originMemVector[j],procview->originMemVector[j+1],temp);
+                        swapInt(proc->originMemVector[j],proc->originMemVector[j+1],temp);
 
-                        swapInt(procview->pidVector[j],procview->pidVector[j+1],temp);
-                        swapInt(procview->niceVector[j],procview->niceVector[j+1],temp);
-                        swapInt(procview->whichcpuVector[j],procview->whichcpuVector[j+1],temp);
-                        swapInt(procview->pmemVector[j],procview->pmemVector[j+1],temp);
-                        swapInt(procview->slpavgVector[j],procview->slpavgVector[j+1],temp);
-                        swapInt(procview->stackVector[j],procview->stackVector[j+1],temp);
-                        swapInt(procview->pcpuVector[j],procview->pcpuVector[j+1],temp);
-                        swapInt(procview->wcpuVector[j],procview->wcpuVector[j+1],temp);
-                        swapInt(procview->uidVector[j],procview->uidVector[j+1],temp);
-                        swapString(procview->cmdVector[j],procview->cmdVector[j+1],tempS);
-                        swapString(procview->statVector[j],procview->statVector[j+1],tempS);
-                        swapString(procview->starttimeVector[j],procview->starttimeVector[j+1],tempS);
-                        swapString(procview->wchanVector[j],procview->wchanVector[j+1],tempS);
-                        swapString(procview->memVector[j],procview->memVector[j+1],tempS);
-                        swapString(procview->ioreadVector[j],procview->ioreadVector[j+1],tempS);
-                        swapString(procview->iowriteVector[j],procview->iowriteVector[j+1],tempS);
-                        swapString(procview->cmdlineVector[j],procview->cmdlineVector[j+1],tempS);
-                        swapString(procview->usernameVector[j],procview->usernameVector[j+1],tempS);
+                        swapInt(proc->pidVector[j],proc->pidVector[j+1],temp);
+                        swapInt(proc->niceVector[j],proc->niceVector[j+1],temp);
+                        swapInt(proc->whichcpuVector[j],proc->whichcpuVector[j+1],temp);
+                        swapInt(proc->pmemVector[j],proc->pmemVector[j+1],temp);
+                        swapInt(proc->slpavgVector[j],proc->slpavgVector[j+1],temp);
+                        swapInt(proc->stackVector[j],proc->stackVector[j+1],temp);
+                        swapInt(proc->pcpuVector[j],proc->pcpuVector[j+1],temp);
+                        swapInt(proc->wcpuVector[j],proc->wcpuVector[j+1],temp);
+                        swapInt(proc->uidVector[j],proc->uidVector[j+1],temp);
+                        swapString(proc->cmdVector[j],proc->cmdVector[j+1],tempS);
+                        swapString(proc->statVector[j],proc->statVector[j+1],tempS);
+                        swapString(proc->starttimeVector[j],proc->starttimeVector[j+1],tempS);
+                        swapString(proc->wchanVector[j],proc->wchanVector[j+1],tempS);
+                        swapString(proc->memVector[j],proc->memVector[j+1],tempS);
+                        swapString(proc->ioreadVector[j],proc->ioreadVector[j+1],tempS);
+                        swapString(proc->iowriteVector[j],proc->iowriteVector[j+1],tempS);
+                        swapString(proc->cmdlineVector[j],proc->cmdlineVector[j+1],tempS);
+                        swapString(proc->usernameVector[j],proc->usernameVector[j+1],tempS);
                     }
                 }
                 if(flagSortMemory==2)
                 {
-                    if(procview->originMemVector[j] > procview->originMemVector[j+1])
+                    if(proc->originMemVector[j] > proc->originMemVector[j+1])
                     {
-                        swapInt(procview->originMemVector[j],procview->originMemVector[j+1],temp);
+                        swapInt(proc->originMemVector[j],proc->originMemVector[j+1],temp);
 
-                        swapInt(procview->pidVector[j],procview->pidVector[j+1],temp);
-                        swapInt(procview->niceVector[j],procview->niceVector[j+1],temp);
-                        swapInt(procview->whichcpuVector[j],procview->whichcpuVector[j+1],temp);
-                        swapInt(procview->pmemVector[j],procview->pmemVector[j+1],temp);
-                        swapInt(procview->slpavgVector[j],procview->slpavgVector[j+1],temp);
-                        swapInt(procview->stackVector[j],procview->stackVector[j+1],temp);
-                        swapInt(procview->pcpuVector[j],procview->pcpuVector[j+1],temp);
-                        swapInt(procview->wcpuVector[j],procview->wcpuVector[j+1],temp);
-                        swapInt(procview->uidVector[j],procview->uidVector[j+1],temp);
-                        swapString(procview->cmdVector[j],procview->cmdVector[j+1],tempS);
-                        swapString(procview->statVector[j],procview->statVector[j+1],tempS);
-                        swapString(procview->starttimeVector[j],procview->starttimeVector[j+1],tempS);
-                        swapString(procview->wchanVector[j],procview->wchanVector[j+1],tempS);
-                        swapString(procview->memVector[j],procview->memVector[j+1],tempS);
-                        swapString(procview->ioreadVector[j],procview->ioreadVector[j+1],tempS);
-                        swapString(procview->iowriteVector[j],procview->iowriteVector[j+1],tempS);
-                        swapString(procview->cmdlineVector[j],procview->cmdlineVector[j+1],tempS);
-                        swapString(procview->usernameVector[j],procview->usernameVector[j+1],tempS);
+                        swapInt(proc->pidVector[j],proc->pidVector[j+1],temp);
+                        swapInt(proc->niceVector[j],proc->niceVector[j+1],temp);
+                        swapInt(proc->whichcpuVector[j],proc->whichcpuVector[j+1],temp);
+                        swapInt(proc->pmemVector[j],proc->pmemVector[j+1],temp);
+                        swapInt(proc->slpavgVector[j],proc->slpavgVector[j+1],temp);
+                        swapInt(proc->stackVector[j],proc->stackVector[j+1],temp);
+                        swapInt(proc->pcpuVector[j],proc->pcpuVector[j+1],temp);
+                        swapInt(proc->wcpuVector[j],proc->wcpuVector[j+1],temp);
+                        swapInt(proc->uidVector[j],proc->uidVector[j+1],temp);
+                        swapString(proc->cmdVector[j],proc->cmdVector[j+1],tempS);
+                        swapString(proc->statVector[j],proc->statVector[j+1],tempS);
+                        swapString(proc->starttimeVector[j],proc->starttimeVector[j+1],tempS);
+                        swapString(proc->wchanVector[j],proc->wchanVector[j+1],tempS);
+                        swapString(proc->memVector[j],proc->memVector[j+1],tempS);
+                        swapString(proc->ioreadVector[j],proc->ioreadVector[j+1],tempS);
+                        swapString(proc->iowriteVector[j],proc->iowriteVector[j+1],tempS);
+                        swapString(proc->cmdlineVector[j],proc->cmdlineVector[j+1],tempS);
+                        swapString(proc->usernameVector[j],proc->usernameVector[j+1],tempS);
                     }
                 }
             }
@@ -1346,57 +1363,57 @@ void qjdProcessMainWindow::setSortData()
     // memory(%) 排序
     if(flagSortPMemory==1 || flagSortPMemory==2)
     {
-        for(int i=0;i<procview->pidVector.size();i++)
+        for(int i=0;i<proc->pidVector.size();i++)
         {
-            t=procview->pidVector.size()-i-1;
+            t=proc->pidVector.size()-i-1;
             for(int j=0;j<t;j++)
             {
                 if(flagSortPMemory==1)
                 {
-                    if(procview->pmemVector[j] < procview->pmemVector[j+1])
+                    if(proc->pmemVector[j] < proc->pmemVector[j+1])
                     {
-                        swapInt(procview->pidVector[j],procview->pidVector[j+1],temp);
-                        swapInt(procview->niceVector[j],procview->niceVector[j+1],temp);
-                        swapInt(procview->whichcpuVector[j],procview->whichcpuVector[j+1],temp);
-                        swapInt(procview->pmemVector[j],procview->pmemVector[j+1],temp);
-                        swapInt(procview->slpavgVector[j],procview->slpavgVector[j+1],temp);
-                        swapInt(procview->stackVector[j],procview->stackVector[j+1],temp);
-                        swapInt(procview->pcpuVector[j],procview->pcpuVector[j+1],temp);
-                        swapInt(procview->wcpuVector[j],procview->wcpuVector[j+1],temp);
-                        swapInt(procview->uidVector[j],procview->uidVector[j+1],temp);
-                        swapString(procview->cmdVector[j],procview->cmdVector[j+1],tempS);
-                        swapString(procview->statVector[j],procview->statVector[j+1],tempS);
-                        swapString(procview->starttimeVector[j],procview->starttimeVector[j+1],tempS);
-                        swapString(procview->wchanVector[j],procview->wchanVector[j+1],tempS);
-                        swapString(procview->memVector[j],procview->memVector[j+1],tempS);
-                        swapString(procview->ioreadVector[j],procview->ioreadVector[j+1],tempS);
-                        swapString(procview->iowriteVector[j],procview->iowriteVector[j+1],tempS);
-                        swapString(procview->cmdlineVector[j],procview->cmdlineVector[j+1],tempS);
-                        swapString(procview->usernameVector[j],procview->usernameVector[j+1],tempS);
+                        swapInt(proc->pidVector[j],proc->pidVector[j+1],temp);
+                        swapInt(proc->niceVector[j],proc->niceVector[j+1],temp);
+                        swapInt(proc->whichcpuVector[j],proc->whichcpuVector[j+1],temp);
+                        swapInt(proc->pmemVector[j],proc->pmemVector[j+1],temp);
+                        swapInt(proc->slpavgVector[j],proc->slpavgVector[j+1],temp);
+                        swapInt(proc->stackVector[j],proc->stackVector[j+1],temp);
+                        swapInt(proc->pcpuVector[j],proc->pcpuVector[j+1],temp);
+                        swapInt(proc->wcpuVector[j],proc->wcpuVector[j+1],temp);
+                        swapInt(proc->uidVector[j],proc->uidVector[j+1],temp);
+                        swapString(proc->cmdVector[j],proc->cmdVector[j+1],tempS);
+                        swapString(proc->statVector[j],proc->statVector[j+1],tempS);
+                        swapString(proc->starttimeVector[j],proc->starttimeVector[j+1],tempS);
+                        swapString(proc->wchanVector[j],proc->wchanVector[j+1],tempS);
+                        swapString(proc->memVector[j],proc->memVector[j+1],tempS);
+                        swapString(proc->ioreadVector[j],proc->ioreadVector[j+1],tempS);
+                        swapString(proc->iowriteVector[j],proc->iowriteVector[j+1],tempS);
+                        swapString(proc->cmdlineVector[j],proc->cmdlineVector[j+1],tempS);
+                        swapString(proc->usernameVector[j],proc->usernameVector[j+1],tempS);
                     }
                 }
                 if(flagSortPMemory==2)
                 {
-                    if(procview->pmemVector[j] > procview->pmemVector[j+1])
+                    if(proc->pmemVector[j] > proc->pmemVector[j+1])
                     {
-                        swapInt(procview->pidVector[j],procview->pidVector[j+1],temp);
-                        swapInt(procview->niceVector[j],procview->niceVector[j+1],temp);
-                        swapInt(procview->whichcpuVector[j],procview->whichcpuVector[j+1],temp);
-                        swapInt(procview->pmemVector[j],procview->pmemVector[j+1],temp);
-                        swapInt(procview->slpavgVector[j],procview->slpavgVector[j+1],temp);
-                        swapInt(procview->stackVector[j],procview->stackVector[j+1],temp);
-                        swapInt(procview->pcpuVector[j],procview->pcpuVector[j+1],temp);
-                        swapInt(procview->wcpuVector[j],procview->wcpuVector[j+1],temp);
-                        swapInt(procview->uidVector[j],procview->uidVector[j+1],temp);
-                        swapString(procview->cmdVector[j],procview->cmdVector[j+1],tempS);
-                        swapString(procview->statVector[j],procview->statVector[j+1],tempS);
-                        swapString(procview->starttimeVector[j],procview->starttimeVector[j+1],tempS);
-                        swapString(procview->wchanVector[j],procview->wchanVector[j+1],tempS);
-                        swapString(procview->memVector[j],procview->memVector[j+1],tempS);
-                        swapString(procview->ioreadVector[j],procview->ioreadVector[j+1],tempS);
-                        swapString(procview->iowriteVector[j],procview->iowriteVector[j+1],tempS);
-                        swapString(procview->cmdlineVector[j],procview->cmdlineVector[j+1],tempS);
-                        swapString(procview->usernameVector[j],procview->usernameVector[j+1],tempS);
+                        swapInt(proc->pidVector[j],proc->pidVector[j+1],temp);
+                        swapInt(proc->niceVector[j],proc->niceVector[j+1],temp);
+                        swapInt(proc->whichcpuVector[j],proc->whichcpuVector[j+1],temp);
+                        swapInt(proc->pmemVector[j],proc->pmemVector[j+1],temp);
+                        swapInt(proc->slpavgVector[j],proc->slpavgVector[j+1],temp);
+                        swapInt(proc->stackVector[j],proc->stackVector[j+1],temp);
+                        swapInt(proc->pcpuVector[j],proc->pcpuVector[j+1],temp);
+                        swapInt(proc->wcpuVector[j],proc->wcpuVector[j+1],temp);
+                        swapInt(proc->uidVector[j],proc->uidVector[j+1],temp);
+                        swapString(proc->cmdVector[j],proc->cmdVector[j+1],tempS);
+                        swapString(proc->statVector[j],proc->statVector[j+1],tempS);
+                        swapString(proc->starttimeVector[j],proc->starttimeVector[j+1],tempS);
+                        swapString(proc->wchanVector[j],proc->wchanVector[j+1],tempS);
+                        swapString(proc->memVector[j],proc->memVector[j+1],tempS);
+                        swapString(proc->ioreadVector[j],proc->ioreadVector[j+1],tempS);
+                        swapString(proc->iowriteVector[j],proc->iowriteVector[j+1],tempS);
+                        swapString(proc->cmdlineVector[j],proc->cmdlineVector[j+1],tempS);
+                        swapString(proc->usernameVector[j],proc->usernameVector[j+1],tempS);
                     }
                 }
             }
@@ -1406,57 +1423,57 @@ void qjdProcessMainWindow::setSortData()
     // sleep(%) 排序
     if(flagSortSleep==1 || flagSortSleep==2)
     {
-        for(int i=0;i<procview->pidVector.size();i++)
+        for(int i=0;i<proc->pidVector.size();i++)
         {
-            t=procview->pidVector.size()-i-1;
+            t=proc->pidVector.size()-i-1;
             for(int j=0;j<t;j++)
             {
                 if(flagSortSleep==1)
                 {
-                    if(procview->slpavgVector[j] < procview->slpavgVector[j+1])
+                    if(proc->slpavgVector[j] < proc->slpavgVector[j+1])
                     {
-                        swapInt(procview->pidVector[j],procview->pidVector[j+1],temp);
-                        swapInt(procview->niceVector[j],procview->niceVector[j+1],temp);
-                        swapInt(procview->whichcpuVector[j],procview->whichcpuVector[j+1],temp);
-                        swapInt(procview->pmemVector[j],procview->pmemVector[j+1],temp);
-                        swapInt(procview->slpavgVector[j],procview->slpavgVector[j+1],temp);
-                        swapInt(procview->stackVector[j],procview->stackVector[j+1],temp);
-                        swapInt(procview->pcpuVector[j],procview->pcpuVector[j+1],temp);
-                        swapInt(procview->wcpuVector[j],procview->wcpuVector[j+1],temp);
-                        swapInt(procview->uidVector[j],procview->uidVector[j+1],temp);
-                        swapString(procview->cmdVector[j],procview->cmdVector[j+1],tempS);
-                        swapString(procview->statVector[j],procview->statVector[j+1],tempS);
-                        swapString(procview->starttimeVector[j],procview->starttimeVector[j+1],tempS);
-                        swapString(procview->wchanVector[j],procview->wchanVector[j+1],tempS);
-                        swapString(procview->memVector[j],procview->memVector[j+1],tempS);
-                        swapString(procview->ioreadVector[j],procview->ioreadVector[j+1],tempS);
-                        swapString(procview->iowriteVector[j],procview->iowriteVector[j+1],tempS);
-                        swapString(procview->cmdlineVector[j],procview->cmdlineVector[j+1],tempS);
-                        swapString(procview->usernameVector[j],procview->usernameVector[j+1],tempS);
+                        swapInt(proc->pidVector[j],proc->pidVector[j+1],temp);
+                        swapInt(proc->niceVector[j],proc->niceVector[j+1],temp);
+                        swapInt(proc->whichcpuVector[j],proc->whichcpuVector[j+1],temp);
+                        swapInt(proc->pmemVector[j],proc->pmemVector[j+1],temp);
+                        swapInt(proc->slpavgVector[j],proc->slpavgVector[j+1],temp);
+                        swapInt(proc->stackVector[j],proc->stackVector[j+1],temp);
+                        swapInt(proc->pcpuVector[j],proc->pcpuVector[j+1],temp);
+                        swapInt(proc->wcpuVector[j],proc->wcpuVector[j+1],temp);
+                        swapInt(proc->uidVector[j],proc->uidVector[j+1],temp);
+                        swapString(proc->cmdVector[j],proc->cmdVector[j+1],tempS);
+                        swapString(proc->statVector[j],proc->statVector[j+1],tempS);
+                        swapString(proc->starttimeVector[j],proc->starttimeVector[j+1],tempS);
+                        swapString(proc->wchanVector[j],proc->wchanVector[j+1],tempS);
+                        swapString(proc->memVector[j],proc->memVector[j+1],tempS);
+                        swapString(proc->ioreadVector[j],proc->ioreadVector[j+1],tempS);
+                        swapString(proc->iowriteVector[j],proc->iowriteVector[j+1],tempS);
+                        swapString(proc->cmdlineVector[j],proc->cmdlineVector[j+1],tempS);
+                        swapString(proc->usernameVector[j],proc->usernameVector[j+1],tempS);
                     }
                 }
                 if(flagSortSleep==2)
                 {
-                    if(procview->slpavgVector[j] > procview->slpavgVector[j+1])
+                    if(proc->slpavgVector[j] > proc->slpavgVector[j+1])
                     {
-                        swapInt(procview->pidVector[j],procview->pidVector[j+1],temp);
-                        swapInt(procview->niceVector[j],procview->niceVector[j+1],temp);
-                        swapInt(procview->whichcpuVector[j],procview->whichcpuVector[j+1],temp);
-                        swapInt(procview->pmemVector[j],procview->pmemVector[j+1],temp);
-                        swapInt(procview->slpavgVector[j],procview->slpavgVector[j+1],temp);
-                        swapInt(procview->stackVector[j],procview->stackVector[j+1],temp);
-                        swapInt(procview->pcpuVector[j],procview->pcpuVector[j+1],temp);
-                        swapInt(procview->wcpuVector[j],procview->wcpuVector[j+1],temp);
-                        swapInt(procview->uidVector[j],procview->uidVector[j+1],temp);
-                        swapString(procview->cmdVector[j],procview->cmdVector[j+1],tempS);
-                        swapString(procview->statVector[j],procview->statVector[j+1],tempS);
-                        swapString(procview->starttimeVector[j],procview->starttimeVector[j+1],tempS);
-                        swapString(procview->wchanVector[j],procview->wchanVector[j+1],tempS);
-                        swapString(procview->memVector[j],procview->memVector[j+1],tempS);
-                        swapString(procview->ioreadVector[j],procview->ioreadVector[j+1],tempS);
-                        swapString(procview->iowriteVector[j],procview->iowriteVector[j+1],tempS);
-                        swapString(procview->cmdlineVector[j],procview->cmdlineVector[j+1],tempS);
-                        swapString(procview->usernameVector[j],procview->usernameVector[j+1],tempS);
+                        swapInt(proc->pidVector[j],proc->pidVector[j+1],temp);
+                        swapInt(proc->niceVector[j],proc->niceVector[j+1],temp);
+                        swapInt(proc->whichcpuVector[j],proc->whichcpuVector[j+1],temp);
+                        swapInt(proc->pmemVector[j],proc->pmemVector[j+1],temp);
+                        swapInt(proc->slpavgVector[j],proc->slpavgVector[j+1],temp);
+                        swapInt(proc->stackVector[j],proc->stackVector[j+1],temp);
+                        swapInt(proc->pcpuVector[j],proc->pcpuVector[j+1],temp);
+                        swapInt(proc->wcpuVector[j],proc->wcpuVector[j+1],temp);
+                        swapInt(proc->uidVector[j],proc->uidVector[j+1],temp);
+                        swapString(proc->cmdVector[j],proc->cmdVector[j+1],tempS);
+                        swapString(proc->statVector[j],proc->statVector[j+1],tempS);
+                        swapString(proc->starttimeVector[j],proc->starttimeVector[j+1],tempS);
+                        swapString(proc->wchanVector[j],proc->wchanVector[j+1],tempS);
+                        swapString(proc->memVector[j],proc->memVector[j+1],tempS);
+                        swapString(proc->ioreadVector[j],proc->ioreadVector[j+1],tempS);
+                        swapString(proc->iowriteVector[j],proc->iowriteVector[j+1],tempS);
+                        swapString(proc->cmdlineVector[j],proc->cmdlineVector[j+1],tempS);
+                        swapString(proc->usernameVector[j],proc->usernameVector[j+1],tempS);
                     }
                 }
             }
@@ -1466,57 +1483,57 @@ void qjdProcessMainWindow::setSortData()
     // stack 排序
     if(flagSortStack==1 || flagSortStack==2)
     {
-        for(int i=0;i<procview->pidVector.size();i++)
+        for(int i=0;i<proc->pidVector.size();i++)
         {
-            t=procview->pidVector.size()-i-1;
+            t=proc->pidVector.size()-i-1;
             for(int j=0;j<t;j++)
             {
                 if(flagSortStack==1)
                 {
-                    if(procview->stackVector[j] < procview->stackVector[j+1])
+                    if(proc->stackVector[j] < proc->stackVector[j+1])
                     {
-                        swapInt(procview->pidVector[j],procview->pidVector[j+1],temp);
-                        swapInt(procview->niceVector[j],procview->niceVector[j+1],temp);
-                        swapInt(procview->whichcpuVector[j],procview->whichcpuVector[j+1],temp);
-                        swapInt(procview->pmemVector[j],procview->pmemVector[j+1],temp);
-                        swapInt(procview->slpavgVector[j],procview->slpavgVector[j+1],temp);
-                        swapInt(procview->stackVector[j],procview->stackVector[j+1],temp);
-                        swapInt(procview->pcpuVector[j],procview->pcpuVector[j+1],temp);
-                        swapInt(procview->wcpuVector[j],procview->wcpuVector[j+1],temp);
-                        swapInt(procview->uidVector[j],procview->uidVector[j+1],temp);
-                        swapString(procview->cmdVector[j],procview->cmdVector[j+1],tempS);
-                        swapString(procview->statVector[j],procview->statVector[j+1],tempS);
-                        swapString(procview->starttimeVector[j],procview->starttimeVector[j+1],tempS);
-                        swapString(procview->wchanVector[j],procview->wchanVector[j+1],tempS);
-                        swapString(procview->memVector[j],procview->memVector[j+1],tempS);
-                        swapString(procview->ioreadVector[j],procview->ioreadVector[j+1],tempS);
-                        swapString(procview->iowriteVector[j],procview->iowriteVector[j+1],tempS);
-                        swapString(procview->cmdlineVector[j],procview->cmdlineVector[j+1],tempS);
-                        swapString(procview->usernameVector[j],procview->usernameVector[j+1],tempS);
+                        swapInt(proc->pidVector[j],proc->pidVector[j+1],temp);
+                        swapInt(proc->niceVector[j],proc->niceVector[j+1],temp);
+                        swapInt(proc->whichcpuVector[j],proc->whichcpuVector[j+1],temp);
+                        swapInt(proc->pmemVector[j],proc->pmemVector[j+1],temp);
+                        swapInt(proc->slpavgVector[j],proc->slpavgVector[j+1],temp);
+                        swapInt(proc->stackVector[j],proc->stackVector[j+1],temp);
+                        swapInt(proc->pcpuVector[j],proc->pcpuVector[j+1],temp);
+                        swapInt(proc->wcpuVector[j],proc->wcpuVector[j+1],temp);
+                        swapInt(proc->uidVector[j],proc->uidVector[j+1],temp);
+                        swapString(proc->cmdVector[j],proc->cmdVector[j+1],tempS);
+                        swapString(proc->statVector[j],proc->statVector[j+1],tempS);
+                        swapString(proc->starttimeVector[j],proc->starttimeVector[j+1],tempS);
+                        swapString(proc->wchanVector[j],proc->wchanVector[j+1],tempS);
+                        swapString(proc->memVector[j],proc->memVector[j+1],tempS);
+                        swapString(proc->ioreadVector[j],proc->ioreadVector[j+1],tempS);
+                        swapString(proc->iowriteVector[j],proc->iowriteVector[j+1],tempS);
+                        swapString(proc->cmdlineVector[j],proc->cmdlineVector[j+1],tempS);
+                        swapString(proc->usernameVector[j],proc->usernameVector[j+1],tempS);
                     }
                 }
                 if(flagSortStack==2)
                 {
-                    if(procview->stackVector[j] > procview->stackVector[j+1])
+                    if(proc->stackVector[j] > proc->stackVector[j+1])
                     {
-                        swapInt(procview->pidVector[j],procview->pidVector[j+1],temp);
-                        swapInt(procview->niceVector[j],procview->niceVector[j+1],temp);
-                        swapInt(procview->whichcpuVector[j],procview->whichcpuVector[j+1],temp);
-                        swapInt(procview->pmemVector[j],procview->pmemVector[j+1],temp);
-                        swapInt(procview->slpavgVector[j],procview->slpavgVector[j+1],temp);
-                        swapInt(procview->stackVector[j],procview->stackVector[j+1],temp);
-                        swapInt(procview->pcpuVector[j],procview->pcpuVector[j+1],temp);
-                        swapInt(procview->wcpuVector[j],procview->wcpuVector[j+1],temp);
-                        swapInt(procview->uidVector[j],procview->uidVector[j+1],temp);
-                        swapString(procview->cmdVector[j],procview->cmdVector[j+1],tempS);
-                        swapString(procview->statVector[j],procview->statVector[j+1],tempS);
-                        swapString(procview->starttimeVector[j],procview->starttimeVector[j+1],tempS);
-                        swapString(procview->wchanVector[j],procview->wchanVector[j+1],tempS);
-                        swapString(procview->memVector[j],procview->memVector[j+1],tempS);
-                        swapString(procview->ioreadVector[j],procview->ioreadVector[j+1],tempS);
-                        swapString(procview->iowriteVector[j],procview->iowriteVector[j+1],tempS);
-                        swapString(procview->cmdlineVector[j],procview->cmdlineVector[j+1],tempS);
-                        swapString(procview->usernameVector[j],procview->usernameVector[j+1],tempS);
+                        swapInt(proc->pidVector[j],proc->pidVector[j+1],temp);
+                        swapInt(proc->niceVector[j],proc->niceVector[j+1],temp);
+                        swapInt(proc->whichcpuVector[j],proc->whichcpuVector[j+1],temp);
+                        swapInt(proc->pmemVector[j],proc->pmemVector[j+1],temp);
+                        swapInt(proc->slpavgVector[j],proc->slpavgVector[j+1],temp);
+                        swapInt(proc->stackVector[j],proc->stackVector[j+1],temp);
+                        swapInt(proc->pcpuVector[j],proc->pcpuVector[j+1],temp);
+                        swapInt(proc->wcpuVector[j],proc->wcpuVector[j+1],temp);
+                        swapInt(proc->uidVector[j],proc->uidVector[j+1],temp);
+                        swapString(proc->cmdVector[j],proc->cmdVector[j+1],tempS);
+                        swapString(proc->statVector[j],proc->statVector[j+1],tempS);
+                        swapString(proc->starttimeVector[j],proc->starttimeVector[j+1],tempS);
+                        swapString(proc->wchanVector[j],proc->wchanVector[j+1],tempS);
+                        swapString(proc->memVector[j],proc->memVector[j+1],tempS);
+                        swapString(proc->ioreadVector[j],proc->ioreadVector[j+1],tempS);
+                        swapString(proc->iowriteVector[j],proc->iowriteVector[j+1],tempS);
+                        swapString(proc->cmdlineVector[j],proc->cmdlineVector[j+1],tempS);
+                        swapString(proc->usernameVector[j],proc->usernameVector[j+1],tempS);
                     }
                 }
             }
@@ -1526,61 +1543,61 @@ void qjdProcessMainWindow::setSortData()
     // IO_READ 排序
     if(flagSortIoRead==1 || flagSortIoRead==2)
     {
-        for(int i=0;i<procview->pidVector.size();i++)
+        for(int i=0;i<proc->pidVector.size();i++)
         {
-            t=procview->pidVector.size()-i-1;
+            t=proc->pidVector.size()-i-1;
             for(int j=0;j<t;j++)
             {
                 if(flagSortIoRead==1)
                 {
-                    if(procview->originIoreadVector[j] < procview->originIoreadVector[j+1])
+                    if(proc->originIoreadVector[j] < proc->originIoreadVector[j+1])
                     {
-                        swapInt(procview->originIoreadVector[j],procview->originIoreadVector[j+1],temp);
+                        swapInt(proc->originIoreadVector[j],proc->originIoreadVector[j+1],temp);
 
-                        swapInt(procview->pidVector[j],procview->pidVector[j+1],temp);
-                        swapInt(procview->niceVector[j],procview->niceVector[j+1],temp);
-                        swapInt(procview->whichcpuVector[j],procview->whichcpuVector[j+1],temp);
-                        swapInt(procview->pmemVector[j],procview->pmemVector[j+1],temp);
-                        swapInt(procview->slpavgVector[j],procview->slpavgVector[j+1],temp);
-                        swapInt(procview->stackVector[j],procview->stackVector[j+1],temp);
-                        swapInt(procview->pcpuVector[j],procview->pcpuVector[j+1],temp);
-                        swapInt(procview->wcpuVector[j],procview->wcpuVector[j+1],temp);
-                        swapInt(procview->uidVector[j],procview->uidVector[j+1],temp);
-                        swapString(procview->cmdVector[j],procview->cmdVector[j+1],tempS);
-                        swapString(procview->statVector[j],procview->statVector[j+1],tempS);
-                        swapString(procview->starttimeVector[j],procview->starttimeVector[j+1],tempS);
-                        swapString(procview->wchanVector[j],procview->wchanVector[j+1],tempS);
-                        swapString(procview->memVector[j],procview->memVector[j+1],tempS);
-                        swapString(procview->ioreadVector[j],procview->ioreadVector[j+1],tempS);
-                        swapString(procview->iowriteVector[j],procview->iowriteVector[j+1],tempS);
-                        swapString(procview->cmdlineVector[j],procview->cmdlineVector[j+1],tempS);
-                        swapString(procview->usernameVector[j],procview->usernameVector[j+1],tempS);
+                        swapInt(proc->pidVector[j],proc->pidVector[j+1],temp);
+                        swapInt(proc->niceVector[j],proc->niceVector[j+1],temp);
+                        swapInt(proc->whichcpuVector[j],proc->whichcpuVector[j+1],temp);
+                        swapInt(proc->pmemVector[j],proc->pmemVector[j+1],temp);
+                        swapInt(proc->slpavgVector[j],proc->slpavgVector[j+1],temp);
+                        swapInt(proc->stackVector[j],proc->stackVector[j+1],temp);
+                        swapInt(proc->pcpuVector[j],proc->pcpuVector[j+1],temp);
+                        swapInt(proc->wcpuVector[j],proc->wcpuVector[j+1],temp);
+                        swapInt(proc->uidVector[j],proc->uidVector[j+1],temp);
+                        swapString(proc->cmdVector[j],proc->cmdVector[j+1],tempS);
+                        swapString(proc->statVector[j],proc->statVector[j+1],tempS);
+                        swapString(proc->starttimeVector[j],proc->starttimeVector[j+1],tempS);
+                        swapString(proc->wchanVector[j],proc->wchanVector[j+1],tempS);
+                        swapString(proc->memVector[j],proc->memVector[j+1],tempS);
+                        swapString(proc->ioreadVector[j],proc->ioreadVector[j+1],tempS);
+                        swapString(proc->iowriteVector[j],proc->iowriteVector[j+1],tempS);
+                        swapString(proc->cmdlineVector[j],proc->cmdlineVector[j+1],tempS);
+                        swapString(proc->usernameVector[j],proc->usernameVector[j+1],tempS);
                     }
                 }
                 if(flagSortIoRead==2)
                 {
-                    if(procview->originIoreadVector[j] > procview->originIoreadVector[j+1])
+                    if(proc->originIoreadVector[j] > proc->originIoreadVector[j+1])
                     {
-                        swapInt(procview->originIoreadVector[j],procview->originIoreadVector[j+1],temp);
+                        swapInt(proc->originIoreadVector[j],proc->originIoreadVector[j+1],temp);
 
-                        swapInt(procview->pidVector[j],procview->pidVector[j+1],temp);
-                        swapInt(procview->niceVector[j],procview->niceVector[j+1],temp);
-                        swapInt(procview->whichcpuVector[j],procview->whichcpuVector[j+1],temp);
-                        swapInt(procview->pmemVector[j],procview->pmemVector[j+1],temp);
-                        swapInt(procview->slpavgVector[j],procview->slpavgVector[j+1],temp);
-                        swapInt(procview->stackVector[j],procview->stackVector[j+1],temp);
-                        swapInt(procview->pcpuVector[j],procview->pcpuVector[j+1],temp);
-                        swapInt(procview->wcpuVector[j],procview->wcpuVector[j+1],temp);
-                        swapInt(procview->uidVector[j],procview->uidVector[j+1],temp);
-                        swapString(procview->cmdVector[j],procview->cmdVector[j+1],tempS);
-                        swapString(procview->statVector[j],procview->statVector[j+1],tempS);
-                        swapString(procview->starttimeVector[j],procview->starttimeVector[j+1],tempS);
-                        swapString(procview->wchanVector[j],procview->wchanVector[j+1],tempS);
-                        swapString(procview->memVector[j],procview->memVector[j+1],tempS);
-                        swapString(procview->ioreadVector[j],procview->ioreadVector[j+1],tempS);
-                        swapString(procview->iowriteVector[j],procview->iowriteVector[j+1],tempS);
-                        swapString(procview->cmdlineVector[j],procview->cmdlineVector[j+1],tempS);
-                        swapString(procview->usernameVector[j],procview->usernameVector[j+1],tempS);
+                        swapInt(proc->pidVector[j],proc->pidVector[j+1],temp);
+                        swapInt(proc->niceVector[j],proc->niceVector[j+1],temp);
+                        swapInt(proc->whichcpuVector[j],proc->whichcpuVector[j+1],temp);
+                        swapInt(proc->pmemVector[j],proc->pmemVector[j+1],temp);
+                        swapInt(proc->slpavgVector[j],proc->slpavgVector[j+1],temp);
+                        swapInt(proc->stackVector[j],proc->stackVector[j+1],temp);
+                        swapInt(proc->pcpuVector[j],proc->pcpuVector[j+1],temp);
+                        swapInt(proc->wcpuVector[j],proc->wcpuVector[j+1],temp);
+                        swapInt(proc->uidVector[j],proc->uidVector[j+1],temp);
+                        swapString(proc->cmdVector[j],proc->cmdVector[j+1],tempS);
+                        swapString(proc->statVector[j],proc->statVector[j+1],tempS);
+                        swapString(proc->starttimeVector[j],proc->starttimeVector[j+1],tempS);
+                        swapString(proc->wchanVector[j],proc->wchanVector[j+1],tempS);
+                        swapString(proc->memVector[j],proc->memVector[j+1],tempS);
+                        swapString(proc->ioreadVector[j],proc->ioreadVector[j+1],tempS);
+                        swapString(proc->iowriteVector[j],proc->iowriteVector[j+1],tempS);
+                        swapString(proc->cmdlineVector[j],proc->cmdlineVector[j+1],tempS);
+                        swapString(proc->usernameVector[j],proc->usernameVector[j+1],tempS);
                     }
                 }
             }
@@ -1590,61 +1607,61 @@ void qjdProcessMainWindow::setSortData()
     // IO_WRITE 排序
     if(flagSortIoWrite==1 || flagSortIoWrite==2)
     {
-        for(int i=0;i<procview->pidVector.size();i++)
+        for(int i=0;i<proc->pidVector.size();i++)
         {
-            t=procview->pidVector.size()-i-1;
+            t=proc->pidVector.size()-i-1;
             for(int j=0;j<t;j++)
             {
                 if(flagSortIoWrite==1)
                 {
-                    if(procview->originIowriteVector[j] < procview->originIowriteVector[j+1])
+                    if(proc->originIowriteVector[j] < proc->originIowriteVector[j+1])
                     {
-                        swapInt(procview->originIowriteVector[j],procview->originIowriteVector[j+1],temp);
+                        swapInt(proc->originIowriteVector[j],proc->originIowriteVector[j+1],temp);
 
-                        swapInt(procview->pidVector[j],procview->pidVector[j+1],temp);
-                        swapInt(procview->niceVector[j],procview->niceVector[j+1],temp);
-                        swapInt(procview->whichcpuVector[j],procview->whichcpuVector[j+1],temp);
-                        swapInt(procview->pmemVector[j],procview->pmemVector[j+1],temp);
-                        swapInt(procview->slpavgVector[j],procview->slpavgVector[j+1],temp);
-                        swapInt(procview->stackVector[j],procview->stackVector[j+1],temp);
-                        swapInt(procview->pcpuVector[j],procview->pcpuVector[j+1],temp);
-                        swapInt(procview->wcpuVector[j],procview->wcpuVector[j+1],temp);
-                        swapInt(procview->uidVector[j],procview->uidVector[j+1],temp);
-                        swapString(procview->cmdVector[j],procview->cmdVector[j+1],tempS);
-                        swapString(procview->statVector[j],procview->statVector[j+1],tempS);
-                        swapString(procview->starttimeVector[j],procview->starttimeVector[j+1],tempS);
-                        swapString(procview->wchanVector[j],procview->wchanVector[j+1],tempS);
-                        swapString(procview->memVector[j],procview->memVector[j+1],tempS);
-                        swapString(procview->ioreadVector[j],procview->ioreadVector[j+1],tempS);
-                        swapString(procview->iowriteVector[j],procview->iowriteVector[j+1],tempS);
-                        swapString(procview->cmdlineVector[j],procview->cmdlineVector[j+1],tempS);
-                        swapString(procview->usernameVector[j],procview->usernameVector[j+1],tempS);
+                        swapInt(proc->pidVector[j],proc->pidVector[j+1],temp);
+                        swapInt(proc->niceVector[j],proc->niceVector[j+1],temp);
+                        swapInt(proc->whichcpuVector[j],proc->whichcpuVector[j+1],temp);
+                        swapInt(proc->pmemVector[j],proc->pmemVector[j+1],temp);
+                        swapInt(proc->slpavgVector[j],proc->slpavgVector[j+1],temp);
+                        swapInt(proc->stackVector[j],proc->stackVector[j+1],temp);
+                        swapInt(proc->pcpuVector[j],proc->pcpuVector[j+1],temp);
+                        swapInt(proc->wcpuVector[j],proc->wcpuVector[j+1],temp);
+                        swapInt(proc->uidVector[j],proc->uidVector[j+1],temp);
+                        swapString(proc->cmdVector[j],proc->cmdVector[j+1],tempS);
+                        swapString(proc->statVector[j],proc->statVector[j+1],tempS);
+                        swapString(proc->starttimeVector[j],proc->starttimeVector[j+1],tempS);
+                        swapString(proc->wchanVector[j],proc->wchanVector[j+1],tempS);
+                        swapString(proc->memVector[j],proc->memVector[j+1],tempS);
+                        swapString(proc->ioreadVector[j],proc->ioreadVector[j+1],tempS);
+                        swapString(proc->iowriteVector[j],proc->iowriteVector[j+1],tempS);
+                        swapString(proc->cmdlineVector[j],proc->cmdlineVector[j+1],tempS);
+                        swapString(proc->usernameVector[j],proc->usernameVector[j+1],tempS);
                     }
                 }
                 if(flagSortIoWrite==2)
                 {
-                    if(procview->originIowriteVector[j] > procview->originIowriteVector[j+1])
+                    if(proc->originIowriteVector[j] > proc->originIowriteVector[j+1])
                     {
-                        swapInt(procview->originIowriteVector[j],procview->originIowriteVector[j+1],temp);
+                        swapInt(proc->originIowriteVector[j],proc->originIowriteVector[j+1],temp);
 
-                        swapInt(procview->pidVector[j],procview->pidVector[j+1],temp);
-                        swapInt(procview->niceVector[j],procview->niceVector[j+1],temp);
-                        swapInt(procview->whichcpuVector[j],procview->whichcpuVector[j+1],temp);
-                        swapInt(procview->pmemVector[j],procview->pmemVector[j+1],temp);
-                        swapInt(procview->slpavgVector[j],procview->slpavgVector[j+1],temp);
-                        swapInt(procview->stackVector[j],procview->stackVector[j+1],temp);
-                        swapInt(procview->pcpuVector[j],procview->pcpuVector[j+1],temp);
-                        swapInt(procview->wcpuVector[j],procview->wcpuVector[j+1],temp);
-                        swapInt(procview->uidVector[j],procview->uidVector[j+1],temp);
-                        swapString(procview->cmdVector[j],procview->cmdVector[j+1],tempS);
-                        swapString(procview->statVector[j],procview->statVector[j+1],tempS);
-                        swapString(procview->starttimeVector[j],procview->starttimeVector[j+1],tempS);
-                        swapString(procview->wchanVector[j],procview->wchanVector[j+1],tempS);
-                        swapString(procview->memVector[j],procview->memVector[j+1],tempS);
-                        swapString(procview->ioreadVector[j],procview->ioreadVector[j+1],tempS);
-                        swapString(procview->iowriteVector[j],procview->iowriteVector[j+1],tempS);
-                        swapString(procview->cmdlineVector[j],procview->cmdlineVector[j+1],tempS);
-                        swapString(procview->usernameVector[j],procview->usernameVector[j+1],tempS);
+                        swapInt(proc->pidVector[j],proc->pidVector[j+1],temp);
+                        swapInt(proc->niceVector[j],proc->niceVector[j+1],temp);
+                        swapInt(proc->whichcpuVector[j],proc->whichcpuVector[j+1],temp);
+                        swapInt(proc->pmemVector[j],proc->pmemVector[j+1],temp);
+                        swapInt(proc->slpavgVector[j],proc->slpavgVector[j+1],temp);
+                        swapInt(proc->stackVector[j],proc->stackVector[j+1],temp);
+                        swapInt(proc->pcpuVector[j],proc->pcpuVector[j+1],temp);
+                        swapInt(proc->wcpuVector[j],proc->wcpuVector[j+1],temp);
+                        swapInt(proc->uidVector[j],proc->uidVector[j+1],temp);
+                        swapString(proc->cmdVector[j],proc->cmdVector[j+1],tempS);
+                        swapString(proc->statVector[j],proc->statVector[j+1],tempS);
+                        swapString(proc->starttimeVector[j],proc->starttimeVector[j+1],tempS);
+                        swapString(proc->wchanVector[j],proc->wchanVector[j+1],tempS);
+                        swapString(proc->memVector[j],proc->memVector[j+1],tempS);
+                        swapString(proc->ioreadVector[j],proc->ioreadVector[j+1],tempS);
+                        swapString(proc->iowriteVector[j],proc->iowriteVector[j+1],tempS);
+                        swapString(proc->cmdlineVector[j],proc->cmdlineVector[j+1],tempS);
+                        swapString(proc->usernameVector[j],proc->usernameVector[j+1],tempS);
                     }
                 }
             }
@@ -1654,57 +1671,57 @@ void qjdProcessMainWindow::setSortData()
     // %CPU 排序
     if(flagSortPCPU==1 || flagSortPCPU==2)
     {
-        for(int i=0;i<procview->pidVector.size();i++)
+        for(int i=0;i<proc->pidVector.size();i++)
         {
-            t=procview->pidVector.size()-i-1;
+            t=proc->pidVector.size()-i-1;
             for(int j=0;j<t;j++)
             {
                 if(flagSortPCPU==1)
                 {
-                    if(procview->pcpuVector[j] < procview->pcpuVector[j+1])
+                    if(proc->pcpuVector[j] < proc->pcpuVector[j+1])
                     {
-                        swapInt(procview->pidVector[j],procview->pidVector[j+1],temp);
-                        swapInt(procview->niceVector[j],procview->niceVector[j+1],temp);
-                        swapInt(procview->whichcpuVector[j],procview->whichcpuVector[j+1],temp);
-                        swapInt(procview->pmemVector[j],procview->pmemVector[j+1],temp);
-                        swapInt(procview->slpavgVector[j],procview->slpavgVector[j+1],temp);
-                        swapInt(procview->stackVector[j],procview->stackVector[j+1],temp);
-                        swapInt(procview->pcpuVector[j],procview->pcpuVector[j+1],temp);
-                        swapInt(procview->wcpuVector[j],procview->wcpuVector[j+1],temp);
-                        swapInt(procview->uidVector[j],procview->uidVector[j+1],temp);
-                        swapString(procview->cmdVector[j],procview->cmdVector[j+1],tempS);
-                        swapString(procview->statVector[j],procview->statVector[j+1],tempS);
-                        swapString(procview->starttimeVector[j],procview->starttimeVector[j+1],tempS);
-                        swapString(procview->wchanVector[j],procview->wchanVector[j+1],tempS);
-                        swapString(procview->memVector[j],procview->memVector[j+1],tempS);
-                        swapString(procview->ioreadVector[j],procview->ioreadVector[j+1],tempS);
-                        swapString(procview->iowriteVector[j],procview->iowriteVector[j+1],tempS);
-                        swapString(procview->cmdlineVector[j],procview->cmdlineVector[j+1],tempS);
-                        swapString(procview->usernameVector[j],procview->usernameVector[j+1],tempS);
+                        swapInt(proc->pidVector[j],proc->pidVector[j+1],temp);
+                        swapInt(proc->niceVector[j],proc->niceVector[j+1],temp);
+                        swapInt(proc->whichcpuVector[j],proc->whichcpuVector[j+1],temp);
+                        swapInt(proc->pmemVector[j],proc->pmemVector[j+1],temp);
+                        swapInt(proc->slpavgVector[j],proc->slpavgVector[j+1],temp);
+                        swapInt(proc->stackVector[j],proc->stackVector[j+1],temp);
+                        swapInt(proc->pcpuVector[j],proc->pcpuVector[j+1],temp);
+                        swapInt(proc->wcpuVector[j],proc->wcpuVector[j+1],temp);
+                        swapInt(proc->uidVector[j],proc->uidVector[j+1],temp);
+                        swapString(proc->cmdVector[j],proc->cmdVector[j+1],tempS);
+                        swapString(proc->statVector[j],proc->statVector[j+1],tempS);
+                        swapString(proc->starttimeVector[j],proc->starttimeVector[j+1],tempS);
+                        swapString(proc->wchanVector[j],proc->wchanVector[j+1],tempS);
+                        swapString(proc->memVector[j],proc->memVector[j+1],tempS);
+                        swapString(proc->ioreadVector[j],proc->ioreadVector[j+1],tempS);
+                        swapString(proc->iowriteVector[j],proc->iowriteVector[j+1],tempS);
+                        swapString(proc->cmdlineVector[j],proc->cmdlineVector[j+1],tempS);
+                        swapString(proc->usernameVector[j],proc->usernameVector[j+1],tempS);
                     }
                 }
                 if(flagSortPCPU==2)
                 {
-                    if(procview->pcpuVector[j] > procview->pcpuVector[j+1])
+                    if(proc->pcpuVector[j] > proc->pcpuVector[j+1])
                     {
-                        swapInt(procview->pidVector[j],procview->pidVector[j+1],temp);
-                        swapInt(procview->niceVector[j],procview->niceVector[j+1],temp);
-                        swapInt(procview->whichcpuVector[j],procview->whichcpuVector[j+1],temp);
-                        swapInt(procview->pmemVector[j],procview->pmemVector[j+1],temp);
-                        swapInt(procview->slpavgVector[j],procview->slpavgVector[j+1],temp);
-                        swapInt(procview->stackVector[j],procview->stackVector[j+1],temp);
-                        swapInt(procview->pcpuVector[j],procview->pcpuVector[j+1],temp);
-                        swapInt(procview->wcpuVector[j],procview->wcpuVector[j+1],temp);
-                        swapInt(procview->uidVector[j],procview->uidVector[j+1],temp);
-                        swapString(procview->cmdVector[j],procview->cmdVector[j+1],tempS);
-                        swapString(procview->statVector[j],procview->statVector[j+1],tempS);
-                        swapString(procview->starttimeVector[j],procview->starttimeVector[j+1],tempS);
-                        swapString(procview->wchanVector[j],procview->wchanVector[j+1],tempS);
-                        swapString(procview->memVector[j],procview->memVector[j+1],tempS);
-                        swapString(procview->ioreadVector[j],procview->ioreadVector[j+1],tempS);
-                        swapString(procview->iowriteVector[j],procview->iowriteVector[j+1],tempS);
-                        swapString(procview->cmdlineVector[j],procview->cmdlineVector[j+1],tempS);
-                        swapString(procview->usernameVector[j],procview->usernameVector[j+1],tempS);
+                        swapInt(proc->pidVector[j],proc->pidVector[j+1],temp);
+                        swapInt(proc->niceVector[j],proc->niceVector[j+1],temp);
+                        swapInt(proc->whichcpuVector[j],proc->whichcpuVector[j+1],temp);
+                        swapInt(proc->pmemVector[j],proc->pmemVector[j+1],temp);
+                        swapInt(proc->slpavgVector[j],proc->slpavgVector[j+1],temp);
+                        swapInt(proc->stackVector[j],proc->stackVector[j+1],temp);
+                        swapInt(proc->pcpuVector[j],proc->pcpuVector[j+1],temp);
+                        swapInt(proc->wcpuVector[j],proc->wcpuVector[j+1],temp);
+                        swapInt(proc->uidVector[j],proc->uidVector[j+1],temp);
+                        swapString(proc->cmdVector[j],proc->cmdVector[j+1],tempS);
+                        swapString(proc->statVector[j],proc->statVector[j+1],tempS);
+                        swapString(proc->starttimeVector[j],proc->starttimeVector[j+1],tempS);
+                        swapString(proc->wchanVector[j],proc->wchanVector[j+1],tempS);
+                        swapString(proc->memVector[j],proc->memVector[j+1],tempS);
+                        swapString(proc->ioreadVector[j],proc->ioreadVector[j+1],tempS);
+                        swapString(proc->iowriteVector[j],proc->iowriteVector[j+1],tempS);
+                        swapString(proc->cmdlineVector[j],proc->cmdlineVector[j+1],tempS);
+                        swapString(proc->usernameVector[j],proc->usernameVector[j+1],tempS);
                     }
                 }
             }
@@ -1714,57 +1731,57 @@ void qjdProcessMainWindow::setSortData()
     // %WCPU 排序
     if(flagSortWCPU==1 || flagSortWCPU==2)
     {
-        for(int i=0;i<procview->pidVector.size();i++)
+        for(int i=0;i<proc->pidVector.size();i++)
         {
-            t=procview->pidVector.size()-i-1;
+            t=proc->pidVector.size()-i-1;
             for(int j=0;j<t;j++)
             {
                 if(flagSortWCPU==1)
                 {
-                    if(procview->wcpuVector[j] < procview->wcpuVector[j+1])
+                    if(proc->wcpuVector[j] < proc->wcpuVector[j+1])
                     {
-                        swapInt(procview->pidVector[j],procview->pidVector[j+1],temp);
-                        swapInt(procview->niceVector[j],procview->niceVector[j+1],temp);
-                        swapInt(procview->whichcpuVector[j],procview->whichcpuVector[j+1],temp);
-                        swapInt(procview->pmemVector[j],procview->pmemVector[j+1],temp);
-                        swapInt(procview->slpavgVector[j],procview->slpavgVector[j+1],temp);
-                        swapInt(procview->stackVector[j],procview->stackVector[j+1],temp);
-                        swapInt(procview->pcpuVector[j],procview->pcpuVector[j+1],temp);
-                        swapInt(procview->wcpuVector[j],procview->wcpuVector[j+1],temp);
-                        swapInt(procview->uidVector[j],procview->uidVector[j+1],temp);
-                        swapString(procview->cmdVector[j],procview->cmdVector[j+1],tempS);
-                        swapString(procview->statVector[j],procview->statVector[j+1],tempS);
-                        swapString(procview->starttimeVector[j],procview->starttimeVector[j+1],tempS);
-                        swapString(procview->wchanVector[j],procview->wchanVector[j+1],tempS);
-                        swapString(procview->memVector[j],procview->memVector[j+1],tempS);
-                        swapString(procview->ioreadVector[j],procview->ioreadVector[j+1],tempS);
-                        swapString(procview->iowriteVector[j],procview->iowriteVector[j+1],tempS);
-                        swapString(procview->cmdlineVector[j],procview->cmdlineVector[j+1],tempS);
-                        swapString(procview->usernameVector[j],procview->usernameVector[j+1],tempS);
+                        swapInt(proc->pidVector[j],proc->pidVector[j+1],temp);
+                        swapInt(proc->niceVector[j],proc->niceVector[j+1],temp);
+                        swapInt(proc->whichcpuVector[j],proc->whichcpuVector[j+1],temp);
+                        swapInt(proc->pmemVector[j],proc->pmemVector[j+1],temp);
+                        swapInt(proc->slpavgVector[j],proc->slpavgVector[j+1],temp);
+                        swapInt(proc->stackVector[j],proc->stackVector[j+1],temp);
+                        swapInt(proc->pcpuVector[j],proc->pcpuVector[j+1],temp);
+                        swapInt(proc->wcpuVector[j],proc->wcpuVector[j+1],temp);
+                        swapInt(proc->uidVector[j],proc->uidVector[j+1],temp);
+                        swapString(proc->cmdVector[j],proc->cmdVector[j+1],tempS);
+                        swapString(proc->statVector[j],proc->statVector[j+1],tempS);
+                        swapString(proc->starttimeVector[j],proc->starttimeVector[j+1],tempS);
+                        swapString(proc->wchanVector[j],proc->wchanVector[j+1],tempS);
+                        swapString(proc->memVector[j],proc->memVector[j+1],tempS);
+                        swapString(proc->ioreadVector[j],proc->ioreadVector[j+1],tempS);
+                        swapString(proc->iowriteVector[j],proc->iowriteVector[j+1],tempS);
+                        swapString(proc->cmdlineVector[j],proc->cmdlineVector[j+1],tempS);
+                        swapString(proc->usernameVector[j],proc->usernameVector[j+1],tempS);
                     }
                 }
                 if(flagSortWCPU==2)
                 {
-                    if(procview->wcpuVector[j] > procview->wcpuVector[j+1])
+                    if(proc->wcpuVector[j] > proc->wcpuVector[j+1])
                     {
-                        swapInt(procview->pidVector[j],procview->pidVector[j+1],temp);
-                        swapInt(procview->niceVector[j],procview->niceVector[j+1],temp);
-                        swapInt(procview->whichcpuVector[j],procview->whichcpuVector[j+1],temp);
-                        swapInt(procview->pmemVector[j],procview->pmemVector[j+1],temp);
-                        swapInt(procview->slpavgVector[j],procview->slpavgVector[j+1],temp);
-                        swapInt(procview->stackVector[j],procview->stackVector[j+1],temp);
-                        swapInt(procview->pcpuVector[j],procview->pcpuVector[j+1],temp);
-                        swapInt(procview->wcpuVector[j],procview->wcpuVector[j+1],temp);
-                        swapInt(procview->uidVector[j],procview->uidVector[j+1],temp);
-                        swapString(procview->cmdVector[j],procview->cmdVector[j+1],tempS);
-                        swapString(procview->statVector[j],procview->statVector[j+1],tempS);
-                        swapString(procview->starttimeVector[j],procview->starttimeVector[j+1],tempS);
-                        swapString(procview->wchanVector[j],procview->wchanVector[j+1],tempS);
-                        swapString(procview->memVector[j],procview->memVector[j+1],tempS);
-                        swapString(procview->ioreadVector[j],procview->ioreadVector[j+1],tempS);
-                        swapString(procview->iowriteVector[j],procview->iowriteVector[j+1],tempS);
-                        swapString(procview->cmdlineVector[j],procview->cmdlineVector[j+1],tempS);
-                        swapString(procview->usernameVector[j],procview->usernameVector[j+1],tempS);
+                        swapInt(proc->pidVector[j],proc->pidVector[j+1],temp);
+                        swapInt(proc->niceVector[j],proc->niceVector[j+1],temp);
+                        swapInt(proc->whichcpuVector[j],proc->whichcpuVector[j+1],temp);
+                        swapInt(proc->pmemVector[j],proc->pmemVector[j+1],temp);
+                        swapInt(proc->slpavgVector[j],proc->slpavgVector[j+1],temp);
+                        swapInt(proc->stackVector[j],proc->stackVector[j+1],temp);
+                        swapInt(proc->pcpuVector[j],proc->pcpuVector[j+1],temp);
+                        swapInt(proc->wcpuVector[j],proc->wcpuVector[j+1],temp);
+                        swapInt(proc->uidVector[j],proc->uidVector[j+1],temp);
+                        swapString(proc->cmdVector[j],proc->cmdVector[j+1],tempS);
+                        swapString(proc->statVector[j],proc->statVector[j+1],tempS);
+                        swapString(proc->starttimeVector[j],proc->starttimeVector[j+1],tempS);
+                        swapString(proc->wchanVector[j],proc->wchanVector[j+1],tempS);
+                        swapString(proc->memVector[j],proc->memVector[j+1],tempS);
+                        swapString(proc->ioreadVector[j],proc->ioreadVector[j+1],tempS);
+                        swapString(proc->iowriteVector[j],proc->iowriteVector[j+1],tempS);
+                        swapString(proc->cmdlineVector[j],proc->cmdlineVector[j+1],tempS);
+                        swapString(proc->usernameVector[j],proc->usernameVector[j+1],tempS);
                     }
                 }
             }
@@ -1774,57 +1791,57 @@ void qjdProcessMainWindow::setSortData()
     // cmdline 排序
     if(flagSortCMDLine==1 || flagSortCMDLine==2)
     {
-        for(int i=0;i<procview->pidVector.size();i++)
+        for(int i=0;i<proc->pidVector.size();i++)
         {
-            t=procview->pidVector.size()-i-1;
+            t=proc->pidVector.size()-i-1;
             for(int j=0;j<t;j++)
             {
                 if(flagSortCMDLine==1)
                 {
-                    if(procview->cmdlineVector[j] < procview->cmdlineVector[j+1])
+                    if(proc->cmdlineVector[j] < proc->cmdlineVector[j+1])
                     {
-                        swapInt(procview->pidVector[j],procview->pidVector[j+1],temp);
-                        swapInt(procview->niceVector[j],procview->niceVector[j+1],temp);
-                        swapInt(procview->whichcpuVector[j],procview->whichcpuVector[j+1],temp);
-                        swapInt(procview->pmemVector[j],procview->pmemVector[j+1],temp);
-                        swapInt(procview->slpavgVector[j],procview->slpavgVector[j+1],temp);
-                        swapInt(procview->stackVector[j],procview->stackVector[j+1],temp);
-                        swapInt(procview->pcpuVector[j],procview->pcpuVector[j+1],temp);
-                        swapInt(procview->wcpuVector[j],procview->wcpuVector[j+1],temp);
-                        swapInt(procview->uidVector[j],procview->uidVector[j+1],temp);
-                        swapString(procview->cmdVector[j],procview->cmdVector[j+1],tempS);
-                        swapString(procview->statVector[j],procview->statVector[j+1],tempS);
-                        swapString(procview->starttimeVector[j],procview->starttimeVector[j+1],tempS);
-                        swapString(procview->wchanVector[j],procview->wchanVector[j+1],tempS);
-                        swapString(procview->memVector[j],procview->memVector[j+1],tempS);
-                        swapString(procview->ioreadVector[j],procview->ioreadVector[j+1],tempS);
-                        swapString(procview->iowriteVector[j],procview->iowriteVector[j+1],tempS);
-                        swapString(procview->cmdlineVector[j],procview->cmdlineVector[j+1],tempS);
-                        swapString(procview->usernameVector[j],procview->usernameVector[j+1],tempS);
+                        swapInt(proc->pidVector[j],proc->pidVector[j+1],temp);
+                        swapInt(proc->niceVector[j],proc->niceVector[j+1],temp);
+                        swapInt(proc->whichcpuVector[j],proc->whichcpuVector[j+1],temp);
+                        swapInt(proc->pmemVector[j],proc->pmemVector[j+1],temp);
+                        swapInt(proc->slpavgVector[j],proc->slpavgVector[j+1],temp);
+                        swapInt(proc->stackVector[j],proc->stackVector[j+1],temp);
+                        swapInt(proc->pcpuVector[j],proc->pcpuVector[j+1],temp);
+                        swapInt(proc->wcpuVector[j],proc->wcpuVector[j+1],temp);
+                        swapInt(proc->uidVector[j],proc->uidVector[j+1],temp);
+                        swapString(proc->cmdVector[j],proc->cmdVector[j+1],tempS);
+                        swapString(proc->statVector[j],proc->statVector[j+1],tempS);
+                        swapString(proc->starttimeVector[j],proc->starttimeVector[j+1],tempS);
+                        swapString(proc->wchanVector[j],proc->wchanVector[j+1],tempS);
+                        swapString(proc->memVector[j],proc->memVector[j+1],tempS);
+                        swapString(proc->ioreadVector[j],proc->ioreadVector[j+1],tempS);
+                        swapString(proc->iowriteVector[j],proc->iowriteVector[j+1],tempS);
+                        swapString(proc->cmdlineVector[j],proc->cmdlineVector[j+1],tempS);
+                        swapString(proc->usernameVector[j],proc->usernameVector[j+1],tempS);
                     }
                 }
                 if(flagSortCMDLine==2)
                 {
-                    if(procview->cmdlineVector[j] > procview->cmdlineVector[j+1])
+                    if(proc->cmdlineVector[j] > proc->cmdlineVector[j+1])
                     {
-                        swapInt(procview->pidVector[j],procview->pidVector[j+1],temp);
-                        swapInt(procview->niceVector[j],procview->niceVector[j+1],temp);
-                        swapInt(procview->whichcpuVector[j],procview->whichcpuVector[j+1],temp);
-                        swapInt(procview->pmemVector[j],procview->pmemVector[j+1],temp);
-                        swapInt(procview->slpavgVector[j],procview->slpavgVector[j+1],temp);
-                        swapInt(procview->stackVector[j],procview->stackVector[j+1],temp);
-                        swapInt(procview->pcpuVector[j],procview->pcpuVector[j+1],temp);
-                        swapInt(procview->wcpuVector[j],procview->wcpuVector[j+1],temp);
-                        swapInt(procview->uidVector[j],procview->uidVector[j+1],temp);
-                        swapString(procview->cmdVector[j],procview->cmdVector[j+1],tempS);
-                        swapString(procview->statVector[j],procview->statVector[j+1],tempS);
-                        swapString(procview->starttimeVector[j],procview->starttimeVector[j+1],tempS);
-                        swapString(procview->wchanVector[j],procview->wchanVector[j+1],tempS);
-                        swapString(procview->memVector[j],procview->memVector[j+1],tempS);
-                        swapString(procview->ioreadVector[j],procview->ioreadVector[j+1],tempS);
-                        swapString(procview->iowriteVector[j],procview->iowriteVector[j+1],tempS);
-                        swapString(procview->cmdlineVector[j],procview->cmdlineVector[j+1],tempS);
-                        swapString(procview->usernameVector[j],procview->usernameVector[j+1],tempS);
+                        swapInt(proc->pidVector[j],proc->pidVector[j+1],temp);
+                        swapInt(proc->niceVector[j],proc->niceVector[j+1],temp);
+                        swapInt(proc->whichcpuVector[j],proc->whichcpuVector[j+1],temp);
+                        swapInt(proc->pmemVector[j],proc->pmemVector[j+1],temp);
+                        swapInt(proc->slpavgVector[j],proc->slpavgVector[j+1],temp);
+                        swapInt(proc->stackVector[j],proc->stackVector[j+1],temp);
+                        swapInt(proc->pcpuVector[j],proc->pcpuVector[j+1],temp);
+                        swapInt(proc->wcpuVector[j],proc->wcpuVector[j+1],temp);
+                        swapInt(proc->uidVector[j],proc->uidVector[j+1],temp);
+                        swapString(proc->cmdVector[j],proc->cmdVector[j+1],tempS);
+                        swapString(proc->statVector[j],proc->statVector[j+1],tempS);
+                        swapString(proc->starttimeVector[j],proc->starttimeVector[j+1],tempS);
+                        swapString(proc->wchanVector[j],proc->wchanVector[j+1],tempS);
+                        swapString(proc->memVector[j],proc->memVector[j+1],tempS);
+                        swapString(proc->ioreadVector[j],proc->ioreadVector[j+1],tempS);
+                        swapString(proc->iowriteVector[j],proc->iowriteVector[j+1],tempS);
+                        swapString(proc->cmdlineVector[j],proc->cmdlineVector[j+1],tempS);
+                        swapString(proc->usernameVector[j],proc->usernameVector[j+1],tempS);
                     }
                 }
             }
@@ -1834,57 +1851,57 @@ void qjdProcessMainWindow::setSortData()
     // uid 排序
     if(flagSortUid==1 || flagSortUid==2)
     {
-        for(int i=0;i<procview->pidVector.size();i++)
+        for(int i=0;i<proc->pidVector.size();i++)
         {
-            t=procview->pidVector.size()-i-1;
+            t=proc->pidVector.size()-i-1;
             for(int j=0;j<t;j++)
             {
                 if(flagSortUid==1)
                 {
-                    if(procview->uidVector[j] < procview->uidVector[j+1])
+                    if(proc->uidVector[j] < proc->uidVector[j+1])
                     {
-                        swapInt(procview->pidVector[j],procview->pidVector[j+1],temp);
-                        swapInt(procview->niceVector[j],procview->niceVector[j+1],temp);
-                        swapInt(procview->whichcpuVector[j],procview->whichcpuVector[j+1],temp);
-                        swapInt(procview->pmemVector[j],procview->pmemVector[j+1],temp);
-                        swapInt(procview->slpavgVector[j],procview->slpavgVector[j+1],temp);
-                        swapInt(procview->stackVector[j],procview->stackVector[j+1],temp);
-                        swapInt(procview->pcpuVector[j],procview->pcpuVector[j+1],temp);
-                        swapInt(procview->wcpuVector[j],procview->wcpuVector[j+1],temp);
-                        swapInt(procview->uidVector[j],procview->uidVector[j+1],temp);
-                        swapString(procview->cmdVector[j],procview->cmdVector[j+1],tempS);
-                        swapString(procview->statVector[j],procview->statVector[j+1],tempS);
-                        swapString(procview->starttimeVector[j],procview->starttimeVector[j+1],tempS);
-                        swapString(procview->wchanVector[j],procview->wchanVector[j+1],tempS);
-                        swapString(procview->memVector[j],procview->memVector[j+1],tempS);
-                        swapString(procview->ioreadVector[j],procview->ioreadVector[j+1],tempS);
-                        swapString(procview->iowriteVector[j],procview->iowriteVector[j+1],tempS);
-                        swapString(procview->cmdlineVector[j],procview->cmdlineVector[j+1],tempS);
-                        swapString(procview->usernameVector[j],procview->usernameVector[j+1],tempS);
+                        swapInt(proc->pidVector[j],proc->pidVector[j+1],temp);
+                        swapInt(proc->niceVector[j],proc->niceVector[j+1],temp);
+                        swapInt(proc->whichcpuVector[j],proc->whichcpuVector[j+1],temp);
+                        swapInt(proc->pmemVector[j],proc->pmemVector[j+1],temp);
+                        swapInt(proc->slpavgVector[j],proc->slpavgVector[j+1],temp);
+                        swapInt(proc->stackVector[j],proc->stackVector[j+1],temp);
+                        swapInt(proc->pcpuVector[j],proc->pcpuVector[j+1],temp);
+                        swapInt(proc->wcpuVector[j],proc->wcpuVector[j+1],temp);
+                        swapInt(proc->uidVector[j],proc->uidVector[j+1],temp);
+                        swapString(proc->cmdVector[j],proc->cmdVector[j+1],tempS);
+                        swapString(proc->statVector[j],proc->statVector[j+1],tempS);
+                        swapString(proc->starttimeVector[j],proc->starttimeVector[j+1],tempS);
+                        swapString(proc->wchanVector[j],proc->wchanVector[j+1],tempS);
+                        swapString(proc->memVector[j],proc->memVector[j+1],tempS);
+                        swapString(proc->ioreadVector[j],proc->ioreadVector[j+1],tempS);
+                        swapString(proc->iowriteVector[j],proc->iowriteVector[j+1],tempS);
+                        swapString(proc->cmdlineVector[j],proc->cmdlineVector[j+1],tempS);
+                        swapString(proc->usernameVector[j],proc->usernameVector[j+1],tempS);
                     }
                 }
                 if(flagSortUid==2)
                 {
-                    if(procview->uidVector[j] > procview->uidVector[j+1])
+                    if(proc->uidVector[j] > proc->uidVector[j+1])
                     {
-                        swapInt(procview->pidVector[j],procview->pidVector[j+1],temp);
-                        swapInt(procview->niceVector[j],procview->niceVector[j+1],temp);
-                        swapInt(procview->whichcpuVector[j],procview->whichcpuVector[j+1],temp);
-                        swapInt(procview->pmemVector[j],procview->pmemVector[j+1],temp);
-                        swapInt(procview->slpavgVector[j],procview->slpavgVector[j+1],temp);
-                        swapInt(procview->stackVector[j],procview->stackVector[j+1],temp);
-                        swapInt(procview->pcpuVector[j],procview->pcpuVector[j+1],temp);
-                        swapInt(procview->wcpuVector[j],procview->wcpuVector[j+1],temp);
-                        swapInt(procview->uidVector[j],procview->uidVector[j+1],temp);
-                        swapString(procview->cmdVector[j],procview->cmdVector[j+1],tempS);
-                        swapString(procview->statVector[j],procview->statVector[j+1],tempS);
-                        swapString(procview->starttimeVector[j],procview->starttimeVector[j+1],tempS);
-                        swapString(procview->wchanVector[j],procview->wchanVector[j+1],tempS);
-                        swapString(procview->memVector[j],procview->memVector[j+1],tempS);
-                        swapString(procview->ioreadVector[j],procview->ioreadVector[j+1],tempS);
-                        swapString(procview->iowriteVector[j],procview->iowriteVector[j+1],tempS);
-                        swapString(procview->cmdlineVector[j],procview->cmdlineVector[j+1],tempS);
-                        swapString(procview->usernameVector[j],procview->usernameVector[j+1],tempS);
+                        swapInt(proc->pidVector[j],proc->pidVector[j+1],temp);
+                        swapInt(proc->niceVector[j],proc->niceVector[j+1],temp);
+                        swapInt(proc->whichcpuVector[j],proc->whichcpuVector[j+1],temp);
+                        swapInt(proc->pmemVector[j],proc->pmemVector[j+1],temp);
+                        swapInt(proc->slpavgVector[j],proc->slpavgVector[j+1],temp);
+                        swapInt(proc->stackVector[j],proc->stackVector[j+1],temp);
+                        swapInt(proc->pcpuVector[j],proc->pcpuVector[j+1],temp);
+                        swapInt(proc->wcpuVector[j],proc->wcpuVector[j+1],temp);
+                        swapInt(proc->uidVector[j],proc->uidVector[j+1],temp);
+                        swapString(proc->cmdVector[j],proc->cmdVector[j+1],tempS);
+                        swapString(proc->statVector[j],proc->statVector[j+1],tempS);
+                        swapString(proc->starttimeVector[j],proc->starttimeVector[j+1],tempS);
+                        swapString(proc->wchanVector[j],proc->wchanVector[j+1],tempS);
+                        swapString(proc->memVector[j],proc->memVector[j+1],tempS);
+                        swapString(proc->ioreadVector[j],proc->ioreadVector[j+1],tempS);
+                        swapString(proc->iowriteVector[j],proc->iowriteVector[j+1],tempS);
+                        swapString(proc->cmdlineVector[j],proc->cmdlineVector[j+1],tempS);
+                        swapString(proc->usernameVector[j],proc->usernameVector[j+1],tempS);
                     }
                 }
             }
@@ -1894,57 +1911,57 @@ void qjdProcessMainWindow::setSortData()
     // username 排序
     if(flagSortUsrName==1 || flagSortUsrName==2)
     {
-        for(int i=0;i<procview->pidVector.size();i++)
+        for(int i=0;i<proc->pidVector.size();i++)
         {
-            t=procview->pidVector.size()-i-1;
+            t=proc->pidVector.size()-i-1;
             for(int j=0;j<t;j++)
             {
                 if(flagSortUsrName==1)
                 {
-                    if(procview->usernameVector[j] < procview->usernameVector[j+1])
+                    if(proc->usernameVector[j] < proc->usernameVector[j+1])
                     {
-                        swapInt(procview->pidVector[j],procview->pidVector[j+1],temp);
-                        swapInt(procview->niceVector[j],procview->niceVector[j+1],temp);
-                        swapInt(procview->whichcpuVector[j],procview->whichcpuVector[j+1],temp);
-                        swapInt(procview->pmemVector[j],procview->pmemVector[j+1],temp);
-                        swapInt(procview->slpavgVector[j],procview->slpavgVector[j+1],temp);
-                        swapInt(procview->stackVector[j],procview->stackVector[j+1],temp);
-                        swapInt(procview->pcpuVector[j],procview->pcpuVector[j+1],temp);
-                        swapInt(procview->wcpuVector[j],procview->wcpuVector[j+1],temp);
-                        swapInt(procview->uidVector[j],procview->uidVector[j+1],temp);
-                        swapString(procview->cmdVector[j],procview->cmdVector[j+1],tempS);
-                        swapString(procview->statVector[j],procview->statVector[j+1],tempS);
-                        swapString(procview->starttimeVector[j],procview->starttimeVector[j+1],tempS);
-                        swapString(procview->wchanVector[j],procview->wchanVector[j+1],tempS);
-                        swapString(procview->memVector[j],procview->memVector[j+1],tempS);
-                        swapString(procview->ioreadVector[j],procview->ioreadVector[j+1],tempS);
-                        swapString(procview->iowriteVector[j],procview->iowriteVector[j+1],tempS);
-                        swapString(procview->cmdlineVector[j],procview->cmdlineVector[j+1],tempS);
-                        swapString(procview->usernameVector[j],procview->usernameVector[j+1],tempS);
+                        swapInt(proc->pidVector[j],proc->pidVector[j+1],temp);
+                        swapInt(proc->niceVector[j],proc->niceVector[j+1],temp);
+                        swapInt(proc->whichcpuVector[j],proc->whichcpuVector[j+1],temp);
+                        swapInt(proc->pmemVector[j],proc->pmemVector[j+1],temp);
+                        swapInt(proc->slpavgVector[j],proc->slpavgVector[j+1],temp);
+                        swapInt(proc->stackVector[j],proc->stackVector[j+1],temp);
+                        swapInt(proc->pcpuVector[j],proc->pcpuVector[j+1],temp);
+                        swapInt(proc->wcpuVector[j],proc->wcpuVector[j+1],temp);
+                        swapInt(proc->uidVector[j],proc->uidVector[j+1],temp);
+                        swapString(proc->cmdVector[j],proc->cmdVector[j+1],tempS);
+                        swapString(proc->statVector[j],proc->statVector[j+1],tempS);
+                        swapString(proc->starttimeVector[j],proc->starttimeVector[j+1],tempS);
+                        swapString(proc->wchanVector[j],proc->wchanVector[j+1],tempS);
+                        swapString(proc->memVector[j],proc->memVector[j+1],tempS);
+                        swapString(proc->ioreadVector[j],proc->ioreadVector[j+1],tempS);
+                        swapString(proc->iowriteVector[j],proc->iowriteVector[j+1],tempS);
+                        swapString(proc->cmdlineVector[j],proc->cmdlineVector[j+1],tempS);
+                        swapString(proc->usernameVector[j],proc->usernameVector[j+1],tempS);
                     }
                 }
                 if(flagSortUsrName==2)
                 {
-                    if(procview->usernameVector[j] > procview->usernameVector[j+1])
+                    if(proc->usernameVector[j] > proc->usernameVector[j+1])
                     {
-                        swapInt(procview->pidVector[j],procview->pidVector[j+1],temp);
-                        swapInt(procview->niceVector[j],procview->niceVector[j+1],temp);
-                        swapInt(procview->whichcpuVector[j],procview->whichcpuVector[j+1],temp);
-                        swapInt(procview->pmemVector[j],procview->pmemVector[j+1],temp);
-                        swapInt(procview->slpavgVector[j],procview->slpavgVector[j+1],temp);
-                        swapInt(procview->stackVector[j],procview->stackVector[j+1],temp);
-                        swapInt(procview->pcpuVector[j],procview->pcpuVector[j+1],temp);
-                        swapInt(procview->wcpuVector[j],procview->wcpuVector[j+1],temp);
-                        swapInt(procview->uidVector[j],procview->uidVector[j+1],temp);
-                        swapString(procview->cmdVector[j],procview->cmdVector[j+1],tempS);
-                        swapString(procview->statVector[j],procview->statVector[j+1],tempS);
-                        swapString(procview->starttimeVector[j],procview->starttimeVector[j+1],tempS);
-                        swapString(procview->wchanVector[j],procview->wchanVector[j+1],tempS);
-                        swapString(procview->memVector[j],procview->memVector[j+1],tempS);
-                        swapString(procview->ioreadVector[j],procview->ioreadVector[j+1],tempS);
-                        swapString(procview->iowriteVector[j],procview->iowriteVector[j+1],tempS);
-                        swapString(procview->cmdlineVector[j],procview->cmdlineVector[j+1],tempS);
-                        swapString(procview->usernameVector[j],procview->usernameVector[j+1],tempS);
+                        swapInt(proc->pidVector[j],proc->pidVector[j+1],temp);
+                        swapInt(proc->niceVector[j],proc->niceVector[j+1],temp);
+                        swapInt(proc->whichcpuVector[j],proc->whichcpuVector[j+1],temp);
+                        swapInt(proc->pmemVector[j],proc->pmemVector[j+1],temp);
+                        swapInt(proc->slpavgVector[j],proc->slpavgVector[j+1],temp);
+                        swapInt(proc->stackVector[j],proc->stackVector[j+1],temp);
+                        swapInt(proc->pcpuVector[j],proc->pcpuVector[j+1],temp);
+                        swapInt(proc->wcpuVector[j],proc->wcpuVector[j+1],temp);
+                        swapInt(proc->uidVector[j],proc->uidVector[j+1],temp);
+                        swapString(proc->cmdVector[j],proc->cmdVector[j+1],tempS);
+                        swapString(proc->statVector[j],proc->statVector[j+1],tempS);
+                        swapString(proc->starttimeVector[j],proc->starttimeVector[j+1],tempS);
+                        swapString(proc->wchanVector[j],proc->wchanVector[j+1],tempS);
+                        swapString(proc->memVector[j],proc->memVector[j+1],tempS);
+                        swapString(proc->ioreadVector[j],proc->ioreadVector[j+1],tempS);
+                        swapString(proc->iowriteVector[j],proc->iowriteVector[j+1],tempS);
+                        swapString(proc->cmdlineVector[j],proc->cmdlineVector[j+1],tempS);
+                        swapString(proc->usernameVector[j],proc->usernameVector[j+1],tempS);
                     }
                 }
             }
@@ -1982,7 +1999,7 @@ void qjdProcessMainWindow::headerHandle(int colNum)
     colName=ui->tblMain->model()->headerData(colNum,Qt::Horizontal).toString(); // 获得列名，用来排序
 //    colName=qjdtable->model()->headerData(colNum,Qt::Horizontal).toString(); // 获得列名，用来排序
     vectorClear();
-    procview->refresh();
+    proc->refresh();
     headerSort();
     setSortData();
     setData();
@@ -1992,7 +2009,7 @@ void qjdProcessMainWindow::on_actionManualRefresh_triggered()
 {
     machineRefresh=true;
     vectorClear();
-    procview->refresh();
+    proc->refresh();
     if(flagSort==true)
     {
         headerSort();
@@ -2018,10 +2035,11 @@ bool qjdProcessMainWindow::eventFilter(QObject *obj, QEvent *event)
     if (event->type() == QEvent::KeyPress)
     {
         QKeyEvent *keyEvent = static_cast<QKeyEvent *>(event);
-        qDebug("Ate key press %d", keyEvent->key());
+//        qDebug("Ate key press %d", keyEvent->key());
         keyPress(keyEvent);
         return true;
     }
+    /// 如果需要鼠标滚轮自定义，要重新实现tableview，然后才能监听事件
 //    else if (event->type() == QEvent::Wheel)
 //    {
 //        QWheelEvent *weve = static_cast<QWheelEvent *>(event);
@@ -2073,77 +2091,77 @@ void qjdProcessMainWindow::keyPress(QKeyEvent *event)
     }
 }
 
-void qjdProcessMainWindow::setTable()
-{
-//    qjdtable->move(10,100);
-//    qjdtable->resize(640,200);
-//    qjdtable->setFocusPolicy(Qt::StrongFocus);
-//    qjdtable->setSelectionBehavior(QAbstractItemView::SelectRows);
-//    qjdtable->setSelectionMode(QAbstractItemView::SingleSelection);
-//    qjdtable->setEditTriggers(QAbstractItemView::NoEditTriggers);
-//    qjdtable->setAlternatingRowColors(true);
-//    qjdtable->verticalHeader()->setVisible(false);
-//
-//    QPalette palette;
-//    QLinearGradient gradient(1, 0, 0.623398, 0.983);
-//    gradient.setSpread(QGradient::PadSpread);
-//    gradient.setCoordinateMode(QGradient::ObjectBoundingMode);
-//    gradient.setColorAt(0, QColor(80, 170, 255, 255));
-//    gradient.setColorAt(1, QColor(85, 85, 255, 255));
-//    QBrush brush(gradient);
-//    palette.setBrush(QPalette::Active, QPalette::Highlight, brush);
-//    QBrush brush1(QColor(255, 255, 255, 255));
-//    brush1.setStyle(Qt::SolidPattern);
-//    palette.setBrush(QPalette::Active, QPalette::HighlightedText, brush1);
-//    QBrush brush2(QColor(255, 255, 220, 255));
-//    brush2.setStyle(Qt::SolidPattern);
-//    palette.setBrush(QPalette::Active, QPalette::AlternateBase, brush2);
-//    QLinearGradient gradient1(1, 0, 0.623398, 0.983);
-//    gradient1.setSpread(QGradient::PadSpread);
-//    gradient1.setCoordinateMode(QGradient::ObjectBoundingMode);
-//    gradient1.setColorAt(0, QColor(80, 170, 255, 255));
-//    gradient1.setColorAt(1, QColor(85, 85, 255, 255));
-//    QBrush brush3(gradient1);
-//    palette.setBrush(QPalette::Inactive, QPalette::Highlight, brush3);
-//    palette.setBrush(QPalette::Inactive, QPalette::HighlightedText, brush1);
-//    palette.setBrush(QPalette::Inactive, QPalette::AlternateBase, brush2);
-//    QLinearGradient gradient2(1, 0, 0.623398, 0.983);
-//    gradient2.setSpread(QGradient::PadSpread);
-//    gradient2.setCoordinateMode(QGradient::ObjectBoundingMode);
-//    gradient2.setColorAt(0, QColor(80, 170, 255, 255));
-//    gradient2.setColorAt(1, QColor(85, 85, 255, 255));
-//    QBrush brush4(gradient2);
-//    palette.setBrush(QPalette::Disabled, QPalette::Highlight, brush4);
-//    palette.setBrush(QPalette::Disabled, QPalette::HighlightedText, brush1);
-//    palette.setBrush(QPalette::Disabled, QPalette::AlternateBase, brush2);
-//    qjdtable->setPalette(palette);
-//
-//    qjdtable->setStyleSheet(QString::fromUtf8("gridline-color: rgb(200, 200, 200);\n"
-//"selection-color: rgb(255, 255, 255);\n"
-//"font: 10pt \"\346\226\207\346\263\211\351\251\277\346\255\243\351\273\221\";\n"
-//"selection-background-color: qlineargradient(spread:pad, x1:1, y1:0, x2:0.623398, y2:0.983, stop:0 rgba(80, 170, 255, 255), stop:1 rgba(85, 85, 255, 255));"));
-//
-//    /// 排序功能
-//    qjdtable->setSortingEnabled(false);       //自动排序关闭
-//    qjdtable->horizontalHeader()->setSortIndicatorShown(true);
-//    qjdtable->horizontalHeader()->setClickable(true);
-//    connect(qjdtable->horizontalHeader(),SIGNAL(sectionClicked(int)),this,SLOT(headerHandle(int)));
-//
-//    /// 设置右键弹出菜单
-//    menu=NULL;
-//    qjdtable->setContextMenuPolicy(Qt::CustomContextMenu);
-//    connect(qjdtable, SIGNAL(customContextMenuRequested(const QPoint&)),
-//            this, SLOT(showContextMenu(const QPoint&)));//this是datatable所在窗口
-//
-//    menu = new QMenu(qjdtable);
-//    actStop = menu->addAction("Stop");
-//    actCon = menu->addAction("Continue");
-//    actTer = menu->addAction("Terminate");
-//    actKill = menu->addAction("Kill");
-//    actHan = menu->addAction("Hang Up");
-//    connect(actTer, SIGNAL(triggered()), this, SLOT(terProcess()));
-//    connect(actKill, SIGNAL(triggered()), this, SLOT(killProcess()));
-//    connect(actHan, SIGNAL(triggered()), this, SLOT(hanProcess()));
-//    connect(actStop, SIGNAL(triggered()), this, SLOT(stopProcess()));
-//    connect(actCon, SIGNAL(triggered()), this, SLOT(conProcess()));
-}
+//void qjdProcessMainWindow::setTable()
+//{
+////    qjdtable->move(10,100);
+////    qjdtable->resize(640,200);
+////    qjdtable->setFocusPolicy(Qt::StrongFocus);
+////    qjdtable->setSelectionBehavior(QAbstractItemView::SelectRows);
+////    qjdtable->setSelectionMode(QAbstractItemView::SingleSelection);
+////    qjdtable->setEditTriggers(QAbstractItemView::NoEditTriggers);
+////    qjdtable->setAlternatingRowColors(true);
+////    qjdtable->verticalHeader()->setVisible(false);
+////
+////    QPalette palette;
+////    QLinearGradient gradient(1, 0, 0.623398, 0.983);
+////    gradient.setSpread(QGradient::PadSpread);
+////    gradient.setCoordinateMode(QGradient::ObjectBoundingMode);
+////    gradient.setColorAt(0, QColor(80, 170, 255, 255));
+////    gradient.setColorAt(1, QColor(85, 85, 255, 255));
+////    QBrush brush(gradient);
+////    palette.setBrush(QPalette::Active, QPalette::Highlight, brush);
+////    QBrush brush1(QColor(255, 255, 255, 255));
+////    brush1.setStyle(Qt::SolidPattern);
+////    palette.setBrush(QPalette::Active, QPalette::HighlightedText, brush1);
+////    QBrush brush2(QColor(255, 255, 220, 255));
+////    brush2.setStyle(Qt::SolidPattern);
+////    palette.setBrush(QPalette::Active, QPalette::AlternateBase, brush2);
+////    QLinearGradient gradient1(1, 0, 0.623398, 0.983);
+////    gradient1.setSpread(QGradient::PadSpread);
+////    gradient1.setCoordinateMode(QGradient::ObjectBoundingMode);
+////    gradient1.setColorAt(0, QColor(80, 170, 255, 255));
+////    gradient1.setColorAt(1, QColor(85, 85, 255, 255));
+////    QBrush brush3(gradient1);
+////    palette.setBrush(QPalette::Inactive, QPalette::Highlight, brush3);
+////    palette.setBrush(QPalette::Inactive, QPalette::HighlightedText, brush1);
+////    palette.setBrush(QPalette::Inactive, QPalette::AlternateBase, brush2);
+////    QLinearGradient gradient2(1, 0, 0.623398, 0.983);
+////    gradient2.setSpread(QGradient::PadSpread);
+////    gradient2.setCoordinateMode(QGradient::ObjectBoundingMode);
+////    gradient2.setColorAt(0, QColor(80, 170, 255, 255));
+////    gradient2.setColorAt(1, QColor(85, 85, 255, 255));
+////    QBrush brush4(gradient2);
+////    palette.setBrush(QPalette::Disabled, QPalette::Highlight, brush4);
+////    palette.setBrush(QPalette::Disabled, QPalette::HighlightedText, brush1);
+////    palette.setBrush(QPalette::Disabled, QPalette::AlternateBase, brush2);
+////    qjdtable->setPalette(palette);
+////
+////    qjdtable->setStyleSheet(QString::fromUtf8("gridline-color: rgb(200, 200, 200);\n"
+////"selection-color: rgb(255, 255, 255);\n"
+////"font: 10pt \"\346\226\207\346\263\211\351\251\277\346\255\243\351\273\221\";\n"
+////"selection-background-color: qlineargradient(spread:pad, x1:1, y1:0, x2:0.623398, y2:0.983, stop:0 rgba(80, 170, 255, 255), stop:1 rgba(85, 85, 255, 255));"));
+////
+////    /// 排序功能
+////    qjdtable->setSortingEnabled(false);       //自动排序关闭
+////    qjdtable->horizontalHeader()->setSortIndicatorShown(true);
+////    qjdtable->horizontalHeader()->setClickable(true);
+////    connect(qjdtable->horizontalHeader(),SIGNAL(sectionClicked(int)),this,SLOT(headerHandle(int)));
+////
+////    /// 设置右键弹出菜单
+////    menu=NULL;
+////    qjdtable->setContextMenuPolicy(Qt::CustomContextMenu);
+////    connect(qjdtable, SIGNAL(customContextMenuRequested(const QPoint&)),
+////            this, SLOT(showContextMenu(const QPoint&)));//this是datatable所在窗口
+////
+////    menu = new QMenu(qjdtable);
+////    actStop = menu->addAction("Stop");
+////    actCon = menu->addAction("Continue");
+////    actTer = menu->addAction("Terminate");
+////    actKill = menu->addAction("Kill");
+////    actHan = menu->addAction("Hang Up");
+////    connect(actTer, SIGNAL(triggered()), this, SLOT(terProcess()));
+////    connect(actKill, SIGNAL(triggered()), this, SLOT(killProcess()));
+////    connect(actHan, SIGNAL(triggered()), this, SLOT(hanProcess()));
+////    connect(actStop, SIGNAL(triggered()), this, SLOT(stopProcess()));
+////    connect(actCon, SIGNAL(triggered()), this, SLOT(conProcess()));
+//}

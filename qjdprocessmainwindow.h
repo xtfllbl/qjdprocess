@@ -27,7 +27,6 @@ public:
     void flagClear();
 
     qjdoptions *options;
-    Procview *procview;
     Proc *proc;
     qjdTable *qjdtable;
 
@@ -62,24 +61,24 @@ public:
     QString aUid;
     QString aUsrName;
 
-    QStandardItem *itemPid;
-    QStandardItem *itemCmd;
-    QStandardItem *itemStat;
-    QStandardItem *itemNice;
-    QStandardItem *itemStartTime;
-    QStandardItem *itemWchan;
-    QStandardItem *itemWhichCpu;
-    QStandardItem *itemMem;
-    QStandardItem *itemPmem;
-    QStandardItem *itemSleepAvg;
-    QStandardItem *itemStack;
-    QStandardItem *itemIoread;
-    QStandardItem *itemIowrite;
-    QStandardItem *itemPcpu;
-    QStandardItem *itemWcpu;
-    QStandardItem *itemCmdLine;
-    QStandardItem *itemUid;
-    QStandardItem *itemUsrName;
+//    QStandardItem *itemPid;
+//    QStandardItem *itemCmd;
+//    QStandardItem *itemStat;
+//    QStandardItem *itemNice;
+//    QStandardItem *itemStartTime;
+//    QStandardItem *itemWchan;
+//    QStandardItem *itemWhichCpu;
+//    QStandardItem *itemMem;
+//    QStandardItem *itemPmem;
+//    QStandardItem *itemSleepAvg;
+//    QStandardItem *itemStack;
+//    QStandardItem *itemIoread;
+//    QStandardItem *itemIowrite;
+//    QStandardItem *itemPcpu;
+//    QStandardItem *itemWcpu;
+//    QStandardItem *itemCmdLine;
+//    QStandardItem *itemUid;
+//    QStandardItem *itemUsrName;
 
     int colNumberSave;
     bool machineRefresh;
@@ -153,7 +152,7 @@ private slots:
     void headerSort();
     void headerHandle(int);
     bool eventFilter(QObject *obj, QEvent *event);
-    void setTable();
+//   void setTable();
 
 };
 #endif // QJDPROCESSMAINWINDOW_H
