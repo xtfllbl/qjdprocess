@@ -126,7 +126,6 @@ qjdProcessMainWindow::qjdProcessMainWindow(QWidget *parent) :
 
     proc->refresh();
     setData();
-//    delete proc;
 }
 
 qjdProcessMainWindow::~qjdProcessMainWindow()
@@ -178,7 +177,7 @@ void qjdProcessMainWindow::setData()
     if(pid2==true)
     {
         model->setHeaderData(countField, Qt::Horizontal, tr("pid"));
-        qDebug()<<model->horizontalHeaderItem(countField)->text();
+//        qDebug()<<model->horizontalHeaderItem(countField)->text();
         countField++;
     }
     if(cmd2==true)
@@ -582,7 +581,6 @@ void qjdProcessMainWindow::vectorClear()
 
 void qjdProcessMainWindow::autoRefresh()
 {
-//    proc=new Proc();
     machineRefresh=true;
     vectorClear();
     proc->refresh();        //refresh 就开始泄漏了
@@ -592,7 +590,6 @@ void qjdProcessMainWindow::autoRefresh()
         setSortData();
     }
     setData();
-//    delete proc;
 }
 
 void qjdProcessMainWindow::on_actionExit_triggered()
