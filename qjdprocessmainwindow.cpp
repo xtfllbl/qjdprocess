@@ -291,7 +291,6 @@ void qjdProcessMainWindow::setData()
         itemUid=new QStandardItem(aUid);//
         itemUsrName=new QStandardItem(aUsrName);
 
-        qDebug()<<itemPid->text()<<itemPid->data();
         /// 插入中间判断，符合要求，则插入数据
         if(ui->comboProcess->currentIndex()==0)
         {
@@ -327,6 +326,7 @@ void qjdProcessMainWindow::setData()
             {
                 selectRow=countRow;        //按照pid来定位选择的行
             }
+
             if(options->pid==true)
             {
                 model->setItem(countRow,countItem,itemPid);
@@ -416,6 +416,80 @@ void qjdProcessMainWindow::setData()
             {
                 model->setItem(countRow,countItem,itemUsrName);
                 countItem++;
+            }
+
+            /// 手动删除没有用到的item
+            if(options->pid==false)
+            {
+                delete itemPid;
+            }
+            if(options->cmd==false)
+            {
+                delete itemCmd;
+            }
+            if(options->stat==false)
+            {
+                delete itemStat;
+            }
+            if(options->nice==false)
+            {
+                delete itemNice;
+            }
+            if(options->startTime==false)
+            {
+                delete itemStartTime;
+            }
+            if(options->wchan==false)
+            {
+                delete itemWchan;
+            }
+            if(options->whichCpu==false)
+            {
+                delete itemWhichCpu;
+            }
+            if(options->mem==false)
+            {
+                delete itemMem;
+            }
+            if(options->pmem==false)
+            {
+                delete itemPmem;
+            }
+            if(options->sleepAvg==false)
+            {
+                delete itemSleepAvg;
+            }
+            if(options->stackSize==false)
+            {
+                delete itemStack;
+            }
+            if(options->ioRead==false)
+            {
+                delete itemIoread;
+            }
+            if(options->ioWrite==false)
+            {
+                delete itemIowrite;
+            }
+            if(options->pcpu==false)
+            {
+                delete itemPcpu;
+            }
+            if(options->wcpu==false)
+            {
+                delete itemWcpu;
+            }
+            if(options->cmdLine==false)
+            {
+                delete itemCmdLine;
+            }
+            if(options->uid==false)
+            {
+                delete itemUid;
+            }
+            if(options->usrName==false)
+            {
+                delete itemUsrName;
             }
             countRow++;
         }

@@ -673,6 +673,7 @@ void Proc::read_proc_all()
 
             if (pif==NULL)   // new process
             {
+                /// 此句造成大量内存泄漏
                 pif = new Procinfo(this,pid);
             }
             int ret=pif->readproc();     //CALL readproc();  有几个线程就要读几遍
