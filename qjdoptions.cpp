@@ -1,31 +1,41 @@
 #include "qjdoptions.h"
 #include "ui_qjdoptions.h"
-
+#include <QDebug>
 qjdoptions::qjdoptions(QWidget *parent) :
         QDialog(parent),
         ui(new Ui::qjdoptions)
 {
     ui->setupUi(this);
     cmd=true;
-    cmdLine=true;
-    ioRead=true;
-    ioWrite=true;
+    cmdLine=false;
+    ioRead=false;
+    ioWrite=false;
     mem=true;
     nice=true;
     pcpu=true;
     pid=true;
-    pmem=true;
-    sleepAvg=true;
+    pmem=false;
+    sleepAvg=false;
     stackSize=true;
     startTime=true;
     stat=true;
-    uid=true;
+    uid=false;
     usrName=true;
     wcpu=true;
-    wchan=true;
+    wchan=false;
     whichCpu=true;
 
-    countCol=18;
+//    ui->chkCMD->setChecked(true);
+//    ui->chkNice->setChecked(true);
+//    ui->chkStartTime->setChecked(true);
+//    ui->chkMem->setChecked(true);
+//    ui->chkStackSize->setChecked(true);
+//    ui->chkWhichCPU->setChecked(true);
+//    ui->chkPCPU->setChecked(true);
+//    ui->chkUsrName->setChecked(true);
+//    ui->chkStat->setChecked(true);
+//    countCol=10;
+    setWindowFlags(Qt::ToolTip);
 }
 
 qjdoptions::~qjdoptions()
@@ -48,12 +58,11 @@ void qjdoptions::changeEvent(QEvent *e)
 void qjdoptions::on_btnApplyField_clicked()
 {
     handleCheck();
-
-    hide();
 }
 
 void qjdoptions::handleCheck()
 {
+    qDebug()<<"handle check";
     countCol=0;
     if(ui->chkCMD->isChecked()==true)
     {

@@ -284,8 +284,6 @@ selection-background-color: qlineargradient(spread:pad, x1:1, y1:0, x2:0.623398,
     <property name="title">
      <string>Option</string>
     </property>
-    <addaction name="actionChoose_Field"/>
-    <addaction name="actionAll"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuOption"/>
@@ -305,6 +303,7 @@ selection-background-color: qlineargradient(spread:pad, x1:1, y1:0, x2:0.623398,
    </attribute>
    <addaction name="actionManualRefresh"/>
    <addaction name="actionStopRefresh"/>
+   <addaction name="actionChoose_Field"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
   <action name="actionExit">
@@ -316,6 +315,9 @@ selection-background-color: qlineargradient(spread:pad, x1:1, y1:0, x2:0.623398,
    </property>
   </action>
   <action name="actionChoose_Field">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
    <property name="text">
     <string>Choose Field</string>
    </property>
@@ -359,14 +361,6 @@ selection-background-color: qlineargradient(spread:pad, x1:1, y1:0, x2:0.623398,
    </property>
    <property name="shortcut">
     <string>F2</string>
-   </property>
-  </action>
-  <action name="actionAll">
-   <property name="text">
-    <string>All</string>
-   </property>
-   <property name="menuRole">
-    <enum>QAction::QuitRole</enum>
    </property>
   </action>
  </widget>

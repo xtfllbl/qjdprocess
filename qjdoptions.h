@@ -12,6 +12,7 @@ class qjdoptions : public QDialog {
 public:
     qjdoptions(QWidget *parent = 0);
     ~qjdoptions();
+    Ui::qjdoptions *ui;
 
     bool cmd;
     bool cmdLine;
@@ -39,7 +40,6 @@ protected:
     void changeEvent(QEvent *e);
 
 private:
-    Ui::qjdoptions *ui;
 
 public slots:
     void on_btnApplyField_clicked();

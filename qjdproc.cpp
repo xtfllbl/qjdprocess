@@ -43,6 +43,8 @@ inline int read_file(char *name, char *buf, int max)
 char *userName(int uid,int euid)
 {
     char buff[128];
+    char copy[128];
+
     struct passwd *pw = getpwuid(uid);
     if(!pw) {
         // dont have name !
@@ -52,8 +54,8 @@ char *userName(int uid,int euid)
 
     if(uid!=euid)
         strcat(buff, euid == 0 ? "*" : "+");
-
-    return strdup(buff);
+    strcpy(copy,buff);
+    return copy;
 }
 
 // return group name (possibly numeric)
@@ -683,7 +685,6 @@ void Proc::read_proc_all()
             }
         }
     }
-
     closedir(d);
 }
 

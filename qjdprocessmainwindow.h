@@ -129,16 +129,38 @@ public:
     int flagSortUidSave;
     int flagSortUsrNameSave;
 
+    bool cmd2;
+    bool cmdLine2;
+    bool ioRead2;
+    bool ioWrite2;
+    bool mem2;
+    bool nice2;
+    bool pcpu2;
+    bool pid2;
+    bool pmem2;
+    bool stat2;
+    bool sleepAvg2;
+    bool stackSize2;
+    bool startTime2;
+    bool uid2;
+    bool usrName2;
+    bool wcpu2;
+    bool wchan2;
+    bool whichCpu2;
+
+    int colNum;
+
+    bool hasOptions;
 protected:
     void changeEvent(QEvent *e);
 private:
     Ui::qjdProcessMainWindow *ui;
 private slots:
-    void on_actionStopRefresh_triggered(bool checked);
+    void on_actionStopRefresh_triggered(bool );
     void on_actionManualRefresh_triggered();
     void keyPress(QKeyEvent *);
-    void on_tblMain_pressed(QModelIndex index);
-    void on_actionChoose_Field_triggered();
+    void on_tblMain_pressed(QModelIndex );
+    void on_actionChoose_Field_triggered(bool );
     void on_actionExit_triggered();
     void autoRefresh();
     void showContextMenu(QPoint);

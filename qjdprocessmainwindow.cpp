@@ -26,9 +26,28 @@ qjdProcessMainWindow::qjdProcessMainWindow(QWidget *parent) :
 
     proc=new Proc();
 
-    options=new qjdoptions();
-    options->handleCheck(); //设置一下显示区域
+    colNum=11;
 
+    cmd2=true;
+    cmdLine2=false;
+    ioRead2=false;
+    ioWrite2=false;
+    mem2=true;
+    nice2=true;
+    pcpu2=true;
+    pid2=true;
+    pmem2=false;
+    sleepAvg2=false;
+    stackSize2=true;
+    startTime2=true;
+    stat2=true;
+    uid2=false;
+    usrName2=true;
+    wcpu2=true;
+    wchan2=false;
+    whichCpu2=true;
+
+    hasOptions=false;
 //    qjdtable=new qjdTable(this);
 //    setTable(); //设置table
 
@@ -107,6 +126,7 @@ qjdProcessMainWindow::qjdProcessMainWindow(QWidget *parent) :
 
     proc->refresh();
     setData();
+//    delete proc;
 }
 
 qjdProcessMainWindow::~qjdProcessMainWindow()
@@ -128,101 +148,120 @@ void qjdProcessMainWindow::changeEvent(QEvent *e)
 
 void qjdProcessMainWindow::setData()
 {    
-    //确定表格的列数和行数
-    int colNum=options->countCol;
-    /// 警示可能的内存泄漏
+    if(hasOptions==true)
+    {
+        colNum=options->countCol;
 
-//    已经delete, 仍然有0.3Mb的泄漏, 不同版本的qt有着不同程度的泄漏
+        cmd2=options->cmd;
+        cmdLine2=options->cmdLine;
+        ioRead2=options->ioRead;
+        ioWrite2=options->ioWrite;
+        mem2=options->mem;
+        nice2=options->nice;
+        pcpu2=options->pcpu;
+        pid2=options->pid;
+        pmem2=options->pmem;
+        sleepAvg2=options->sleepAvg;
+        stackSize2=options->stackSize;
+        startTime2=options->startTime;
+        stat2=options->stat;
+        uid2=options->uid;
+        usrName2=options->usrName;
+        wcpu2=options->wcpu;
+        wchan2=options->wchan;
+        whichCpu2=options->whichCpu;
+    }
     model = new QStandardItemModel(0, colNum, this);
 
     int countField=0;
     //确定列名, 排除泄漏
-    if(options->pid==true)
+    if(pid2==true)
     {
         model->setHeaderData(countField, Qt::Horizontal, tr("pid"));
+        qDebug()<<model->horizontalHeaderItem(countField)->text();
         countField++;
     }
-    if(options->cmd==true)
+    if(cmd2==true)
     {
         model->setHeaderData(countField, Qt::Horizontal, tr("process name"));
         countField++;
     }
-    if(options->stat==true)
+    if(stat2==true)
     {
         model->setHeaderData(countField, Qt::Horizontal, tr("state"));
         countField++;
     }
-    if(options->nice==true)
+    if(nice2==true)
     {
         model->setHeaderData(countField, Qt::Horizontal, tr("nice"));
         countField++;
     }
-    if(options->startTime==true)
+    if(startTime2==true)
     {
         model->setHeaderData(countField, Qt::Horizontal, tr("starttime"));
         countField++;
     }
-    if(options->wchan==true)
+    if(wchan2==true)
     {
         model->setHeaderData(countField, Qt::Horizontal, tr("wchan"));
         countField++;
     }
-    if(options->whichCpu==true)
+    if(whichCpu2==true)
     {
         model->setHeaderData(countField, Qt::Horizontal, tr("cpu"));
         countField++;
     }
-    if(options->mem==true)
+    if(mem2==true)
     {
         model->setHeaderData(countField, Qt::Horizontal, tr("Memory"));
         countField++;
     }
-    if(options->pmem==true)
+    if(pmem2==true)
     {
         model->setHeaderData(countField, Qt::Horizontal, tr("memory(%)"));
         countField++;
     }
-    if(options->sleepAvg==true)
+    if(sleepAvg2==true)
     {
         model->setHeaderData(countField, Qt::Horizontal, tr("sleep(%)"));
         countField++;
     }
-    if(options->stackSize==true)
+    if(stackSize2==true)
     {
         model->setHeaderData(countField, Qt::Horizontal, tr("stack(K)"));
         countField++;
     }
-    if(options->ioRead==true)
+    if(ioRead2==true)
     {
         model->setHeaderData(countField, Qt::Horizontal, tr("IO_READ"));
         countField++;
     }
-    if(options->ioWrite==true)
+    if(ioWrite2==true)
     {
         model->setHeaderData(countField, Qt::Horizontal, tr("IO_WRITE"));
         countField++;
     }
-    if(options->pcpu==true)
+    if(pcpu2==true)
     {
         model->setHeaderData(countField, Qt::Horizontal, tr("% CPU"));
         countField++;
     }
-    if(options->wcpu==true)
+    if(wcpu2==true)
     {
         model->setHeaderData(countField, Qt::Horizontal, tr("% WCPU"));
         countField++;
     }
-    if(options->cmdLine==true)
+    if(cmdLine2==true)
     {
         model->setHeaderData(countField, Qt::Horizontal, tr("COMMAND LINE"));
         countField++;
     }
-    if(options->uid==true)
+    if(uid2==true)
     {
         model->setHeaderData(countField, Qt::Horizontal, tr("UID"));
         countField++;
     }
-    if(options->usrName==true)
+    if(usrName2==true)
     {
         model->setHeaderData(countField, Qt::Horizontal, tr("USERNAME"));
         countField++;
@@ -327,167 +366,167 @@ void qjdProcessMainWindow::setData()
                 selectRow=countRow;        //按照pid来定位选择的行
             }
 
-            if(options->pid==true)
+            if(pid2==true)
             {
                 model->setItem(countRow,countItem,itemPid);
                 countItem++;
             }
-            if(options->cmd==true)
+            if(cmd2==true)
             {
                 model->setItem(countRow,countItem,itemCmd);
                 countItem++;
             }
-            if(options->stat==true)
+            if(stat2==true)
             {
                 model->setItem(countRow,countItem,itemStat);
                 countItem++;
             }
-            if(options->nice==true)
+            if(nice2==true)
             {
                 model->setItem(countRow,countItem,itemNice);
                 countItem++;
             }
-            if(options->startTime==true)
+            if(startTime2==true)
             {
                 model->setItem(countRow,countItem,itemStartTime);
                 countItem++;
             }
-            if(options->wchan==true)
+            if(wchan2==true)
             {
                 model->setItem(countRow,countItem,itemWchan);
                 countItem++;
             }
-            if(options->whichCpu==true)
+            if(whichCpu2==true)
             {
                 model->setItem(countRow,countItem,itemWhichCpu);
                 countItem++;
             }
-            if(options->mem==true)
+            if(mem2==true)
             {
                 model->setItem(countRow,countItem,itemMem);
                 countItem++;
             }
-            if(options->pmem==true)
+            if(pmem2==true)
             {
                 model->setItem(countRow,countItem,itemPmem);
                 countItem++;
             }
-            if(options->sleepAvg==true)
+            if(sleepAvg2==true)
             {
                 model->setItem(countRow,countItem,itemSleepAvg);
                 countItem++;
             }
-            if(options->stackSize==true)
+            if(stackSize2==true)
             {
                 model->setItem(countRow,countItem,itemStack);
                 countItem++;
             }
-            if(options->ioRead==true)
+            if(ioRead2==true)
             {
                 model->setItem(countRow,countItem,itemIoread);
                 countItem++;
             }
-            if(options->ioWrite==true)
+            if(ioWrite2==true)
             {
                 model->setItem(countRow,countItem,itemIowrite);
                 countItem++;
             }
-            if(options->pcpu==true)
+            if(pcpu2==true)
             {
                 model->setItem(countRow,countItem,itemPcpu);
                 countItem++;
             }
-            if(options->wcpu==true)
+            if(wcpu2==true)
             {
                 model->setItem(countRow,countItem,itemWcpu);
                 countItem++;
             }
-            if(options->cmdLine==true)
+            if(cmdLine2==true)
             {
                 model->setItem(countRow,countItem,itemCmdLine);
                 countItem++;
             }
-            if(options->uid==true)
+            if(uid2==true)
             {
                 model->setItem(countRow,countItem,itemUid);
                 countItem++;
             }
-            if(options->usrName==true)
+            if(usrName2==true)
             {
                 model->setItem(countRow,countItem,itemUsrName);
                 countItem++;
             }
 
             /// 手动删除没有用到的item
-            if(options->pid==false)
+            if(pid2==false)
             {
                 delete itemPid;
             }
-            if(options->cmd==false)
+            if(cmd2==false)
             {
                 delete itemCmd;
             }
-            if(options->stat==false)
+            if(stat2==false)
             {
                 delete itemStat;
             }
-            if(options->nice==false)
+            if(nice2==false)
             {
                 delete itemNice;
             }
-            if(options->startTime==false)
+            if(startTime2==false)
             {
                 delete itemStartTime;
             }
-            if(options->wchan==false)
+            if(wchan2==false)
             {
                 delete itemWchan;
             }
-            if(options->whichCpu==false)
+            if(whichCpu2==false)
             {
                 delete itemWhichCpu;
             }
-            if(options->mem==false)
+            if(mem2==false)
             {
                 delete itemMem;
             }
-            if(options->pmem==false)
+            if(pmem2==false)
             {
                 delete itemPmem;
             }
-            if(options->sleepAvg==false)
+            if(sleepAvg2==false)
             {
                 delete itemSleepAvg;
             }
-            if(options->stackSize==false)
+            if(stackSize2==false)
             {
                 delete itemStack;
             }
-            if(options->ioRead==false)
+            if(ioRead2==false)
             {
                 delete itemIoread;
             }
-            if(options->ioWrite==false)
+            if(ioWrite2==false)
             {
                 delete itemIowrite;
             }
-            if(options->pcpu==false)
+            if(pcpu2==false)
             {
                 delete itemPcpu;
             }
-            if(options->wcpu==false)
+            if(wcpu2==false)
             {
                 delete itemWcpu;
             }
-            if(options->cmdLine==false)
+            if(cmdLine2==false)
             {
                 delete itemCmdLine;
             }
-            if(options->uid==false)
+            if(uid2==false)
             {
                 delete itemUid;
             }
-            if(options->usrName==false)
+            if(usrName2==false)
             {
                 delete itemUsrName;
             }
@@ -543,6 +582,7 @@ void qjdProcessMainWindow::vectorClear()
 
 void qjdProcessMainWindow::autoRefresh()
 {
+//    proc=new Proc();
     machineRefresh=true;
     vectorClear();
     proc->refresh();        //refresh 就开始泄漏了
@@ -552,6 +592,7 @@ void qjdProcessMainWindow::autoRefresh()
         setSortData();
     }
     setData();
+//    delete proc;
 }
 
 void qjdProcessMainWindow::on_actionExit_triggered()
@@ -561,9 +602,89 @@ void qjdProcessMainWindow::on_actionExit_triggered()
 
 
 
-void qjdProcessMainWindow::on_actionChoose_Field_triggered()
+void qjdProcessMainWindow::on_actionChoose_Field_triggered(bool checked)
 {
-    options->show();
+    if(checked==true)
+    {
+        options=new qjdoptions();
+
+        if(cmd2==true)
+        {
+            options->ui->chkCMD->setChecked(true);
+        }
+        if(stat2==true)
+        {
+            options->ui->chkStat->setChecked(true);
+        }
+        if(nice2==true)
+        {
+            options->ui->chkNice->setChecked(true);
+        }
+        if(startTime2==true)
+        {
+            options->ui->chkStartTime->setChecked(true);
+        }
+        if(wchan2==true)
+        {
+            options->ui->chkWchan->setChecked(true);
+        }
+        if(whichCpu2==true)
+        {
+            options->ui->chkWhichCPU->setChecked(true);
+        }
+        if(mem2==true)
+        {
+            options->ui->chkMem->setChecked(true);
+        }
+        if(pmem2==true)
+        {
+            options->ui->chkPMem->setChecked(true);
+        }
+        if(sleepAvg2==true)
+        {
+            options->ui->chkSleepAvg->setChecked(true);
+        }
+        if(stackSize2==true)
+        {
+            options->ui->chkStackSize->setChecked(true);
+        }
+        if(ioRead2==true)
+        {
+            options->ui->chkIOREAD->setChecked(true);
+        }
+        if(ioWrite2==true)
+        {
+            options->ui->chkIOWRITE->setChecked(true);
+        }
+        if(pcpu2==true)
+        {
+            options->ui->chkPCPU->setChecked(true);
+        }
+        if(wcpu2==true)
+        {
+            options->ui->chkWCPU->setChecked(true);
+        }
+        if(cmdLine2==true)
+        {
+            options->ui->chkCMDline->setChecked(true);
+        }
+        if(uid2==true)
+        {
+            options->ui->chkUID->setChecked(true);
+        }
+        if(usrName2==true)
+        {
+            options->ui->chkUsrName->setChecked(true);
+        }
+        options->show();
+        options->handleCheck();
+        hasOptions=true;
+    }
+    if(checked==false)
+    {
+        delete options;
+        hasOptions=false;
+    }
 }
 
 void qjdProcessMainWindow::on_tblMain_pressed(QModelIndex index)
