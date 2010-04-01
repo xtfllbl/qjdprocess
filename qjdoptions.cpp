@@ -62,7 +62,7 @@ void qjdoptions::on_btnApplyField_clicked()
 
 void qjdoptions::handleCheck()
 {
-    qDebug()<<"handle check";
+//    qDebug()<<"handle check";
     countCol=0;
     if(ui->chkCMD->isChecked()==true)
     {

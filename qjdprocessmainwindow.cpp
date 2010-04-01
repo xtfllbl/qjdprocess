@@ -48,8 +48,8 @@ qjdProcessMainWindow::qjdProcessMainWindow(QWidget *parent) :
     whichCpu2=true;
 
     hasOptions=false;
-//    qjdtable=new qjdTable(this);
-//    setTable(); //设置table
+    //    qjdtable=new qjdTable(this);
+    //    setTable(); //设置table
 
     timer = new QTimer(this);
     connect(timer, SIGNAL(timeout()), this, SLOT(autoRefresh()));
@@ -177,7 +177,7 @@ void qjdProcessMainWindow::setData()
     if(pid2==true)
     {
         model->setHeaderData(countField, Qt::Horizontal, tr("pid"));
-//        qDebug()<<model->horizontalHeaderItem(countField)->text();
+        //        qDebug()<<model->horizontalHeaderItem(countField)->text();
         countField++;
     }
     if(cmd2==true)
@@ -357,6 +357,27 @@ void qjdProcessMainWindow::setData()
             }
         }
 
+        if(flagUse==false)
+        {
+            delete itemPid;
+            delete itemCmd;
+            delete itemStat;
+            delete itemNice;
+            delete itemStartTime;
+            delete itemWchan;
+            delete itemWhichCpu;
+            delete itemMem;
+            delete itemPmem;
+            delete itemSleepAvg;
+            delete itemStack;
+            delete itemIoread;
+            delete itemIowrite;
+            delete itemPcpu;
+            delete itemWcpu;
+            delete itemCmdLine;
+            delete itemUid;
+            delete itemUsrName;
+        }
         if(flagUse==true)   //只有通过才添加这个进程
         {
             int countItem=0;
@@ -532,22 +553,22 @@ void qjdProcessMainWindow::setData()
             countRow++;
         }
     }
-//    qDebug()<<countRow<<"setItemTime"<<model->rowCount();
+    //    qDebug()<<countRow<<"setItemTime"<<model->rowCount();
     ui->tblMain->setModel(model);
     ui->tblMain->horizontalHeader()->setVisible(true);
     ui->tblMain->verticalHeader()->setVisible(false);     //不需要竖轴头
 
-//    qjdtable->setModel(model);
+    //    qjdtable->setModel(model);
 
     if(flagFirstRun==false)
     {
         ui->tblMain->resizeColumnsToContents();
-//        qjdtable->resizeColumnsToContents();
+        //        qjdtable->resizeColumnsToContents();
     }
     flagFirstRun=true;
-//    qDebug()<<"setData"<<selectRow;
+    //    qDebug()<<"setData"<<selectRow;
     ui->tblMain->setCurrentIndex(ui->tblMain->model()->index(selectRow,0));
-//    qjdtable->setCurrentIndex(ui->tblMain->model()->index(selectRow,0));
+    //    qjdtable->setCurrentIndex(ui->tblMain->model()->index(selectRow,0));
 }
 
 void qjdProcessMainWindow::vectorClear()
@@ -681,20 +702,21 @@ void qjdProcessMainWindow::on_actionChoose_Field_triggered(bool checked)
     {
         delete options;
         hasOptions=false;
+        ui->tblMain->resizeColumnsToContents();
     }
 }
 
 void qjdProcessMainWindow::on_tblMain_pressed(QModelIndex index)
 {
     index = ui->tblMain->indexAt(ui->tblMain->viewport()->mapFromGlobal(QCursor::pos()));
-//    index = qjdtable->indexAt(qjdtable->viewport()->mapFromGlobal(QCursor::pos()));
+    //    index = qjdtable->indexAt(qjdtable->viewport()->mapFromGlobal(QCursor::pos()));
     selectRow=index.row();
     selectCol=index.column();
 
     //获取所在行的pid
     processID=ui->tblMain->model()->index(selectRow,0).data().toInt();
-//    processID=qjdtable->model()->index(selectRow,0).data().toInt();
-//    qDebug()<<processID;
+    //    processID=qjdtable->model()->index(selectRow,0).data().toInt();
+    //    qDebug()<<processID;
 }
 
 void qjdProcessMainWindow::showContextMenu(QPoint point)
@@ -2170,7 +2192,7 @@ void qjdProcessMainWindow::headerHandle(int colNum)
     machineRefresh=false;
     colNumberSave=colNum;
     colName=ui->tblMain->model()->headerData(colNum,Qt::Horizontal).toString(); // 获得列名，用来排序
-//    colName=qjdtable->model()->headerData(colNum,Qt::Horizontal).toString(); // 获得列名，用来排序
+    //    colName=qjdtable->model()->headerData(colNum,Qt::Horizontal).toString(); // 获得列名，用来排序
     vectorClear();
     proc->refresh();
     headerSort();
@@ -2208,17 +2230,17 @@ bool qjdProcessMainWindow::eventFilter(QObject *obj, QEvent *event)
     if (event->type() == QEvent::KeyPress)
     {
         QKeyEvent *keyEvent = static_cast<QKeyEvent *>(event);
-//        qDebug("Ate key press %d", keyEvent->key());
+        //        qDebug("Ate key press %d", keyEvent->key());
         keyPress(keyEvent);
         return true;
     }
     /// 如果需要鼠标滚轮自定义，要重新实现tableview，然后才能监听事件
-//    else if (event->type() == QEvent::Wheel)
-//    {
-//        QWheelEvent *weve = static_cast<QWheelEvent *>(event);
-//        qDebug("Ate wheel %d", weve->delta());
-//        return true;
-//    }
+    //    else if (event->type() == QEvent::Wheel)
+    //    {
+    //        QWheelEvent *weve = static_cast<QWheelEvent *>(event);
+    //        qDebug("Ate wheel %d", weve->delta());
+    //        return true;
+    //    }
     else
     {
         // standard event processing
