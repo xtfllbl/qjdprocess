@@ -13,12 +13,10 @@ SOURCES += main.cpp \
     qjdprocessmainwindow.cpp \
     qjdproc.cpp \
     qjdmisc.cpp \
-    qjdoptions.cpp \
-    qjdtable.cpp
+    qjdoptions.cpp
 HEADERS += qjdprocessmainwindow.h \
     qjdproc.h \
     config.h \
-    qjdoptions.h \
-    qjdtable.h
+    qjdoptions.h
 FORMS += qjdprocessmainwindow.ui \
     qjdoptions.ui
