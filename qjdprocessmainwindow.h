@@ -5,11 +5,11 @@
 #include <qjdproc.h>
 #include <QTimer>
 #include <qjdoptions.h>
+//#include <qjdreport.h>
 #include <signal.h>
 #include <errno.h>
 #include <QStandardItemModel>
 #include <QKeyEvent>
-#include <qjdtable.h>
 
 namespace Ui {
     class qjdProcessMainWindow;
@@ -28,7 +28,7 @@ public:
 
     qjdoptions *options;
     Proc *proc;
-    qjdTable *qjdtable;
+//    qjdReport *report;
 
     QTimer *timer;
     QMenu *menu;
@@ -41,6 +41,7 @@ public:
     QAction *actTer;
     QAction *actKill;
     QAction *actHan;
+    QAction *actView;
 
     QString aPid;
     QString aCmd;
@@ -175,6 +176,7 @@ private slots:
     void headerHandle(int);
     bool eventFilter(QObject *obj, QEvent *event);
 //   void setTable();
+//    void viewReport();
 
 };
 #endif // QJDPROCESSMAINWINDOW_H

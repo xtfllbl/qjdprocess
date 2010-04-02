@@ -43,8 +43,6 @@ inline int read_file(char *name, char *buf, int max)
 char *userName(int uid,int euid)
 {
     char buff[128];
-    char copy[128];
-
     struct passwd *pw = getpwuid(uid);
     if(!pw) {
         // dont have name !
@@ -54,8 +52,8 @@ char *userName(int uid,int euid)
 
     if(uid!=euid)
         strcat(buff, euid == 0 ? "*" : "+");
-    strcpy(copy,buff);
-    return copy;
+
+    return strdup(buff);
 }
 
 // return group name (possibly numeric)
@@ -130,6 +128,11 @@ Procinfo::Procinfo(Proc *system_proc,int process_id, int thread_id) : refcnt(1)
 
     ppid=0;   // no parent
 
+    generation=-1;
+    //    detail = 0;  //暂时注释
+
+    /// per_cpu_times = 0; not yet
+
     size=0;
     resident=0;
     trs=0;
@@ -138,6 +141,7 @@ Procinfo::Procinfo(Proc *system_proc,int process_id, int thread_id) : refcnt(1)
     share=0;
     mem=0;
 
+    //tgid=0;
     pcpu=0;
     pmem=0;
 
@@ -145,6 +149,7 @@ Procinfo::Procinfo(Proc *system_proc,int process_id, int thread_id) : refcnt(1)
     old_wcpu=0;
 
     command="noname";
+    tty=0;
     nice=0;
     starttime=0;
     state='Z';
@@ -154,17 +159,17 @@ Procinfo::Procinfo(Proc *system_proc,int process_id, int thread_id) : refcnt(1)
 
     hashstr[0]=0;
     hashlen=0;
-    io_read=0;
-    io_write=0;
 }
 
 Procinfo::~Procinfo()
 {}
 
-bool Procinfo::isThread()
+// miscellaneous static initializations
+void Proc::init_static()
 {
-    return pid!=tgid; // how to check
+    pagesize=sysconf(_SC_PAGESIZE); // same getpagesize()  in <unistd.h>
 }
+
 
 // using cache
 int  Procinfo::hashcmp(char *sbuf)
@@ -198,13 +203,14 @@ int mini_sscanf(const char *s,const char *fmt, ...);
 
 int Procinfo::readproc()
 {
+//    qDebug()<<"3."<<old_utime;
+
     char cmdbuf[MAX_CMD_LEN];
     char path[64];
     char *sbuf;  // should be enough to acommodate /proc/PID/stat
     char *buf;
     int	i_tty;
     long stime, cstime;
-
 
     if(isThread())// flag_thread_ok, 是线程
     {
@@ -234,7 +240,7 @@ int Procinfo::readproc()
 
         proc->uidVector<<uid;
         username=userName(uid,euid);
-//        groupname=groupName(gid);
+        groupname=groupName(gid);
         proc->usernameVector<<username;
         char cmdline_cmd[256]; // !!!! some name .... larger
         //read /proc/pid/cmdline
@@ -350,8 +356,7 @@ int Procinfo::readproc()
                        &nthreads,&starttime, &wchan,&which_cpu,
                        &guest_utime,&cguest_utime);
 
-    strName.clear();
-    strName.append(state);
+    QString strName(state);
     proc->statVector<<strName;
     proc->niceVector<<nice;
     proc->whichcpuVector<<which_cpu;
@@ -362,13 +367,13 @@ int Procinfo::readproc()
     /// 计算程序运行时间
     long u=(long)time(NULL)-(long)starttime;    //神奇的一句话
     proc->originStarttimeVector<<u;
-    QString runtime=QString::number(u,10)+"Sec";
+    QString runtime=QString::number(u)+"Sec";
     int a=0,b=0,c=0,d=0,e=0,f=0;
     if(u>=60 && u<3600)
     {
         c=u/60;
         d=u%60;
-        runtime=QString::number(c,10)+"Min "+QString::number(d,10)+"Sec";
+        runtime=QString::number(c)+"Min "+QString::number(d)+"Sec";
     }
     if(u>=3600 && u<86400)
     {
@@ -383,7 +388,7 @@ int Procinfo::readproc()
         {
             d=b;
         }
-        runtime=QString::number(a,10)+"Hour "+QString::number(c,10)+"Min "+QString::number(d,10)+"Sec";
+        runtime=QString::number(a)+"Hour "+QString::number(c)+"Min "+QString::number(d)+"Sec";
     }
     if(u>86400)
     {
@@ -408,36 +413,35 @@ int Procinfo::readproc()
             e=b/60;
             f=b%60;
         }
-        runtime=QString::number(a,10)+"Day "+QString::number(c,10)+"Hour "+QString::number(e,10)+"Min "+QString::number(f,10)+"Sec";
+        runtime=QString::number(a)+"Day "+QString::number(c)+"Hour "+QString::number(e)+"Min "+QString::number(f)+"Sec";
     }
     proc->starttimeVector<<runtime;
     ///    qDebug()<<(long)time(NULL)-(long)starttime;      //进程启动时间
+    tty = (dev_t)i_tty; // hmmm
     utime += stime;		// we make no user/system time distinction
     cutime += cstime;
 
 
-    if(1) //原来是 old_utime>0 // check..      基本都是==0
+    if(1)
     {
         int dcpu;
         dcpu = utime - old_utime; // user_time from proc
+//        qDebug()<<"1."<<old_utime;
 
-        if(dcpu<0 ) {
-            // why.. this occurs ?
-            // Qps exception:[3230,firefox] dcpu=-22 utime=39268 old_utime=39290 why occur?
-            if(flag_devel)
-                printf("Qps :[%d,%s] dcpu=%d utime=%ld old_utime=%ld why occurs?\n"
-                       ,pid,qPrintable(command),dcpu,utime,old_utime);
-            return 1;
+        if(proc->dt_total>0)	// move to Proc ??
+        {
+            pcpu = 100.0 * dcpu / proc->dt_total;
         }
 
-        const float a = 1.0;
+        const float a = Procview::avg_factor;
         wcpu = a * old_wcpu + (1 - a) * pcpu;
     }
     proc->pcpuVector<<pcpu;
     proc->wcpuVector<<wcpu;
-    //    qDebug()<<pcpu<<wcpu;
+//        qDebug()<<pcpu<<wcpu;
     old_wcpu=wcpu;
     old_utime=utime;    // ****
+//    qDebug()<<"2."<<old_utime;
 
 
     // read /proc/%PID/statm  - memory usage
@@ -454,13 +458,13 @@ int Procinfo::readproc()
     mem= resident-share;            //内存使用量
     proc->originMemVector<<mem;
     pmem = 100.0 * mem / proc->mem_total;       //内存使用的百分比
-    QString memT=QString::number(mem,10)+"K";
+    QString memT=QString::number(mem)+"K";
     int memTemp;
     memTemp=mem;
     if(mem>1024)
     {
         memTemp=mem/1024;
-        memT=QString::number(memTemp,10)+"M";
+        memT=QString::number(memTemp)+"M";
     }
     proc->memVector<<memT;
 
@@ -498,19 +502,19 @@ int Procinfo::readproc()
         proc->originIoreadVector<<io_read;
         proc->originIowriteVector<<io_write;
         /// 将io使用情况转换为相应单位准备显示
-        read=QString::number(io_read,10)+"K";
-        write=QString::number(io_write,10)+"K";
+        read=QString::number(io_read)+"K";
+        write=QString::number(io_write)+"K";
 
         if(io_read>1024)
         {
             readTemp=io_read/1024;
-            read=QString::number(readTemp,10)+"M";
+            read=QString::number(readTemp)+"M";
 
         }
         if(io_write>1024)
         {
             writeTemp=io_write/1024;
-            write=QString::number(writeTemp,10)+"M";
+            write=QString::number(writeTemp)+"M";
         }
         proc->ioreadVector<<read;
         proc->iowriteVector<<write;
@@ -526,6 +530,9 @@ int Procinfo::readproc()
     return 2; // return ok.
 }
 
+// Description:  read common information  for all processes
+// return value
+// 		-1 : too fast refresh !
 int Proc::read_system()
 {
     static bool first_time=true;
@@ -557,6 +564,18 @@ int Proc::read_system()
         {
             p+=6;
             sscanf(p, "%d", &boot_time);
+        }
+
+        int max_cpus=512;
+        cpu_times_vec = new unsigned[CPUTIMES * max_cpus];
+        old_cpu_times_vec = new unsigned[CPUTIMES * max_cpus];
+
+        //init
+        for(int cpu = 0; cpu < max_cpus ; cpu++)
+            for(int i = 0; i < CPUTIMES; i++)
+            {
+            cpu_times(cpu, i)=0;
+            old_cpu_times(cpu, i) =0;
         }
     }
 
@@ -591,6 +610,22 @@ int Proc::read_system()
         num_cpus=vals[r];
     }
 
+    // Hotplugging Detection : save total_cpu
+    if(Proc::num_cpus != Proc::old_num_cpus) {
+        for(int i = 0; i < CPUTIMES; i++)
+            cpu_times(num_cpus, i) = cpu_times(Proc::old_num_cpus, i);
+
+        Proc::old_num_cpus=Proc::num_cpus;
+    }
+
+
+    // backup old values :  important*******
+    for(int cpu = 0; cpu < Proc::num_cpus+1; cpu++)
+    {
+        for(int i = 0; i < CPUTIMES; i++)
+            old_cpu_times(cpu, i) = cpu_times(cpu, i);
+    }
+
     /*
                 /proc/stat
                 cpu#	user	nice	system	idle		iowait(2.6)	irq(2.6)	sft(2.6)	steal(2.6.11) 	guest(2.6.24)
@@ -601,6 +636,7 @@ int Proc::read_system()
         */
 
     // Total_cpu
+//    int total_cpu=Proc::num_cpus;
     unsigned user,nice,system,idle,iowait, irq, sftirq, steal,guest, nflds;
     //将这些信息通通读进到buf中去，读一个nflds＋1
     nflds = sscanf(buf, "cpu %u %u %u %u %u %u %u %u %u", &user, &nice, &system, &idle, &iowait, &irq, &sftirq, &steal,&guest);
@@ -614,7 +650,85 @@ int Proc::read_system()
         system+=steal;
         system+=guest;
     }
+    cpu_times(Proc::num_cpus, CPUTIME_USER)=user;           //赋值给cpu的相关参数
+    cpu_times(Proc::num_cpus, CPUTIME_NICE)=nice;
+    cpu_times(Proc::num_cpus, CPUTIME_SYSTEM)=system;
+    cpu_times(Proc::num_cpus, CPUTIME_IDLE)=idle;
 
+    // infobar uses this value, so this ga
+    Proc::dt_used=user - old_cpu_times(Proc::num_cpus, CPUTIME_USER);
+    Proc::dt_used+=system - old_cpu_times(Proc::num_cpus, CPUTIME_SYSTEM);
+    Proc::dt_total= dt_used +
+                    nice - old_cpu_times(Proc::num_cpus, CPUTIME_NICE)+
+                    idle - old_cpu_times(Proc::num_cpus, CPUTIME_IDLE);
+
+    if(first_time)
+    {
+        //	printf("\n==================== tooo fast =================================\n");
+        //	printf("DEBUG:dt_total=%d dt_used=%d\n",Proc::dt_total,Proc::dt_used);
+        //	return -1; // too early refresh again  !! 不在第一次的时候刷新的意思
+    }
+    if(Proc::dt_total==0)
+    {
+        //?????
+        printf("Error: dt_total=0 , dt_used=%ld(ld) \n",Proc::dt_used,old_cpu_times(Proc::num_cpus,CPUTIME_IDLE));
+        dt_total=500; //more tolerable?
+        //abort(); // stdlib.h
+    }
+
+    //	void watchdog_syscpu(int );
+    //	watchdog_syscpu((user-old_cpu_times(num_cpus,CPUTIME_USER))*100/dt_total); // test
+
+    if(flag_devel and flag_SMPsim )     //这2个flag从未被赋真值，不会被执行
+    {
+        // for Developer only !!! ～～～～原来如此
+        // printf("user%d nuce%d system%d idle%d\n",user,nice,system,idle);
+        for(int cpu = 0; cpu < num_cpus ; cpu++) {
+            //stdlib.h, int rand();
+            if(dt_used!=0) cpu_times(cpu, CPUTIME_USER)=old_cpu_times(cpu, CPUTIME_USER ) + rand()%dt_used;
+            else 	cpu_times(cpu, CPUTIME_USER)=0;
+            cpu_times(cpu, CPUTIME_NICE)=nice;
+            cpu_times(cpu, CPUTIME_SYSTEM)=system;
+            cpu_times(cpu, CPUTIME_IDLE)=idle;
+
+        }
+    }
+    else
+    {
+        // SMP(Multi-CPU)
+        for(int cpu = 0; cpu < num_cpus ; cpu++)
+        {
+            char cpu_buf[10];
+            sprintf(cpu_buf, "cpu%d", cpu);
+            if((p = strstr(buf, cpu_buf)) != 0)
+            {
+                //将那些读进来再次进行转存
+                nflds = sscanf(p, "%*s %u %u %u %u %u %u %u %u %u",
+                               &cpu_times(cpu, CPUTIME_USER), &cpu_times(cpu, CPUTIME_NICE),
+                               &cpu_times(cpu, CPUTIME_SYSTEM), &cpu_times(cpu, CPUTIME_IDLE),
+                               &iowait, &irq, &sftirq,&steal,&guest);
+                //cpu_times(cpu, CPUTIME_USER),cpu_times(cpu, CPUTIME_NICE),
+                if( nflds > 4 )
+                {
+                    // kernel 2.6.x
+                    cpu_times(cpu, CPUTIME_SYSTEM)+=(irq+sftirq);
+                    cpu_times(cpu, CPUTIME_IDLE)+=iowait;
+                }
+                if( nflds == 9 )
+                {
+                    cpu_times(cpu, CPUTIME_SYSTEM)+=(steal+guest);
+                }
+
+                // 2.4.27-SMP bug
+
+            }
+            else
+            {
+                fprintf(stderr, "Qps: Error reading info for cpu%d (/proc/stat)\n", cpu);
+                abort();
+            }
+        }
+    }
 
     // read memory info
     strcpy(path, PROCDIR);
@@ -622,6 +736,8 @@ int Proc::read_system()
     if((n = read_file(path, buf, sizeof(buf) - 1)) <= 0) return 0;
     buf[n] = '\0';
 
+    // Skip the old /meminfo cruft, making this work in post-2.1.42 kernels
+    // as well.  (values are now in kB)
     //匹配，则给予赋值
     if( p = strstr(buf, "MemTotal:"))
         sscanf(p, "MemTotal: %d kB\n", &mem_total);
@@ -641,62 +757,101 @@ int Proc::read_system()
 
 Proc::Proc()
 {
+    commonPostInit();
+    Proc::init_static();
+}
+Proc::~Proc()
+{}
+
+// COMMON for LINUX,SOLARIS
+// Polling /proc/PID/*
+// 在proc_common的refresh中刷新
+void Proc::read_proc_all()
+{
+    DIR *d = opendir("/proc");
+    struct dirent *e;
+
+    //    int loop=0;
+    while((e = readdir(d)) != 0)
+    {
+        if(e->d_name[0] >= '0' and e->d_name[0] <= '9')
+        {
+            int pid;
+            Procinfo *pi=NULL;
+            pid=atoi(e->d_name);
+            pidVector<<pid;         //取出所有pid，自定义
+            pi=procs.value(pid,NULL);
+
+            if (pi==NULL)   // new process
+            {
+                pi = new Procinfo(this,pid);
+                procs.insert(pid,pi);
+            }
+            int ret=pi->readproc();     //CALL readproc();
+            if(ret>0)
+            {
+                pi->generation = current_gen; // this process is alive
+                cmdVector<<pi->command;
+            }
+        }
+    }
+    closedir(d);
+}
+
+bool Procinfo::isThread()
+{
+    return pid!=tgid; // how to check
+}
+
+/* ========================  Procview ============================  */
+float Procview::avg_factor = 1.0;
+
+Procview::Procview()
+{
+    enable=true;
+    refresh(); // before reading Watchdog list
+}
+
+void Proc::commonPostInit()
+{
+    dt_total = 0; // diff system tick
+    dt_used = 0; // for infobar
     Proc::num_cpus = 0;
+    Proc::old_num_cpus = 0;
     Proc::mem_total = 0;
     Proc::mem_free = 0;
     Proc::mem_buffers = 0;
     Proc::mem_cached = 0;
     Proc::swap_total = 0;
     Proc::swap_free = 0;
+    Proc::cpu_times_vec = 0;	// array.
+    Proc::old_cpu_times_vec = 0;
     Proc::boot_time = 0;
     Proc::clk_tick = 100; //for most system
+
+    current_gen=0; // !
     clk_tick=sysconf(_SC_CLK_TCK); //The  number  of  clock ticks per second.
-    pagesize=sysconf(_SC_PAGESIZE); // same getpagesize()  in <unistd.h>
-}
-Proc::~Proc()
-{}
-
-// Polling /proc/PID/*
-// 在proc_common的refresh中刷新
-void Proc::read_proc_all()
-{
-//    qDebug()<<"read all";
-    DIR *d = opendir("/proc");
-    struct dirent *e;
-
-    while((e = readdir(d)) != 0)
-    {
-        if(e->d_name[0] >= '0' and e->d_name[0] <= '9')
-        {
-            int pid;
-            Procinfo *pif=NULL;
-            pid=atoi(e->d_name);
-            pidVector<<pid;         //取出所有pid，自定义
-
-            if (pif==NULL)   // new process
-            {
-                /// 此句造成大量内存泄漏,现唯一泄漏点
-                pif = new Procinfo(this,pid);
-            }
-            int ret=pif->readproc();     //CALL readproc();  有几个线程就要读几遍
-            if(ret>0)
-            {
-                cmdVector<<pif->command;
-            }
-            delete pif;
-        }
-    }
-    closedir(d);
 }
 
 // Description: update the process list      BottleNeck 1.5%    有瓶颈
 // 		read /proc/*
+// 		called by Procview::refresh(), every UPDATE .
 void Proc::refresh()
 {
+    current_gen++;
+
     //init
-    if(Proc::read_system()<0)
-        return; // **** should be every refresh !!
+    if(Proc::read_system()<0) return; // **** should be every refresh !!
 
     read_proc_all();
 
+}
+
+// read new process info
+void Procview::refresh()
+{
+    if(enable)
+    {
+        Proc::refresh(); 	// read "/proc/*", then update the process list
+    }
 }
