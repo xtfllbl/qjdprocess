@@ -5,7 +5,7 @@
 #include <qjdproc.h>
 #include <QTimer>
 #include <qjdoptions.h>
-//#include <qjdreport.h>
+#include <qjdreport.h>
 #include <signal.h>
 #include <errno.h>
 #include <QStandardItemModel>
@@ -28,9 +28,10 @@ public:
 
     qjdoptions *options;
     Proc *proc;
-//    qjdReport *report;
+    qjdreport *report;
 
     QTimer *timer;
+    QTimer *reportTimer;
     QMenu *menu;
     QString colName;
     QString colNameSave;
@@ -88,6 +89,7 @@ public:
     int selectCol;
     int selectRow;
     int processID;
+    QString processName;
     bool flagUse;
     bool flagFirstRun;
     bool flagSort;
@@ -152,6 +154,8 @@ public:
     int colNum;
 
     bool hasOptions;
+
+    bool isProgress;
 protected:
     void changeEvent(QEvent *e);
 private:
@@ -176,7 +180,8 @@ private slots:
     void headerHandle(int);
     bool eventFilter(QObject *obj, QEvent *event);
 //   void setTable();
-//    void viewReport();
+    void viewReport();
+    void updateReport();
 
 };
 #endif // QJDPROCESSMAINWINDOW_H

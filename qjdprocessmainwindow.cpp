@@ -718,8 +718,9 @@ void qjdProcessMainWindow::on_tblMain_pressed(QModelIndex index)
 
     //获取所在行的pid
     processID=ui->tblMain->model()->index(selectRow,0).data().toInt();
-    //    processID=qjdtable->model()->index(selectRow,0).data().toInt();
-    //    qDebug()<<processID;
+    processName=ui->tblMain->model()->index(selectRow,1).data().toString();
+//    qDebug()<<processID<<processName;
+
 }
 
 void qjdProcessMainWindow::showContextMenu(QPoint point)
@@ -2260,6 +2261,7 @@ void qjdProcessMainWindow::keyPress(QKeyEvent *event)
         if(selectRow<=0)
             selectRow=0;
         processID=ui->tblMain->model()->index(selectRow,0).data().toInt();
+        processName=ui->tblMain->model()->index(selectRow,1).data().toString();
         ui->tblMain->setCurrentIndex(ui->tblMain->model()->index(selectRow,0));
         break;
 
@@ -2268,6 +2270,7 @@ void qjdProcessMainWindow::keyPress(QKeyEvent *event)
         if(selectRow>=model->rowCount())
             selectRow=model->rowCount()-1;
         processID=ui->tblMain->model()->index(selectRow,0).data().toInt();
+        processName=ui->tblMain->model()->index(selectRow,1).data().toString();
         ui->tblMain->setCurrentIndex(ui->tblMain->model()->index(selectRow,0));
         break;
 
@@ -2276,6 +2279,7 @@ void qjdProcessMainWindow::keyPress(QKeyEvent *event)
         if(selectRow<=0)
             selectRow=0;
         processID=ui->tblMain->model()->index(selectRow,0).data().toInt();
+        processName=ui->tblMain->model()->index(selectRow,1).data().toString();
         ui->tblMain->setCurrentIndex(ui->tblMain->model()->index(selectRow,0));
         break;
 
@@ -2284,7 +2288,125 @@ void qjdProcessMainWindow::keyPress(QKeyEvent *event)
         if(selectRow>=model->rowCount())
             selectRow=model->rowCount()-1;
         processID=ui->tblMain->model()->index(selectRow,0).data().toInt();
+        processName=ui->tblMain->model()->index(selectRow,1).data().toString();
         ui->tblMain->setCurrentIndex(ui->tblMain->model()->index(selectRow,0));
         break;
     }
+}
+
+void qjdProcessMainWindow::viewReport()
+{
+    isProgress=false;
+    report=new qjdreport();
+    reportTimer = new QTimer(this);
+    connect(reportTimer, SIGNAL(timeout()), this, SLOT(updateReport()));
+    /// 自动刷新
+    reportTimer->start(refreshInterval);       //启动自动刷新
+    updateReport();
+
+    if(isProgress==true)
+    {
+        report->show();
+    }
+}
+
+
+void qjdProcessMainWindow::updateReport()
+{
+    qDebug()<<"update";
+    QFile fp;
+    QFile fp2;
+    QString path="";
+    QString arguments="";
+    QString stime="";
+
+    fp.setFileName("/home/xtf/pathFile.txt");
+    fp.open(QFile::ReadOnly);
+    while(!fp.atEnd())
+    {
+        QString a=fp.readLine(100);
+        if(a.contains(processName,Qt::CaseSensitive)==true)
+        {
+            QString b=fp.readLine(100);
+            if(b.contains("Private File Path"))
+            {
+                path=fp.readLine(128);
+                path=path.left(path.indexOf("\n"));
+            }
+
+            QString c=fp.readLine(100);
+            if(c.contains("Arguments"))
+            {
+                arguments=fp.readLine(128);
+                arguments=arguments.left(arguments.indexOf("\n"));
+            }
+            QString d=fp.readLine(100);
+            if(d.contains("Start Time"))
+            {
+                stime=fp.readLine(128);
+                stime=stime.left(stime.indexOf("\n"));
+            }
+        }
+    }
+
+    if(path=="")
+    {
+        qDebug()<<"this is not zuoye";
+        delete report;
+        reportTimer->stop();
+        disconnect(reportTimer, SIGNAL(timeout()), this, SLOT(updateReport()));
+        isProgress=false;
+        return;
+    }
+    else
+    {
+        isProgress=true;
+        qDebug()<<"find the correct path, prepare to load the log";
+        qDebug()<<path;
+        fp2.setFileName(path);
+
+        if(!fp2.open(QFile::ReadOnly))
+            qDebug()<<"open failure";
+        else
+            qDebug()<<"open success";
+    }
+    qDebug()<<"go on";
+    /// 显示相关信息
+    QString statement="";
+    QString progress="";
+    QString curProgress="";
+    QString allProgress="";
+    QString ltime="";
+    while(!fp2.atEnd())
+    {
+        QString b=fp2.readLine(100);
+        if(b.contains("Statement"))
+        {
+            statement=fp2.readLine(128);
+            statement=statement.left(statement.indexOf("\n"));
+        }
+        if(b.contains("Progress"))
+        {
+            progress=fp2.readLine(128);
+            progress=progress.left(progress.indexOf("\n"));
+            allProgress=progress.right(progress.size()-progress.indexOf("/")-1);
+            curProgress=progress.left(progress.indexOf("/"));
+        }
+        if(b.contains("Left Time"))
+        {
+            ltime=fp2.readLine(128);
+            ltime=ltime.left(ltime.indexOf("\n"));
+        }
+    }
+    report->ui->lblName->setText(processName);
+    report->ui->lblArgu->setText(arguments);
+    report->ui->lblLTime->setText(ltime);
+    report->ui->lblStat->setText(statement);
+    report->ui->lblSTime->setText(stime);
+    report->ui->pgBar->setMaximum(allProgress.toInt());
+    report->ui->pgBar->setValue(curProgress.toInt());
+
+    fp.close();
+    fp2.close();
+
 }

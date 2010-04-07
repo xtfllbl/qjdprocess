@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>qjdReport</class>
- <widget class="QDialog" name="qjdReport">
+ <class>qjdreport</class>
+ <widget class="QDialog" name="qjdreport">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>199</width>
-    <height>165</height>
+    <width>240</width>
+    <height>320</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -17,54 +17,58 @@
    <item row="0" column="0">
     <widget class="QLabel" name="label">
      <property name="text">
-      <string>Name</string>
+      <string>Name:</string>
      </property>
     </widget>
    </item>
    <item row="0" column="1">
-    <widget class="QLabel" name="label_7">
+    <widget class="QLabel" name="lblName">
      <property name="text">
       <string>TextLabel</string>
      </property>
     </widget>
    </item>
-   <item row="1" column="0">
-    <widget class="QLabel" name="label_2">
-     <property name="text">
-      <string>S Time</string>
-     </property>
-    </widget>
-   </item>
-   <item row="1" column="1">
-    <widget class="QLabel" name="label_8">
-     <property name="text">
-      <string>TextLabel</string>
-     </property>
-    </widget>
+   <item row="1" column="0" colspan="2">
+    <layout class="QVBoxLayout" name="verticalLayout">
+     <item>
+      <widget class="QLabel" name="label_5">
+       <property name="text">
+        <string>Arguments:</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="lblArgu">
+       <property name="text">
+        <string>TextLabel</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
    </item>
    <item row="2" column="0">
-    <widget class="QLabel" name="label_3">
+    <widget class="QLabel" name="label_2">
      <property name="text">
-      <string>Statement</string>
+      <string>Start Time:</string>
      </property>
     </widget>
    </item>
    <item row="2" column="1">
-    <widget class="QLabel" name="label_6">
+    <widget class="QLabel" name="lblSTime">
      <property name="text">
       <string>TextLabel</string>
      </property>
     </widget>
    </item>
    <item row="3" column="0">
-    <widget class="QLabel" name="label_10">
+    <widget class="QLabel" name="label_3">
      <property name="text">
-      <string>Progress</string>
+      <string>Status:</string>
      </property>
     </widget>
    </item>
    <item row="3" column="1">
-    <widget class="QLabel" name="label_9">
+    <widget class="QLabel" name="lblStat">
      <property name="text">
       <string>TextLabel</string>
      </property>
@@ -73,12 +77,26 @@
    <item row="4" column="0">
     <widget class="QLabel" name="label_4">
      <property name="text">
-      <string>Left Time:</string>
+      <string>Progress:</string>
      </property>
     </widget>
    </item>
    <item row="4" column="1">
-    <widget class="QLabel" name="label_5">
+    <widget class="QProgressBar" name="pgBar">
+     <property name="value">
+      <number>24</number>
+     </property>
+    </widget>
+   </item>
+   <item row="5" column="0">
+    <widget class="QLabel" name="label_10">
+     <property name="text">
+      <string>Left Time:</string>
+     </property>
+    </widget>
+   </item>
+   <item row="5" column="1">
+    <widget class="QLabel" name="lblLTime">
      <property name="text">
       <string>TextLabel</string>
      </property>

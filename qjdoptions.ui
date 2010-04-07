@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>353</width>
-    <height>331</height>
+    <height>341</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -44,11 +44,14 @@
      </item>
      <item row="1" column="0">
       <widget class="QCheckBox" name="chkCMD">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
        <property name="text">
         <string>Process Name</string>
        </property>
        <property name="checked">
-        <bool>false</bool>
+        <bool>true</bool>
        </property>
       </widget>
      </item>

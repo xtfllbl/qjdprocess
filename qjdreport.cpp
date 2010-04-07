@@ -1,19 +1,19 @@
 #include "qjdreport.h"
 #include "ui_qjdreport.h"
-#include "qdebug.h"
-qjdReport::qjdReport(QWidget *parent) :
+
+qjdreport::qjdreport(QWidget *parent) :
     QDialog(parent),
-    ui(new Ui::qjdReport)
+    ui(new Ui::qjdreport)
 {
     ui->setupUi(this);
 }
 
-qjdReport::~qjdReport()
+qjdreport::~qjdreport()
 {
     delete ui;
 }
 
-void qjdReport::changeEvent(QEvent *e)
+void qjdreport::changeEvent(QEvent *e)
 {
     QDialog::changeEvent(e);
     switch (e->type()) {
@@ -25,7 +25,7 @@ void qjdReport::changeEvent(QEvent *e)
     }
 }
 
-void qjdReport::closeEvent(QCloseEvent *event)
+void qjdreport::closeEvent(QCloseEvent *)
 {
     delete ui;
 }

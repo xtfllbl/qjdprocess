@@ -2,22 +2,23 @@
 #define QJDREPORT_H
 
 #include <QDialog>
+#include "ui_qjdreport.h"
 
 namespace Ui {
-    class qjdReport;
+    class qjdreport;
 }
 
-class qjdReport : public QDialog {
+class qjdreport : public QDialog {
     Q_OBJECT
 public:
-    explicit qjdReport(QWidget *parent = 0);
-    ~qjdReport();
+    explicit qjdreport(QWidget *parent = 0);
+    ~qjdreport();
+    Ui::qjdreport *ui;
 
 protected:
     void changeEvent(QEvent *e);
 
 private:
-    Ui::qjdReport *ui;
 
     void closeEvent(QCloseEvent *);
 };
