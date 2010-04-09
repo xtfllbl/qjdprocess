@@ -2,10 +2,11 @@
 #define QJDPROCESSMAINWINDOW_H
 
 #include <QMainWindow>
-#include <qjdproc.h>
+#include "qjdproc.h"
+#include "qjdoptions.h"
+#include "qjdreport.h"
+#include "qjdtask.h"
 #include <QTimer>
-#include <qjdoptions.h>
-#include <qjdreport.h>
 #include <signal.h>
 #include <errno.h>
 #include <QStandardItemModel>
@@ -29,7 +30,7 @@ public:
     qjdoptions *options;
     Proc *proc;
     qjdreport *report;
-
+    qjdTask *task;
     QTimer *timer;
     QTimer *reportTimer;
     QMenu *menu;
@@ -154,13 +155,25 @@ public:
     int colNum;
 
     bool hasOptions;
-
     bool isProgress;
+
+    QFile fp;
+    QFile fp2;
+    QString path;
+    QString arguments;
+    QString stime;
+    QString statement;
+    QString progress;
+    QString curProgress;
+    QString allProgress;
+    QString ltime;
+    bool reportIsShow;
 protected:
     void changeEvent(QEvent *e);
 private:
     Ui::qjdProcessMainWindow *ui;
 private slots:
+    void on_actionTask_triggered();
     void on_actionStopRefresh_triggered(bool );
     void on_actionManualRefresh_triggered();
     void keyPress(QKeyEvent *);
@@ -181,6 +194,7 @@ private slots:
     bool eventFilter(QObject *obj, QEvent *event);
 //   void setTable();
     void viewReport();
+    void setReportData();
     void updateReport();
 
 };

@@ -27,5 +27,5 @@ void qjdreport::changeEvent(QEvent *e)
 
 void qjdreport::closeEvent(QCloseEvent *)
 {
-    delete ui;
+    hide();
 }

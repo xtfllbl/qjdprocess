@@ -14,12 +14,15 @@ SOURCES += main.cpp \
     qjdproc.cpp \
     qjdmisc.cpp \
     qjdoptions.cpp \
-    qjdreport.cpp
+    qjdreport.cpp \
+    qjdtask.cpp
 HEADERS += qjdprocessmainwindow.h \
     qjdproc.h \
     config.h \
     qjdoptions.h \
-    qjdreport.h
+    qjdreport.h \
+    qjdtask.h
 FORMS += qjdprocessmainwindow.ui \
     qjdoptions.ui \
-    qjdreport.ui
+    qjdreport.ui \
+    qjdtask.ui

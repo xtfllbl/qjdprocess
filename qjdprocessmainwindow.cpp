@@ -7,6 +7,7 @@
 #include <QTest>
 #include <QMessageBox>
 #define refreshInterval 3000
+#define lineWidth 256
 #define swapInt(x,y,t)((t)=(x),(x)=(y),(y)=(t))
 #define swapString(x,y,t)((t)=(x),(x)=(y),(y)=(t))
 
@@ -50,6 +51,9 @@ qjdProcessMainWindow::qjdProcessMainWindow(QWidget *parent) :
     hasOptions=false;
     //    qjdtable=new qjdTable(this);
     //    setTable(); //设置table
+
+    reportTimer = new QTimer(this);
+    reportIsShow=false;
 
     timer = new QTimer(this);
     connect(timer, SIGNAL(timeout()), this, SLOT(autoRefresh()));
@@ -719,6 +723,18 @@ void qjdProcessMainWindow::on_tblMain_pressed(QModelIndex index)
     //获取所在行的pid
     processID=ui->tblMain->model()->index(selectRow,0).data().toInt();
     processName=ui->tblMain->model()->index(selectRow,1).data().toString();
+
+    if(isProgress==false)
+    {
+        if(reportTimer->isActive())
+        {
+            reportTimer->stop();
+        }
+    }
+    else
+    {
+        setReportData();
+    }
 //    qDebug()<<processID<<processName;
 
 }
@@ -2297,63 +2313,69 @@ void qjdProcessMainWindow::keyPress(QKeyEvent *event)
 void qjdProcessMainWindow::viewReport()
 {
     isProgress=false;
-    report=new qjdreport();
-    reportTimer = new QTimer(this);
-    connect(reportTimer, SIGNAL(timeout()), this, SLOT(updateReport()));
-    /// 自动刷新
-    reportTimer->start(refreshInterval);       //启动自动刷新
-    updateReport();
+    setReportData();   //先设置一些基本信息，没必要每次读巨大的日志
 
+    if(reportIsShow==true)
+        updateReport();     //仅读取很小的那个私人日志
     if(isProgress==true)
     {
         report->show();
     }
 }
 
-
-void qjdProcessMainWindow::updateReport()
+void qjdProcessMainWindow::setReportData()
 {
-    qDebug()<<"update";
-    QFile fp;
-    QFile fp2;
-    QString path="";
-    QString arguments="";
-    QString stime="";
+     path="";
+     arguments="";
+     stime="";
 
+     qDebug()<<"setReportData();";
+    /// 会发现很多同名的作业，如何区分？
+    // 由于是append，所以为读取到最后一个为准
+    // TODO:文件变大之后非常缓慢，函数需要分离,遍历的事情只要做一边
     fp.setFileName("/home/xtf/pathFile.txt");
     fp.open(QFile::ReadOnly);
     while(!fp.atEnd())
     {
-        QString a=fp.readLine(100);
+        QString a=fp.readLine(lineWidth);
         if(a.contains(processName,Qt::CaseSensitive)==true)
         {
-            QString b=fp.readLine(100);
+            QString b=fp.readLine(lineWidth);
             if(b.contains("Private File Path"))
             {
-                path=fp.readLine(128);
+                path=fp.readLine(lineWidth);
                 path=path.left(path.indexOf("\n"));
             }
 
-            QString c=fp.readLine(100);
+            QString c=fp.readLine(lineWidth);
             if(c.contains("Arguments"))
             {
-                arguments=fp.readLine(128);
+                arguments=fp.readLine(lineWidth);
                 arguments=arguments.left(arguments.indexOf("\n"));
             }
-            QString d=fp.readLine(100);
+            QString d=fp.readLine(lineWidth);
             if(d.contains("Start Time"))
             {
-                stime=fp.readLine(128);
+                stime=fp.readLine(lineWidth);
                 stime=stime.left(stime.indexOf("\n"));
             }
         }
     }
+    fp.close();
 
     if(path=="")
     {
         qDebug()<<"this is not zuoye";
-        delete report;
-        reportTimer->stop();
+//        delete report;
+        if(reportTimer->isActive())
+        {
+            reportTimer->stop();
+        }
+        if(reportIsShow==true)
+        {
+            delete report;
+            reportIsShow=false;
+        }
         disconnect(reportTimer, SIGNAL(timeout()), this, SLOT(updateReport()));
         isProgress=false;
         return;
@@ -2361,52 +2383,71 @@ void qjdProcessMainWindow::updateReport()
     else
     {
         isProgress=true;
-        qDebug()<<"find the correct path, prepare to load the log";
-        qDebug()<<path;
-        fp2.setFileName(path);
+        report=new qjdreport();
+        connect(reportTimer, SIGNAL(timeout()), this, SLOT(updateReport()));
+        reportIsShow=true;
+        /// 自动刷新
+        reportTimer->start(refreshInterval);       //启动自动刷新
+        report->ui->lblSTime->setText(stime);
+        report->ui->lblName->setText(processName);
+        report->ui->lblArgu->setText(arguments);
 
+        fp2.setFileName(path);
+    }
+}
+
+void qjdProcessMainWindow::updateReport()
+{
+    qDebug()<<reportTimer->isActive();
+    if(isProgress==true)
+    {
         if(!fp2.open(QFile::ReadOnly))
             qDebug()<<"open failure";
         else
             qDebug()<<"open success";
     }
-    qDebug()<<"go on";
+//    qDebug()<<"go on";
     /// 显示相关信息
-    QString statement="";
-    QString progress="";
-    QString curProgress="";
-    QString allProgress="";
-    QString ltime="";
+     statement="";
+     progress="";
+     curProgress="";
+     allProgress="";
+     ltime="";
     while(!fp2.atEnd())
     {
-        QString b=fp2.readLine(100);
+        QString b=fp2.readLine(lineWidth);
         if(b.contains("Statement"))
         {
-            statement=fp2.readLine(128);
+            statement=fp2.readLine(lineWidth);
             statement=statement.left(statement.indexOf("\n"));
         }
         if(b.contains("Progress"))
         {
-            progress=fp2.readLine(128);
+            progress=fp2.readLine(lineWidth);
             progress=progress.left(progress.indexOf("\n"));
             allProgress=progress.right(progress.size()-progress.indexOf("/")-1);
             curProgress=progress.left(progress.indexOf("/"));
         }
         if(b.contains("Left Time"))
         {
-            ltime=fp2.readLine(128);
+            ltime=fp2.readLine(lineWidth);
             ltime=ltime.left(ltime.indexOf("\n"));
         }
     }
-    report->ui->lblName->setText(processName);
-    report->ui->lblArgu->setText(arguments);
+
+    qDebug()<<"still update";
     report->ui->lblLTime->setText(ltime);
     report->ui->lblStat->setText(statement);
-    report->ui->lblSTime->setText(stime);
+
     report->ui->pgBar->setMaximum(allProgress.toInt());
     report->ui->pgBar->setValue(curProgress.toInt());
 
-    fp.close();
     fp2.close();
 
+}
+
+void qjdProcessMainWindow::on_actionTask_triggered()
+{
+    task=new qjdTask(this);
+    task->show();
 }

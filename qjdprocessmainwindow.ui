@@ -304,6 +304,7 @@ selection-background-color: qlineargradient(spread:pad, x1:1, y1:0, x2:0.623398,
    <addaction name="actionManualRefresh"/>
    <addaction name="actionStopRefresh"/>
    <addaction name="actionChoose_Field"/>
+   <addaction name="actionTask"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
   <action name="actionExit">
@@ -361,6 +362,14 @@ selection-background-color: qlineargradient(spread:pad, x1:1, y1:0, x2:0.623398,
    </property>
    <property name="shortcut">
     <string>F2</string>
+   </property>
+  </action>
+  <action name="actionTask">
+   <property name="text">
+    <string>Task</string>
+   </property>
+   <property name="toolTip">
+    <string>Start the task control</string>
    </property>
   </action>
  </widget>
