@@ -4,7 +4,6 @@
 #include <QMainWindow>
 #include "qjdproc.h"
 #include "qjdoptions.h"
-#include "qjdreport.h"
 #include "qjdtask.h"
 #include <QTimer>
 #include <signal.h>
@@ -29,7 +28,6 @@ public:
 
     qjdoptions *options;
     Proc *proc;
-    qjdreport *report;
     qjdTask *task;
     QTimer *timer;
     QTimer *reportTimer;
@@ -155,7 +153,6 @@ public:
     int colNum;
 
     bool hasOptions;
-    bool isProgress;
 
     QFile fp;
     QFile fp2;
@@ -193,9 +190,7 @@ private slots:
     void headerHandle(int);
     bool eventFilter(QObject *obj, QEvent *event);
 //   void setTable();
-    void viewReport();
-    void setReportData();
-    void updateReport();
+    void setFirstActiveTableData();
 
 };
 #endif // QJDPROCESSMAINWINDOW_H

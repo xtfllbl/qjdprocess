@@ -119,13 +119,11 @@ qjdProcessMainWindow::qjdProcessMainWindow(QWidget *parent) :
     actTer = menu->addAction("Terminate");
     actKill = menu->addAction("Kill");
     actHan = menu->addAction("Hang Up");
-    actView = menu->addAction("View Report");
     connect(actTer, SIGNAL(triggered()), this, SLOT(terProcess()));
     connect(actKill, SIGNAL(triggered()), this, SLOT(killProcess()));
     connect(actHan, SIGNAL(triggered()), this, SLOT(hanProcess()));
     connect(actStop, SIGNAL(triggered()), this, SLOT(stopProcess()));
     connect(actCon, SIGNAL(triggered()), this, SLOT(conProcess()));
-    connect(actView, SIGNAL(triggered()), this, SLOT(viewReport()));
 
     // 按要求显示进程名称
     connect(ui->comboProcess,SIGNAL(currentIndexChanged(int)),this,SLOT(autoRefresh()));
@@ -310,7 +308,7 @@ void qjdProcessMainWindow::setData()
         aIoread=proc->ioreadVector.at(i);//
         aIowrite=proc->iowriteVector.at(i);//
         aPcpu=QString::number(proc->pcpuVector.at(i),10);
-//        qDebug()<<aPcpu;
+        //        qDebug()<<aPcpu;
         aWcpu.sprintf("%f",proc->wcpuVector.at(i));//
         aCmdLine=proc->cmdlineVector.at(i);  //
         aUid=QString::number(proc->uidVector.at(i),10);//
@@ -723,23 +721,9 @@ void qjdProcessMainWindow::on_tblMain_pressed(QModelIndex index)
     //获取所在行的pid
     processID=ui->tblMain->model()->index(selectRow,0).data().toInt();
     processName=ui->tblMain->model()->index(selectRow,1).data().toString();
-
-    if(isProgress==false)
-    {
-        if(reportTimer->isActive())
-        {
-            reportTimer->stop();
-        }
-    }
-    else
-    {
-        setReportData();
-    }
-//    qDebug()<<processID<<processName;
-
 }
 
-void qjdProcessMainWindow::showContextMenu(QPoint point)
+void qjdProcessMainWindow::showContextMenu(QPoint )
 {
     if(menu)
     {
@@ -2212,7 +2196,6 @@ void qjdProcessMainWindow::headerHandle(int colNum)
     machineRefresh=false;
     colNumberSave=colNum;
     colName=ui->tblMain->model()->headerData(colNum,Qt::Horizontal).toString(); // 获得列名，用来排序
-    //    colName=qjdtable->model()->headerData(colNum,Qt::Horizontal).toString(); // 获得列名，用来排序
     vectorClear();
     proc->refresh();
     headerSort();
@@ -2310,144 +2293,51 @@ void qjdProcessMainWindow::keyPress(QKeyEvent *event)
     }
 }
 
-void qjdProcessMainWindow::viewReport()
+void qjdProcessMainWindow::on_actionTask_triggered()
 {
-    isProgress=false;
-    setReportData();   //先设置一些基本信息，没必要每次读巨大的日志
-
-    if(reportIsShow==true)
-        updateReport();     //仅读取很小的那个私人日志
-    if(isProgress==true)
-    {
-        report->show();
-    }
+    task=new qjdTask(this);
+    setFirstActiveTableData();
+    connect(task,SIGNAL(sigRefresh()),this,SLOT(setFirstActiveTableData()));
+    task->show();
 }
 
-void qjdProcessMainWindow::setReportData()
+void qjdProcessMainWindow::setFirstActiveTableData()
 {
-     path="";
-     arguments="";
-     stime="";
-
-     qDebug()<<"setReportData();";
-    /// 会发现很多同名的作业，如何区分？
-    // 由于是append，所以为读取到最后一个为准
-    // TODO:文件变大之后非常缓慢，函数需要分离,遍历的事情只要做一边
+    QVector<QString> pname;
     fp.setFileName("/home/xtf/pathFile.txt");
     fp.open(QFile::ReadOnly);
     while(!fp.atEnd())
     {
         QString a=fp.readLine(lineWidth);
-        if(a.contains(processName,Qt::CaseSensitive)==true)
+        if(a.contains("----------")==true)
         {
-            QString b=fp.readLine(lineWidth);
-            if(b.contains("Private File Path"))
-            {
-                path=fp.readLine(lineWidth);
-                path=path.left(path.indexOf("\n"));
-            }
-
-            QString c=fp.readLine(lineWidth);
-            if(c.contains("Arguments"))
-            {
-                arguments=fp.readLine(lineWidth);
-                arguments=arguments.left(arguments.indexOf("\n"));
-            }
-            QString d=fp.readLine(lineWidth);
-            if(d.contains("Start Time"))
-            {
-                stime=fp.readLine(lineWidth);
-                stime=stime.left(stime.indexOf("\n"));
-            }
+            a=a.right(a.size()-10);
+            a=a.left(a.size()-11);       //因为结尾处有\n，所以要加1
+            pname<<a;
         }
     }
+
     fp.close();
 
-    if(path=="")
+    QVector<QString> tempCmd;
+    QVector<int> tempPname;
+    for(int i=0;i<proc->cmdVector.size();i++)
     {
-        qDebug()<<"this is not zuoye";
-//        delete report;
-        if(reportTimer->isActive())
+        for(int j=0;j<pname.size();j++)
         {
-            reportTimer->stop();
-        }
-        if(reportIsShow==true)
-        {
-            delete report;
-            reportIsShow=false;
-        }
-        disconnect(reportTimer, SIGNAL(timeout()), this, SLOT(updateReport()));
-        isProgress=false;
-        return;
-    }
-    else
-    {
-        isProgress=true;
-        report=new qjdreport();
-        connect(reportTimer, SIGNAL(timeout()), this, SLOT(updateReport()));
-        reportIsShow=true;
-        /// 自动刷新
-        reportTimer->start(refreshInterval);       //启动自动刷新
-        report->ui->lblSTime->setText(stime);
-        report->ui->lblName->setText(processName);
-        report->ui->lblArgu->setText(arguments);
-
-        fp2.setFileName(path);
-    }
-}
-
-void qjdProcessMainWindow::updateReport()
-{
-    qDebug()<<reportTimer->isActive();
-    if(isProgress==true)
-    {
-        if(!fp2.open(QFile::ReadOnly))
-            qDebug()<<"open failure";
-        else
-            qDebug()<<"open success";
-    }
-//    qDebug()<<"go on";
-    /// 显示相关信息
-     statement="";
-     progress="";
-     curProgress="";
-     allProgress="";
-     ltime="";
-    while(!fp2.atEnd())
-    {
-        QString b=fp2.readLine(lineWidth);
-        if(b.contains("Statement"))
-        {
-            statement=fp2.readLine(lineWidth);
-            statement=statement.left(statement.indexOf("\n"));
-        }
-        if(b.contains("Progress"))
-        {
-            progress=fp2.readLine(lineWidth);
-            progress=progress.left(progress.indexOf("\n"));
-            allProgress=progress.right(progress.size()-progress.indexOf("/")-1);
-            curProgress=progress.left(progress.indexOf("/"));
-        }
-        if(b.contains("Left Time"))
-        {
-            ltime=fp2.readLine(lineWidth);
-            ltime=ltime.left(ltime.indexOf("\n"));
+            if(proc->cmdVector.at(i).contains(pname[j]))
+            {
+                // 返回及时作业中和历史记录中同名作业,会返回很多，而且可能不同名字
+                tempCmd<<proc->cmdVector.at(i);
+                tempPname<<j;
+            }
         }
     }
 
-    qDebug()<<"still update";
-    report->ui->lblLTime->setText(ltime);
-    report->ui->lblStat->setText(statement);
-
-    report->ui->pgBar->setMaximum(allProgress.toInt());
-    report->ui->pgBar->setValue(curProgress.toInt());
-
-    fp2.close();
-
-}
-
-void qjdProcessMainWindow::on_actionTask_triggered()
-{
-    task=new qjdTask(this);
-    task->show();
+    // 使用hash，确保进程对应最新的日志
+    for(int i=0;i<tempCmd.size();i++)
+    {
+        task->hashActive[tempCmd[i]]=tempPname[i];
+    }
+    task->setActiveTableData();
 }
