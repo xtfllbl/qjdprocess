@@ -88,6 +88,7 @@ public:
     int selectCol;
     int selectRow;
     int processID;
+    int selfID;
     QString processName;
     bool flagUse;
     bool flagFirstRun;

@@ -5,7 +5,7 @@
 #include "ui_qjdtask.h"
 #include <QFile>
 #include <QTimer>
-
+#include <QProcess>
 namespace Ui {
     class qjdTask;
 }
@@ -53,8 +53,8 @@ private:
 
 private slots:
     void on_btnRefresh_clicked();
-    void on_pushButton_2_clicked();
-    void on_pushButton_clicked();
+    void on_btnStart_clicked();
+    void on_btnClose_clicked();
     void on_activeTable_clicked(QModelIndex index);
     void on_tabWidget_selected(QString );
     void on_historyTable_clicked(QModelIndex index);
@@ -62,6 +62,9 @@ private slots:
     void setHistoryTablePrivateData();
     void headerHandleH(int);
     void headerHandleA(int);
+
+    void restartProgress();
+    void handleError(QProcess::ProcessError);
 };
 
 #endif // QJDTASK_H

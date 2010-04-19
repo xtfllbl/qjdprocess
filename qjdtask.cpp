@@ -2,6 +2,8 @@
 #include "ui_qjdtask.h"
 #include <QDebug>
 #include <QProgressBar>
+#include <QProcess>
+#include <QMessageBox>
 #define lineWidth 256
 
 qjdTask::qjdTask(QWidget *parent) :
@@ -79,10 +81,10 @@ void qjdTask::setHistoryTableData()
    }
    fp.close();
 
-   //设置行数，不设置会显示不出
+   // 设置行数，不设置会显示不出
    ui->historyTable->setRowCount(historyTableRowNumber);
 
-//   qDebug()<<path.size();//大小正确
+   // qDebug()<<path.size();  //大小正确
    for(int i=0;i<path.size();i++)
    {
        QTableWidgetItem *itemPname = new QTableWidgetItem(pname[i]);
@@ -279,7 +281,7 @@ void qjdTask::closeEvent(QCloseEvent *)
 }
 
 
-void qjdTask::on_pushButton_clicked()
+void qjdTask::on_btnClose_clicked()
 {
     this->close();
 }
@@ -303,10 +305,12 @@ void qjdTask::headerHandleA(int colNum)
     qDebug()<<colNum;
 }
 
-void qjdTask::on_pushButton_2_clicked()
+void qjdTask::on_btnStart_clicked()
 {
-    qDebug()<<"mu qian shi fu yun";
+    qDebug()<<"test start";
     /// 代参数启动作业？不太好,能接的上只是日志而已
+    // 此处使用QProcess，能有效捕捉crash；自行发作业无法捕捉crash
+    restartProgress();
 }
 
 void qjdTask::on_btnRefresh_clicked()
@@ -325,4 +329,28 @@ void qjdTask::on_btnRefresh_clicked()
     // 更新active table
     emit sigRefresh();      //发送信号，在mainwindow中接受并处理
     ui->activeTable->resizeColumnsToContents();
+}
+
+/// TODO: 弹出界面，选择启动程序，参数，历史中断文件，参数文件等
+void qjdTask::restartProgress()
+{
+    QString program = "/home/xtf/Code/notification/notification";
+    QStringList arguments;
+    arguments << "-style" << "motif";
+
+    QProcess *myProcess = new QProcess();
+    connect(myProcess,SIGNAL(error(QProcess::ProcessError)),this,SLOT(handleError(QProcess::ProcessError)));
+    myProcess->start(program,arguments);
+    //    qDebug()<<myProcess->environment();
+    // 返回5==unkown error
+    //    qDebug()<<"error code:"<<myProcess->error()<<myProcess->errorString();      //kill==5 (5下的kill?并没返回kill)
+    //    int errCode=myProcess->error();
+    //    if(errCode==5)
+    //        QMessageBox::warning(this,"Error Occured","Unkown Error");
+
+}
+
+void qjdTask::handleError(QProcess::ProcessError error)
+{
+    qDebug()<<"handleerror";
 }

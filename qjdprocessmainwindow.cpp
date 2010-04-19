@@ -64,6 +64,7 @@ qjdProcessMainWindow::qjdProcessMainWindow(QWidget *parent) :
     selectRow=0;
     selectCol=0;
     processID=0;
+    selfID=0;
     flagUse=false;
     flagFirstRun=false;
     flagSort=false;
@@ -721,6 +722,9 @@ void qjdProcessMainWindow::on_tblMain_pressed(QModelIndex index)
     //获取所在行的pid
     processID=ui->tblMain->model()->index(selectRow,0).data().toInt();
     processName=ui->tblMain->model()->index(selectRow,1).data().toString();
+    if(processName=="qjdprocess")
+        selfID=processID;
+    else selfID=0;
 }
 
 void qjdProcessMainWindow::showContextMenu(QPoint )
@@ -755,7 +759,10 @@ void qjdProcessMainWindow::conProcess()
 }
 void qjdProcessMainWindow::send_to_selected(int sig)
 {
-    sendsig(processID, sig);
+    if(processID==selfID)
+        QMessageBox::information(this,"Attention","Don`t even try it");
+    else
+        sendsig(processID, sig);
 }
 
 void qjdProcessMainWindow::sendsig(int pid, int sig)
