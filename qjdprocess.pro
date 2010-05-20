@@ -9,6 +9,8 @@ CONFIG += warn_off \
     debug # debug
 CONFIG += qtestlib
 QT += dbus
+QT += xml
+
 SOURCES += main.cpp \
     qjdprocessmainwindow.cpp \
     qjdproc.cpp \

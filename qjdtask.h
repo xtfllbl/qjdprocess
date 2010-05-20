@@ -6,6 +6,8 @@
 #include <QFile>
 #include <QTimer>
 #include <QProcess>
+#include <QtXml/QXmlStreamReader>
+
 namespace Ui {
     class qjdTask;
 }
@@ -33,10 +35,20 @@ private:
 
     QTimer *timerA;
 //    bool hasTimerA;
-    QVector<QString> pname;
     QVector<QString> path;
-    QVector<QString> arguments;
     QVector<QString> stime;
+    QVector<QString> pname;
+    bool isPname;
+    bool isPath;
+    bool isStime;
+
+    bool isCurrentTime;
+    bool isStatement;
+    bool isCurrentProgress;
+    bool isWholeProgress;
+    bool isLeftTime;
+//    bool isStime;
+    QVector<QString> arguments;
     QString statement;
     QString progress;
     QString curProgress;

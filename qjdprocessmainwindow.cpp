@@ -6,6 +6,7 @@
 #include <QDebug>
 #include <QTest>
 #include <QMessageBox>
+
 #define refreshInterval 3000
 #define lineWidth 256
 #define swapInt(x,y,t)((t)=(x),(x)=(y),(y)=(t))
