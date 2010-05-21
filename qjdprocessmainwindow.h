@@ -156,7 +156,6 @@ public:
     bool hasOptions;
 
     QFile fp;
-    QFile fp2;
     QString path;
     QString arguments;
     QString stime;

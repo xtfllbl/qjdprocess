@@ -52,14 +52,15 @@ void qjdTask::setHistoryTableData()
    // 由于是append，所以为读取到最后一个为准
    // TODO:文件变大之后非常缓慢，函数需要分离,遍历的事情只要做一边
     /// 这个设置公共文件的路径想办法弄一下
-   fp.setFileName("/home/xtf/pathFile.xml");
-   fp.open(QFile::ReadOnly);
+   pubFile.setFileName("/home/xtf/pathFile.index");
+   pubFile.open(QFile::ReadOnly);
 
    isPname=false;
-   isPath=false;
+   isPriPath=false;
+   isArgPath=false;
    isStime=false;
 
-   QXmlStreamReader stream(&fp);
+   QXmlStreamReader stream(&pubFile);
    while (!stream.atEnd())
    {
        int a= stream.readNext();
@@ -90,7 +91,11 @@ void qjdTask::setHistoryTableData()
            }
            if(name=="Private_File_Path")
            {
-               isPath=true;
+               isPriPath=true;
+           }
+           if(name=="Argument_File_Path")
+           {
+               isArgPath=true;
            }
            if(name=="Start_Time")
            {
@@ -108,10 +113,15 @@ void qjdTask::setHistoryTableData()
                pname<<text;
                isPname=false;
            }
-           if(isPath==true)
+           if(isPriPath==true)
            {
-               path<<text;
-               isPath=false;
+               priPath<<text;
+               isPriPath=false;
+           }
+           if(isArgPath==true)
+           {
+               argPath<<text;
+               isArgPath=false;
            }
            if(isStime==true)
            {
@@ -140,25 +150,25 @@ void qjdTask::setHistoryTableData()
    {
          qDebug()<<"do error handling";
    }
-   fp.close();
-   qDebug()<<pname<<path<<stime;
+   pubFile.close();
+   qDebug()<<pname<<priPath<<argPath<<stime;
 
    /// ------------------------------------------------------------------------------------------------------------------- ///
    // 设置行数，不设置会显示不出
-   historyTableRowNumber=path.size();
+   historyTableRowNumber=priPath.size();
    ui->historyTable->setRowCount(historyTableRowNumber);
 
    // qDebug()<<path.size();  //大小正确
-   for(int i=0;i<path.size();i++)
+   for(int i=0;i<priPath.size();i++)
    {
        QTableWidgetItem *itemPname = new QTableWidgetItem(pname[i]);
        QTableWidgetItem *itemStime = new QTableWidgetItem(stime[i]);
        ui->historyTable->setItem(i,0,itemPname);
        ui->historyTable->setItem(i,1,itemStime);
 
-       fp2.setFileName(path[i]);
-       qDebug()<<fp2.fileName();
-       if(!fp2.open(QFile::ReadOnly))
+       priFile.setFileName(priPath[i]);
+       qDebug()<<priFile.fileName();
+       if(!priFile.open(QFile::ReadOnly))
            qDebug()<<"open failure";
        else
            qDebug()<<"open success";
@@ -178,7 +188,7 @@ void qjdTask::setHistoryTableData()
         isWholeProgress=false;
 //        isLeftTime=false;
 
-        QXmlStreamReader stream(&fp2);
+        QXmlStreamReader stream(&priFile);
         while (!stream.atEnd())
         {
             int a= stream.readNext();
@@ -250,11 +260,6 @@ void qjdTask::setHistoryTableData()
                     allProgress=text;
                     isWholeProgress=false;
                 }
-//                if(isLeftTime==true)
-//                {
-//                    endtime=text;
-//                    isLeftTime=false;
-//                }
             }
         }
         if (stream.hasError())
@@ -270,44 +275,132 @@ void qjdTask::setHistoryTableData()
        ui->historyTable->setCellWidget(i,3,itemPgbar);
        ui->historyTable->setItem(i,4,itemStatement);
 
-       fp2.close();
+       priFile.close();
    }
    ui->historyTable->resizeColumnsToContents();
 }
 
-void qjdTask::setHistoryTablePrivateData()
-{
-    fHisArgu.setFileName(path[selectRowNum]);
-    if(!fHisArgu.open(QFile::ReadOnly))
-        qDebug()<<"open failure";
-    else
-        qDebug()<<"open success";
-    /// 需要点击才显示相关参数
-    QByteArray argu=fHisArgu.read(1620);
-    ui->historyArguBrowser->setText(argu);
-
-    fHisArgu.close();
-}
+/// 设置历史作业界面中的显示参数
+//void qjdTask::setHistoryTableArguments()
+//{}
 
 void qjdTask::on_historyTable_clicked(QModelIndex index)
 {
     selectRowNum=index.row();
-    setHistoryTablePrivateData();
+//    setHistoryTableArguments();
+    fHisArgu.setFileName(argPath[selectRowNum]);
+    if(!fHisArgu.open(QFile::ReadOnly))
+        qDebug()<<"open histable argu failure";
+    else
+        qDebug()<<"open histable argu success";
+    /// 需要点击才显示相关参数
+    // TODO:现在仍然是全部显示，没有任何的解析，最好通过解析参数文件，自行生成界面！！！！
+    bool isArgu=false;
+    QVector<QString> arguName;
+    QVector<QString> arguMents;
+    QXmlStreamReader stream(&fHisArgu);
+    while (!stream.atEnd())
+    {
+        int a= stream.readNext();
+
+        if(a==4)
+        {
+            /// 无法读取后面的链接
+            qDebug()<<"a=4 stream.name"<<stream.name();      // 难办，开头项也是在这里被读出，不太好处理
+            QString name=stream.name().toString();
+            if(name.isEmpty()==false && name.isNull()==false)
+            {
+                isArgu=true;
+                arguName<<name;
+            }
+        }
+        if(a==6)
+        {
+            QString text=stream.text().toString();
+            if(isArgu==true)
+            {
+                isArgu=false;
+                arguMents<<text;
+            }
+        }
+    }
+    if (stream.hasError())
+    {
+          qDebug()<<"do error handling"<<stream.errorString();
+    }
+
+    QByteArray hisArgu;
+    for(int i=0;i<arguName.size();i++)
+    {
+        hisArgu.append(arguName[i]);
+        hisArgu.append(":");
+        hisArgu.append(arguMents[i]);
+        hisArgu.append("\n");
+    }
+    ui->historyArguBrowser->setText(hisArgu);
+
+    fHisArgu.close();
 }
 
+/// 显示参数文件
+// TODO:解析参数文件
 void qjdTask::on_activeTable_clicked(QModelIndex index)
 {
-//    fActArgu.setFileName(path[hashActive.value(hashActive.keys().at(index.row()))]);
-//    if(!fActArgu.open(QFile::ReadOnly))
-//        qDebug()<<"open failure";
-//    else
-//        qDebug()<<"open success";
-//    /// 需要点击才显示相关参数
-//    /// 这个参数文件是不正确的，还需要另外加上一个
-//    QByteArray argu=fActArgu.read(1620);
-//    ui->activeArguBrowser->setText(argu);
+    fActArgu.setFileName(argPath[hashActive.value(hashActive.keys().at(index.row()))]);
+    if(!fActArgu.open(QFile::ReadOnly))
+        qDebug()<<"open act argu failure";
+    else
+        qDebug()<<"open act argu success";
+    /// 需要点击才显示相关参数
+    // TODO:现在仍然是全部显示，没有任何的解析，最好通过解析参数文件，自行生成界面！！！！
+    //    QByteArray argu=fActArgu.readAll();
+    //    ui->activeArguBrowser->setText(argu);
 
-//    fActArgu.close();
+    bool isArgu=false;
+    QVector<QString> arguName;
+    QVector<QString> arguMents;
+    QXmlStreamReader stream(&fActArgu);
+    while (!stream.atEnd())
+    {
+        int a= stream.readNext();
+
+        if(a==4)
+        {
+            /// 无法读取后面的链接
+            qDebug()<<"a=4 stream.name"<<stream.name();      // 难办，开头项也是在这里被读出，不太好处理
+            QString name=stream.name().toString();
+            if(name.isEmpty()==false && name.isNull()==false)
+            {
+                isArgu=true;
+                arguName<<name;
+            }
+        }
+        if(a==6)
+        {
+            QString text=stream.text().toString();
+            if(isArgu==true)
+            {
+                isArgu=false;
+                arguMents<<text;
+            }
+        }
+    }
+    if (stream.hasError())
+    {
+          qDebug()<<"do error handling"<<stream.errorString();
+    }
+
+    QByteArray actArgu;
+    for(int i=0;i<arguName.size();i++)
+    {
+        actArgu.append(arguName[i]);
+        actArgu.append(":");
+        actArgu.append(arguMents[i]);
+        actArgu.append("\n");
+    }
+    ui->activeArguBrowser->setText(actArgu);
+
+    fActArgu.close();
 }
 
 void qjdTask::setActiveTableData()
@@ -330,7 +423,7 @@ void qjdTask::setActiveTableData()
         ui->activeTable->setItem(i,0,itemActivePname);
         ui->activeTable->setItem(i,1,itemActiveStime);
 
-        fActive.setFileName(path[hashActive.value(cmdKeys[i])]);
+        fActive.setFileName(priPath[hashActive.value(cmdKeys[i])]);
         qDebug()<<fActive.fileName();
         if(!fActive.open(QFile::ReadOnly))
             qDebug()<<"open failure";
@@ -350,7 +443,7 @@ void qjdTask::setActiveTableData()
          isWholeProgress=false;
          isLeftTime=false;
 
-         QXmlStreamReader stream(&fp2);
+         QXmlStreamReader stream(&fActive);
          while (!stream.atEnd())
          {
              int a= stream.readNext();
@@ -412,6 +505,7 @@ void qjdTask::setActiveTableData()
                  }
                  if(isStatement==true)
                  {
+                     qDebug()<<"stat IN"<<text;
                      statement=text;
                      isStatement=false;
                  }
@@ -434,7 +528,7 @@ void qjdTask::setActiveTableData()
          }
          if (stream.hasError())
          {
-               qDebug()<<"do error handling";
+               qDebug()<<"do error handling"<<stream.errorString();
          }
 
         fActive.close();
@@ -469,10 +563,10 @@ void qjdTask::on_tabWidget_selected(QString selected)
 void qjdTask::closeEvent(QCloseEvent *)
 {
     //备用
-     if(fp.isOpen())
-         fp.close();
-     if(fp2.isOpen())
-         fp2.close();
+     if(pubFile.isOpen())
+         pubFile.close();
+     if(priFile.isOpen())
+         priFile.close();
      if(fHisArgu.isOpen())
          fHisArgu.close();
      if(fActArgu.isOpen())
@@ -522,7 +616,7 @@ void qjdTask::on_btnRefresh_clicked()
     // 更新all table
     historyTableRowNumber=0;
     pname.clear();
-    path.clear();
+    priPath.clear();
     stime.clear();
     setHistoryTableData();
     ui->historyTable->resizeColumnsToContents();
@@ -536,6 +630,7 @@ void qjdTask::on_btnRefresh_clicked()
 /// 出错管理尝试使用原始try catch来实现
 void qjdTask::restartProgress()
 {
+    /// 未开始完成
     QString program = "/home/xtf/Code/notification/notification";
     QStringList arguments;
     arguments << "-style" << "motif";
@@ -543,12 +638,6 @@ void qjdTask::restartProgress()
     QProcess *myProcess = new QProcess();
     connect(myProcess,SIGNAL(error(QProcess::ProcessError)),this,SLOT(handleError(QProcess::ProcessError)));
     myProcess->start(program,arguments);
-    //    qDebug()<<myProcess->environment();
-    // 返回5==unkown error
-    //    qDebug()<<"error code:"<<myProcess->error()<<myProcess->errorString();      //kill==5 (5下的kill?并没返回kill)
-    //    int errCode=myProcess->error();
-    //    if(errCode==5)
-    //        QMessageBox::warning(this,"Error Occured","Unkown Error");
 
 }
 

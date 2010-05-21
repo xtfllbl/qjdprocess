@@ -2309,22 +2309,41 @@ void qjdProcessMainWindow::on_actionTask_triggered()
     task->show();
 }
 
+//  shit 这里也要用到这个文件。。。 通用性太差
 void qjdProcessMainWindow::setFirstActiveTableData()
 {
     QVector<QString> pname;
-    fp.setFileName("/home/xtf/pathFile.txt");
+    bool isPname=false;
+    fp.setFileName("/home/xtf/pathFile.index");
     fp.open(QFile::ReadOnly);
-    while(!fp.atEnd())
+
+    QXmlStreamReader stream(&fp);
+    while (!stream.atEnd())
     {
-        QString a=fp.readLine(lineWidth);
-        if(a.contains("----------")==true)
+        int a= stream.readNext();
+
+        if(a==4)
         {
-            a=a.right(a.size()-10);
-            a=a.left(a.size()-11);       //因为结尾处有\n，所以要加1
-            pname<<a;
+            QString name=stream.name().toString();
+            if(name=="Process_Name")
+            {
+                isPname=true;
+            }
+        }
+        if(a==6)
+        {
+            QString text=stream.text().toString();
+            if(isPname==true)
+            {
+                pname<<text;
+                isPname=false;
+            }
         }
     }
-
+    if (stream.hasError())
+    {
+          qDebug()<<"do error handling";
+    }
     fp.close();
 
     QVector<QString> tempCmd;

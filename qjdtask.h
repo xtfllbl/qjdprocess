@@ -27,19 +27,23 @@ protected:
     void changeEvent(QEvent *e);
 
 private:
-    QFile fp;
-    QFile fp2;
+    QFile pubFile;
+    QFile priFile;
+    QFile argFile;
+
     QFile fHisArgu;
     QFile fActArgu;
     QFile fActive;
 
     QTimer *timerA;
 //    bool hasTimerA;
-    QVector<QString> path;
+    QVector<QString> priPath;
+    QVector<QString> argPath;
     QVector<QString> stime;
     QVector<QString> pname;
     bool isPname;
-    bool isPath;
+    bool isPriPath;
+    bool isArgPath;
     bool isStime;
 
     bool isCurrentTime;
@@ -71,7 +75,7 @@ private slots:
     void on_tabWidget_selected(QString );
     void on_historyTable_clicked(QModelIndex index);
     void setHistoryTableData();
-    void setHistoryTablePrivateData();
+//    void setHistoryTableArguments();
     void headerHandleH(int);
     void headerHandleA(int);
 
