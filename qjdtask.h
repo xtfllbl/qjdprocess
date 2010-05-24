@@ -7,6 +7,7 @@
 #include <QTimer>
 #include <QProcess>
 #include <QtXml/QXmlStreamReader>
+#include <qjdstarttask.h>
 
 namespace Ui {
     class qjdTask;
@@ -27,6 +28,8 @@ protected:
     void changeEvent(QEvent *e);
 
 private:
+    qjdStartTask *startTask;
+
     QFile pubFile;
     QFile priFile;
     QFile argFile;
@@ -81,6 +84,7 @@ private slots:
 
     void restartProgress();
     void handleError(QProcess::ProcessError);
+
 };
 
 #endif // QJDTASK_H

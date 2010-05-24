@@ -7,17 +7,19 @@
 #define lineWidth 256
 
 qjdTask::qjdTask(QWidget *parent) :
-    QDialog(parent),
-    ui(new Ui::qjdTask)
+        QDialog(parent),
+        ui(new Ui::qjdTask)
 {
     ui->setupUi(this);
+    startTask=new qjdStartTask();
+
     historyTableColNumber=0;
     historyTableRowNumber=0;
     setHistoryTableData();
     timerA=new QTimer(this);
     connect(timerA, SIGNAL(timeout()), this, SLOT(setActiveTableData()));
 
-//    ui->historyTable->setSortingEnabled(true);  //暂时用自带的，现无法获取cell widget中的value
+    //    ui->historyTable->setSortingEnabled(true);  //暂时用自带的，现无法获取cell widget中的value
 
     ui->historyTable->setSortingEnabled(false);       //自动排序关闭
     ui->historyTable->horizontalHeader()->setSortIndicatorShown(true);
@@ -48,133 +50,124 @@ void qjdTask::changeEvent(QEvent *e)
 void qjdTask::setHistoryTableData()
 {
     qDebug()<<"setHistoryTableData();";
-   /// 会发现很多同名的作业，如何区分？
-   // 由于是append，所以为读取到最后一个为准
-   // TODO:文件变大之后非常缓慢，函数需要分离,遍历的事情只要做一边
+    /// 会发现很多同名的作业，如何区分？
+    // 由于是append，所以为读取到最后一个为准
+    /// TODO:文件变大之后非常缓慢，函数需要分离,遍历的事情只要做一边
     /// 这个设置公共文件的路径想办法弄一下
-   pubFile.setFileName("/home/xtf/pathFile.index");
-   pubFile.open(QFile::ReadOnly);
+    pubFile.setFileName("/home/xtf/pathFile.index");
+    pubFile.open(QFile::ReadOnly);
 
-   isPname=false;
-   isPriPath=false;
-   isArgPath=false;
-   isStime=false;
+    isPname=false;
+    isPriPath=false;
+    isArgPath=false;
+    isStime=false;
 
-   QXmlStreamReader stream(&pubFile);
-   while (!stream.atEnd())
-   {
-       int a= stream.readNext();
+    QXmlStreamReader stream(&pubFile);
+    while (!stream.atEnd())
+    {
+        int a= stream.readNext();
 
-       if(a==0)
-       {
-           qDebug()<<"The reader has not yet read anything.\n";
-       }
-       if(a==1)
-       {
-           qDebug()<<"An error has occurred, reported in error() and errorString().\n";
-       }
-       if(a==2)
-       {
-//           qDebug()<<stream.isStandaloneDocument();
-       }
-       if(a==3)
-       {
-//           qDebug()<<stream.isStandaloneDocument();
-       }
-       if(a==4)
-       {
-           /// 无法读取后面的链接
-           QString name=stream.name().toString();
-           if(name=="Process_Name")
-           {
-               isPname=true;
-           }
-           if(name=="Private_File_Path")
-           {
-               isPriPath=true;
-           }
-           if(name=="Argument_File_Path")
-           {
-               isArgPath=true;
-           }
-           if(name=="Start_Time")
-           {
-               isStime=true;
-           }
-       }
-       if(a==5)
-       {
-       }
-       if(a==6)
-       {
-           QString text=stream.text().toString();
-           if(isPname==true)
-           {
-               pname<<text;
-               isPname=false;
-           }
-           if(isPriPath==true)
-           {
-               priPath<<text;
-               isPriPath=false;
-           }
-           if(isArgPath==true)
-           {
-               argPath<<text;
-               isArgPath=false;
-           }
-           if(isStime==true)
-           {
-               stime<<text;
-               isStime=false;
-           }
-       }
-       if(a==7)
-       {
-           qDebug()<<"The reader reports a comment in text().\n";
-       }
-       if(a==8)
-       {
-           qDebug()<<"The reader reports a DTD in text().\n";
-       }
-       if(a==9)
-       {
-           qDebug()<<"The reader reports an entity reference that could not be resolved. \n";
-       }
-       if(a==10)
-       {
-           qDebug()<<"The reader reports a processing instruction in processingInstructionTarget() and processingInstructionData().\n";
-       }
-   }
-   if (stream.hasError())
-   {
-         qDebug()<<"do error handling";
-   }
-   pubFile.close();
-   qDebug()<<pname<<priPath<<argPath<<stime;
+        if(a==0)
+        {
+            qDebug()<<"The reader has not yet read anything.\n";
+        }
+        if(a==1)
+        {
+            qDebug()<<"An error has occurred, reported in error() and errorString().\n";
+        }
+        if(a==4)
+        {
+            /// 无法读取后面的链接
+            QString name=stream.name().toString();
+            if(name=="Process_Name")
+            {
+                isPname=true;
+            }
+            if(name=="Private_File_Path")
+            {
+                isPriPath=true;
+            }
+            if(name=="Argument_File_Path")
+            {
+                isArgPath=true;
+            }
+            if(name=="Start_Time")
+            {
+                isStime=true;
+            }
+        }
+        if(a==5)
+        {
+        }
+        if(a==6)
+        {
+            QString text=stream.text().toString();
+            if(isPname==true)
+            {
+                pname<<text;
+                isPname=false;
+            }
+            if(isPriPath==true)
+            {
+                priPath<<text;
+                isPriPath=false;
+            }
+            if(isArgPath==true)
+            {
+                argPath<<text;
+                isArgPath=false;
+            }
+            if(isStime==true)
+            {
+                stime<<text;
+                isStime=false;
+            }
+        }
+        if(a==7)
+        {
+            qDebug()<<"The reader reports a comment in text().\n";
+        }
+        if(a==8)
+        {
+            qDebug()<<"The reader reports a DTD in text().\n";
+        }
+        if(a==9)
+        {
+            qDebug()<<"The reader reports an entity reference that could not be resolved. \n";
+        }
+        if(a==10)
+        {
+            qDebug()<<"The reader reports a processing instruction in processingInstructionTarget() and processingInstructionData().\n";
+        }
+    }
+    if (stream.hasError())
+    {
+        qDebug()<<"do error handling";
+    }
+    pubFile.close();
+    qDebug()<<pname<<priPath<<argPath<<stime;
 
-   /// ------------------------------------------------------------------------------------------------------------------- ///
-   // 设置行数，不设置会显示不出
-   historyTableRowNumber=priPath.size();
-   ui->historyTable->setRowCount(historyTableRowNumber);
+    /// ------------------------------------------------------------------------------------------------------------------- ///
+    // 设置行数，不设置会显示不出
+    historyTableRowNumber=priPath.size();
+    ui->historyTable->setRowCount(historyTableRowNumber);
 
-   // qDebug()<<path.size();  //大小正确
-   for(int i=0;i<priPath.size();i++)
-   {
-       QTableWidgetItem *itemPname = new QTableWidgetItem(pname[i]);
-       QTableWidgetItem *itemStime = new QTableWidgetItem(stime[i]);
-       ui->historyTable->setItem(i,0,itemPname);
-       ui->historyTable->setItem(i,1,itemStime);
+    for(int i=0;i<priPath.size();i++)
+    {
+        QTableWidgetItem *itemPname = new QTableWidgetItem(pname[i]);
+        QTableWidgetItem *itemStime = new QTableWidgetItem(stime[i]);
+        ui->historyTable->setItem(i,0,itemPname);
+        ui->historyTable->setItem(i,1,itemStime);
 
-       priFile.setFileName(priPath[i]);
-       qDebug()<<priFile.fileName();
-       if(!priFile.open(QFile::ReadOnly))
-           qDebug()<<"open failure";
-       else
-           qDebug()<<"open success";
+        priFile.setFileName(priPath[i]);
+        qDebug()<<priFile.fileName();
+        if(!priFile.open(QFile::ReadOnly))
+            qDebug()<<"open failure";
+        else
+            qDebug()<<"open success";
 
-       /// 需要点击才显示相关参数
-       /// 显示相关信息
+        /// 需要点击才显示相关参数
+        /// 显示相关信息
         statement="";
         progress="";
         curProgress="";
@@ -186,7 +179,6 @@ void qjdTask::setHistoryTableData()
         isStatement=false;
         isCurrentProgress=false;
         isWholeProgress=false;
-//        isLeftTime=false;
 
         QXmlStreamReader stream(&priFile);
         while (!stream.atEnd())
@@ -200,14 +192,6 @@ void qjdTask::setHistoryTableData()
             if(a==1)
             {
                 qDebug()<<"An error has occurred, reported in error() and errorString().\n";
-            }
-            if(a==2)
-            {
-//                qDebug()<<stream.isStandaloneDocument();
-            }
-            if(a==3)
-            {
-//                qDebug()<<stream.isStandaloneDocument();
             }
             if(a==4)
             {
@@ -229,10 +213,6 @@ void qjdTask::setHistoryTableData()
                 {
                     isWholeProgress=true;
                 }
-//                if(name=="Left_Time")
-//                {
-//                    isLeftTime=true;
-//                }
             }
             if(a==5)
             {
@@ -264,20 +244,20 @@ void qjdTask::setHistoryTableData()
         }
         if (stream.hasError())
         {
-              qDebug()<<"do error handling";
+            qDebug()<<"do error handling";
         }
-       QTableWidgetItem *itemEndTime = new QTableWidgetItem(endtime);
-       QProgressBar *itemPgbar=new QProgressBar();
-       QTableWidgetItem *itemStatement=new QTableWidgetItem(statement);
-       itemPgbar->setMaximum(allProgress.toInt());
-       itemPgbar->setValue(curProgress.toInt());
-       ui->historyTable->setItem(i,2,itemEndTime);
-       ui->historyTable->setCellWidget(i,3,itemPgbar);
-       ui->historyTable->setItem(i,4,itemStatement);
+        QTableWidgetItem *itemEndTime = new QTableWidgetItem(endtime);
+        QProgressBar *itemPgbar=new QProgressBar();
+        QTableWidgetItem *itemStatement=new QTableWidgetItem(statement);
+        itemPgbar->setMaximum(allProgress.toInt());
+        itemPgbar->setValue(curProgress.toInt());
+        ui->historyTable->setItem(i,2,itemEndTime);
+        ui->historyTable->setCellWidget(i,3,itemPgbar);
+        ui->historyTable->setItem(i,4,itemStatement);
 
-       priFile.close();
-   }
-   ui->historyTable->resizeColumnsToContents();
+        priFile.close();
+    }
+    ui->historyTable->resizeColumnsToContents();
 }
 
 /// 设置历史作业界面中的显示参数
@@ -287,7 +267,7 @@ void qjdTask::setHistoryTableData()
 void qjdTask::on_historyTable_clicked(QModelIndex index)
 {
     selectRowNum=index.row();
-//    setHistoryTableArguments();
+    //    setHistoryTableArguments();
     fHisArgu.setFileName(argPath[selectRowNum]);
     if(!fHisArgu.open(QFile::ReadOnly))
         qDebug()<<"open histable argu failure";
@@ -326,7 +306,7 @@ void qjdTask::on_historyTable_clicked(QModelIndex index)
     }
     if (stream.hasError())
     {
-          qDebug()<<"do error handling"<<stream.errorString();
+        qDebug()<<"do error handling"<<stream.errorString();
     }
 
     QByteArray hisArgu;
@@ -387,7 +367,7 @@ void qjdTask::on_activeTable_clicked(QModelIndex index)
     }
     if (stream.hasError())
     {
-          qDebug()<<"do error handling"<<stream.errorString();
+        qDebug()<<"do error handling"<<stream.errorString();
     }
 
     QByteArray actArgu;
@@ -408,7 +388,6 @@ void qjdTask::setActiveTableData()
     qDebug()<<"setActiveTableData";
     // 显示名称，开始时间，参数，剩余时间，进度
     QVector<QString> cmdKeys;
-//    QVector<QString> activeArguments;
     QVector<QString> activeStime;
 
     ui->activeTable->setRowCount(hashActive.keys().size());
@@ -431,105 +410,105 @@ void qjdTask::setActiveTableData()
             qDebug()<<"open success";
 
         /// 显示相关信息
-         statement="";
-         progress="";
-         curProgress="";
-         allProgress="";
-         ltime="";
+        statement="";
+        progress="";
+        curProgress="";
+        allProgress="";
+        ltime="";
 
-         isCurrentTime=false;
-         isStatement=false;
-         isCurrentProgress=false;
-         isWholeProgress=false;
-         isLeftTime=false;
+        isCurrentTime=false;
+        isStatement=false;
+        isCurrentProgress=false;
+        isWholeProgress=false;
+        isLeftTime=false;
 
-         QXmlStreamReader stream(&fActive);
-         while (!stream.atEnd())
-         {
-             int a= stream.readNext();
+        QXmlStreamReader stream(&fActive);
+        while (!stream.atEnd())
+        {
+            int a= stream.readNext();
 
-             if(a==0)
-             {
-                 qDebug()<<"The reader has not yet read anything.\n";
-             }
-             if(a==1)
-             {
-                 qDebug()<<"An error has occurred, reported in error() and errorString().\n";
-             }
-             if(a==2)
-             {
-                 qDebug()<<stream.isStandaloneDocument();
-             }
-             if(a==3)
-             {
-                 qDebug()<<stream.isStandaloneDocument();
-             }
-             if(a==4)
-             {
-                 /// 无法读取后面的链接
-                 qDebug()<<"a=4 stream.name"<<stream.name();      // 难办，开头项也是在这里被读出，不太好处理
-                 QString name=stream.name().toString();
-                 if(name=="Current_Time")
-                 {
-                     isCurrentTime=true;
-                 }
-                 if(name=="Statement")
-                 {
-                     isStatement=true;
-                 }
-                 if(name=="Current_Progress")
-                 {
-                     isCurrentProgress=true;
-                 }
-                 if(name=="Whole_Progress")
-                 {
-                     isWholeProgress=true;
-                 }
-                 if(name=="Left_Time")
-                 {
-                     isLeftTime=true;
-                 }
-             }
-             if(a==5)
-             {
-                 qDebug()<<"a=5 stream.name"<<stream.name();
-             }
-             if(a==6)
-             {
-                 qDebug()<<"a=6 stream.text"<<stream.text();
-                 QString text=stream.text().toString();
-                 if(isCurrentTime==true)
-                 {
-                     endtime=text;
-                     isCurrentTime=false;
-                 }
-                 if(isStatement==true)
-                 {
-                     qDebug()<<"stat IN"<<text;
-                     statement=text;
-                     isStatement=false;
-                 }
-                 if(isCurrentProgress==true)
-                 {
-                     curProgress=text;
-                     isCurrentProgress=false;
-                 }
-                 if(isWholeProgress==true)
-                 {
-                     allProgress=text;
-                     isWholeProgress=false;
-                 }
-                 if(isLeftTime==true)
-                 {
-                     ltime=text;
-                     isLeftTime=false;
-                 }
-             }
-         }
-         if (stream.hasError())
-         {
-               qDebug()<<"do error handling"<<stream.errorString();
-         }
+            if(a==0)
+            {
+                qDebug()<<"The reader has not yet read anything.\n";
+            }
+            if(a==1)
+            {
+                qDebug()<<"An error has occurred, reported in error() and errorString().\n";
+            }
+            if(a==2)
+            {
+                qDebug()<<stream.isStandaloneDocument();
+            }
+            if(a==3)
+            {
+                qDebug()<<stream.isStandaloneDocument();
+            }
+            if(a==4)
+            {
+                /// 无法读取后面的链接
+                qDebug()<<"a=4 stream.name"<<stream.name();      // 难办，开头项也是在这里被读出，不太好处理
+                QString name=stream.name().toString();
+                if(name=="Current_Time")
+                {
+                    isCurrentTime=true;
+                }
+                if(name=="Statement")
+                {
+                    isStatement=true;
+                }
+                if(name=="Current_Progress")
+                {
+                    isCurrentProgress=true;
+                }
+                if(name=="Whole_Progress")
+                {
+                    isWholeProgress=true;
+                }
+                if(name=="Left_Time")
+                {
+                    isLeftTime=true;
+                }
+            }
+            if(a==5)
+            {
+                qDebug()<<"a=5 stream.name"<<stream.name();
+            }
+            if(a==6)
+            {
+                qDebug()<<"a=6 stream.text"<<stream.text();
+                QString text=stream.text().toString();
+                if(isCurrentTime==true)
+                {
+                    endtime=text;
+                    isCurrentTime=false;
+                }
+                if(isStatement==true)
+                {
+                    qDebug()<<"stat IN"<<text;
+                    statement=text;
+                    isStatement=false;
+                }
+                if(isCurrentProgress==true)
+                {
+                    curProgress=text;
+                    isCurrentProgress=false;
+                }
+                if(isWholeProgress==true)
+                {
+                    allProgress=text;
+                    isWholeProgress=false;
+                }
+                if(isLeftTime==true)
+                {
+                    ltime=text;
+                    isLeftTime=false;
+                }
+            }
+        }
+        if (stream.hasError())
+        {
+            qDebug()<<"do error handling"<<stream.errorString();
+        }
 
         fActive.close();
 
@@ -563,16 +542,16 @@ void qjdTask::on_tabWidget_selected(QString selected)
 void qjdTask::closeEvent(QCloseEvent *)
 {
     //备用
-     if(pubFile.isOpen())
-         pubFile.close();
-     if(priFile.isOpen())
-         priFile.close();
-     if(fHisArgu.isOpen())
-         fHisArgu.close();
-     if(fActArgu.isOpen())
-         fActArgu.close();
-     if(fActive.isOpen())
-         fActive.close();
+    if(pubFile.isOpen())
+        pubFile.close();
+    if(priFile.isOpen())
+        priFile.close();
+    if(fHisArgu.isOpen())
+        fHisArgu.close();
+    if(fActArgu.isOpen())
+        fActArgu.close();
+    if(fActive.isOpen())
+        fActive.close();
 }
 
 
@@ -588,10 +567,8 @@ void qjdTask::headerHandleH(int colNum)
     qDebug()<<colNum;
     for(int i=0;i<ui->historyTable->rowCount();i++)
     {
-//    qDebug()<<ui->historyTable->item(i,colNum)->text();  //不支持widget，支持item
         QWidget *a=ui->historyTable->cellWidget(i,colNum);  //始终获取不到value
         qDebug()<<a;
-//        QProgressBar *b=a;        // debug 显示为 progressbar，但是无法转换成progressbar
     }
 }
 
@@ -602,10 +579,7 @@ void qjdTask::headerHandleA(int colNum)
 
 void qjdTask::on_btnStart_clicked()
 {
-    qDebug()<<"test start";
-    /// 代参数启动作业？不太好,能接的上只是日志而已
-    // 此处使用QProcess，能有效捕捉crash；自行发作业无法捕捉crash
-    restartProgress();
+    startTask->show();
 }
 
 void qjdTask::on_btnRefresh_clicked()
@@ -627,21 +601,22 @@ void qjdTask::on_btnRefresh_clicked()
 }
 
 /// TODO: 弹出界面，选择启动程序，参数，历史中断文件，参数文件等
-/// 出错管理尝试使用原始try catch来实现
+/// 出错管理尝试使用原始try catch来实现 ？
 void qjdTask::restartProgress()
 {
-    /// 未开始完成
-    QString program = "/home/xtf/Code/notification/notification";
-    QStringList arguments;
-    arguments << "-style" << "motif";
+    /// 未完成
+    //    QString program = "/home/xtf/Code/notification/notification";
+    //    QStringList arguments;
+    //    arguments << "-style" << "motif";
 
-    QProcess *myProcess = new QProcess();
-    connect(myProcess,SIGNAL(error(QProcess::ProcessError)),this,SLOT(handleError(QProcess::ProcessError)));
-    myProcess->start(program,arguments);
-
+    //    QProcess *myProcess = new QProcess();
+    //    connect(myProcess,SIGNAL(error(QProcess::ProcessError)),this,SLOT(handleError(QProcess::ProcessError)));
+    //    myProcess->start(program,arguments);
 }
 
 void qjdTask::handleError(QProcess::ProcessError error)
 {
     qDebug()<<"handle error";
 }
+
+
