@@ -4,11 +4,12 @@
 #include <QListView>
 #include <QModelIndex>
 #include <QDebug>
-#include <QTest>
 #include <QMessageBox>
 
+#include <QProgressBar>
+#include <QProcess>
+
 #define refreshInterval 3000
-#define lineWidth 256
 #define swapInt(x,y,t)((t)=(x),(x)=(y),(y)=(t))
 #define swapString(x,y,t)((t)=(x),(x)=(y),(y)=(t))
 
@@ -132,6 +133,23 @@ qjdProcessMainWindow::qjdProcessMainWindow(QWidget *parent) :
 
     proc->refresh();
     setData();
+
+    setFirstActiveTableData();  /// 用来设置hash表的，既然移植过来了，看看可否去掉或者简化
+    connect(this,SIGNAL(sigRefresh()),this,SLOT(setFirstActiveTableData()));
+    /// --------------------------------------------------------------------------------------------------------///
+//    task=new qjdTask(this);  决定移植到这个类，不用初始化了
+    startTask=new qjdStartTask();
+
+    ui->historyTable->setSortingEnabled(false);       //自动排序关闭
+    ui->historyTable->horizontalHeader()->setSortIndicatorShown(true);
+    ui->historyTable->horizontalHeader()->setClickable(true);
+    ui->activeTable->setSortingEnabled(true);  //暂时用自带的，现无法获取cell widget中的value
+
+    historyTableColNumber=0;
+    historyTableRowNumber=0;
+    setHistoryTableData();
+    timerA=new QTimer();
+    connect(timerA, SIGNAL(timeout()), this, SLOT(setActiveTableData()));
 }
 
 qjdProcessMainWindow::~qjdProcessMainWindow()
@@ -2301,14 +2319,6 @@ void qjdProcessMainWindow::keyPress(QKeyEvent *event)
     }
 }
 
-void qjdProcessMainWindow::on_actionTask_triggered()
-{
-    task=new qjdTask(this);
-    setFirstActiveTableData();
-    connect(task,SIGNAL(sigRefresh()),this,SLOT(setFirstActiveTableData()));
-    task->show();
-}
-
 //  shit 这里也要用到这个文件。。。 通用性太差
 void qjdProcessMainWindow::setFirstActiveTableData()
 {
@@ -2364,7 +2374,532 @@ void qjdProcessMainWindow::setFirstActiveTableData()
     // 使用hash，确保进程对应最新的日志
     for(int i=0;i<tempCmd.size();i++)
     {
-        task->hashActive[tempCmd[i]]=tempPname[i];
+        hashActive[tempCmd[i]]=tempPname[i];
     }
-    task->setActiveTableData();
+    setActiveTableData();
+}
+
+///  读取公共文件
+void qjdProcessMainWindow::setHistoryTableData()
+{
+    qDebug()<<"setHistoryTableData();";
+    /// 会发现很多同名的作业，如何区分？
+    // 由于是append，所以为读取到最后一个为准
+    /// TODO:文件变大之后非常缓慢，函数需要分离,遍历的事情只要做一边
+    /// 这个设置公共文件的路径想办法弄一下
+    pubFile.setFileName("/home/xtf/pathFile.index");
+    pubFile.open(QFile::ReadOnly);
+
+    isPnameJob=false;
+    isPriPathJob=false;
+    isArgPathJob=false;
+    isStimeJob=false;
+
+    QXmlStreamReader stream(&pubFile);
+    while (!stream.atEnd())
+    {
+        int a= stream.readNext();
+
+        if(a==0)
+        {
+            qDebug()<<"The reader has not yet read anything.\n";
+        }
+        if(a==1)
+        {
+            qDebug()<<"An error has occurred, reported in error() and errorString().\n";
+        }
+        if(a==4)
+        {
+            /// 无法读取后面的链接
+            QString name=stream.name().toString();
+            if(name=="Process_Name")
+            {
+                isPnameJob=true;
+            }
+            if(name=="Private_File_Path")
+            {
+                isPriPathJob=true;
+            }
+            if(name=="Argument_File_Path")
+            {
+                isArgPathJob=true;
+            }
+            if(name=="Start_Time")
+            {
+                isStimeJob=true;
+            }
+        }
+        if(a==5)
+        {
+        }
+        if(a==6)
+        {
+            QString text=stream.text().toString();
+            if(isPnameJob==true)
+            {
+                pnameJob<<text;
+                isPnameJob=false;
+            }
+            if(isPriPathJob==true)
+            {
+                priPathJob<<text;
+                isPriPathJob=false;
+            }
+            if(isArgPathJob==true)
+            {
+                argPathJob<<text;
+                isArgPathJob=false;
+            }
+            if(isStimeJob==true)
+            {
+                stimeJob<<text;
+                isStimeJob=false;
+            }
+        }
+        if(a==7)
+        {
+            qDebug()<<"The reader reports a comment in text().\n";
+        }
+        if(a==8)
+        {
+            qDebug()<<"The reader reports a DTD in text().\n";
+        }
+        if(a==9)
+        {
+            qDebug()<<"The reader reports an entity reference that could not be resolved. \n";
+        }
+        if(a==10)
+        {
+            qDebug()<<"The reader reports a processing instruction in processingInstructionTarget() and processingInstructionData().\n";
+        }
+    }
+    if (stream.hasError())
+    {
+        qDebug()<<"do error handling";
+    }
+    pubFile.close();
+    qDebug()<<pnameJob<<priPathJob<<argPathJob<<stimeJob;
+
+    /// ------------------------------------------------------------------------------------------------------------------- ///
+    // 设置行数，不设置会显示不出
+    historyTableRowNumber=priPathJob.size();
+    ui->historyTable->setRowCount(historyTableRowNumber);
+
+    for(int i=0;i<priPathJob.size();i++)
+    {
+        QTableWidgetItem *itemPname = new QTableWidgetItem(pnameJob[i]);
+        QTableWidgetItem *itemStime = new QTableWidgetItem(stimeJob[i]);
+        ui->historyTable->setItem(i,0,itemPname);
+        ui->historyTable->setItem(i,1,itemStime);
+
+        priFile.setFileName(priPathJob[i]);
+        qDebug()<<priFile.fileName();
+        if(!priFile.open(QFile::ReadOnly))
+            qDebug()<<"open failure";
+        else
+            qDebug()<<"open success";
+
+        /// 需要点击才显示相关参数
+        /// 显示相关信息
+        statementJob="";
+        progressJob="";
+        curProgressJob="";
+        allProgressJob="";
+        ltimeJob="";
+        endtimeJob="";
+
+        isCurrentTimeJob=false;
+        isStatementJob=false;
+        isCurrentProgressJob=false;
+        isWholeProgressJob=false;
+
+        QXmlStreamReader stream(&priFile);
+        while (!stream.atEnd())
+        {
+            int a= stream.readNext();
+
+            if(a==0)
+            {
+                qDebug()<<"The reader has not yet read anything.\n";
+            }
+            if(a==1)
+            {
+                qDebug()<<"An error has occurred, reported in error() and errorString().\n";
+            }
+            if(a==4)
+            {
+                /// 无法读取后面的链接
+                QString name=stream.name().toString();
+                if(name=="Current_Time")
+                {
+                    isCurrentTimeJob=true;
+                }
+                if(name=="Statement")
+                {
+                    isStatementJob=true;
+                }
+                if(name=="Current_Progress")
+                {
+                    isCurrentProgressJob=true;
+                }
+                if(name=="Whole_Progress")
+                {
+                    isWholeProgressJob=true;
+                }
+            }
+            if(a==5)
+            {
+            }
+            if(a==6)
+            {
+                QString text=stream.text().toString();
+                if(isCurrentTimeJob==true)
+                {
+                    endtimeJob=text;
+                    isCurrentTimeJob=false;
+                }
+                if(isStatementJob==true)
+                {
+                    statementJob=text;
+                    isStatementJob=false;
+                }
+                if(isCurrentProgressJob==true)
+                {
+                    curProgressJob=text;
+                    isCurrentProgressJob=false;
+                }
+                if(isWholeProgressJob==true)
+                {
+                    allProgressJob=text;
+                    isWholeProgressJob=false;
+                }
+            }
+        }
+        if (stream.hasError())
+        {
+            qDebug()<<"do error handling";
+        }
+        QTableWidgetItem *itemEndTime = new QTableWidgetItem(endtimeJob);
+        QProgressBar *itemPgbar=new QProgressBar();
+        QTableWidgetItem *itemStatement=new QTableWidgetItem(statementJob);
+        itemPgbar->setMaximum(allProgressJob.toInt());
+        itemPgbar->setValue(curProgressJob.toInt());
+        ui->historyTable->setItem(i,2,itemEndTime);
+        ui->historyTable->setCellWidget(i,3,itemPgbar);
+        ui->historyTable->setItem(i,4,itemStatement);
+
+        priFile.close();
+    }
+    ui->historyTable->resizeColumnsToContents();
+}
+
+void qjdProcessMainWindow::on_historyTable_clicked(QModelIndex index)
+{
+    selectRowNum=index.row();
+    //    setHistoryTableArguments();
+    fHisArgu.setFileName(argPathJob[selectRowNum]);
+    if(!fHisArgu.open(QFile::ReadOnly))
+        qDebug()<<"open histable argu failure";
+    else
+        qDebug()<<"open histable argu success";
+    /// 需要点击才显示相关参数
+    // TODO:现在仍然是全部显示，没有任何的解析，最好通过解析参数文件，自行生成界面！！！！
+    bool isArgu=false;
+    QVector<QString> arguName;
+    QVector<QString> arguMents;
+    QXmlStreamReader stream(&fHisArgu);
+    while (!stream.atEnd())
+    {
+        int a= stream.readNext();
+
+        if(a==4)
+        {
+            /// 无法读取后面的链接
+            qDebug()<<"a=4 stream.name"<<stream.name();      // 难办，开头项也是在这里被读出，不太好处理
+            QString name=stream.name().toString();
+            if(name.isEmpty()==false && name.isNull()==false)
+            {
+                isArgu=true;
+                arguName<<name;
+            }
+        }
+        if(a==6)
+        {
+            QString text=stream.text().toString();
+            if(isArgu==true)
+            {
+                isArgu=false;
+                arguMents<<text;
+            }
+        }
+    }
+    if (stream.hasError())
+    {
+        qDebug()<<"do error handling"<<stream.errorString();
+    }
+
+    QByteArray hisArgu;
+    for(int i=0;i<arguName.size();i++)
+    {
+        hisArgu.append(arguName[i]);
+        hisArgu.append(":");
+        hisArgu.append(arguMents[i]);
+        hisArgu.append("\n");
+    }
+    ui->historyArguBrowser->setText(hisArgu);
+
+    fHisArgu.close();
+}
+
+void qjdProcessMainWindow::on_activeTable_clicked(QModelIndex index)
+{
+    fActArgu.setFileName(argPathJob[hashActive.value(hashActive.keys().at(index.row()))]);
+    if(!fActArgu.open(QFile::ReadOnly))
+        qDebug()<<"open act argu failure";
+    else
+        qDebug()<<"open act argu success";
+    /// 需要点击才显示相关参数
+    // TODO:现在仍然是全部显示，没有任何的解析，最好通过解析参数文件，自行生成界面！！！！
+    //    QByteArray argu=fActArgu.readAll();
+    //    ui->activeArguBrowser->setText(argu);
+
+    bool isArgu=false;
+    QVector<QString> arguName;
+    QVector<QString> arguMents;
+    QXmlStreamReader stream(&fActArgu);
+    while (!stream.atEnd())
+    {
+        int a= stream.readNext();
+
+        if(a==4)
+        {
+            /// 无法读取后面的链接
+            qDebug()<<"a=4 stream.name"<<stream.name();      // 难办，开头项也是在这里被读出，不太好处理
+            QString name=stream.name().toString();
+            if(name.isEmpty()==false && name.isNull()==false)
+            {
+                isArgu=true;
+                arguName<<name;
+            }
+        }
+        if(a==6)
+        {
+            QString text=stream.text().toString();
+            if(isArgu==true)
+            {
+                isArgu=false;
+                arguMents<<text;
+            }
+        }
+    }
+    if (stream.hasError())
+    {
+        qDebug()<<"do error handling"<<stream.errorString();
+    }
+
+    QByteArray actArgu;
+    for(int i=0;i<arguName.size();i++)
+    {
+        actArgu.append(arguName[i]);
+        actArgu.append(":");
+        actArgu.append(arguMents[i]);
+        actArgu.append("\n");
+    }
+    ui->activeArguBrowser->setText(actArgu);
+
+    fActArgu.close();
+}
+
+void qjdProcessMainWindow::setActiveTableData()
+{
+    qDebug()<<"setActiveTableData";
+    // 显示名称，开始时间，参数，剩余时间，进度
+    QVector<QString> cmdKeys;
+    QVector<QString> activeStime;
+
+    ui->activeTable->setRowCount(hashActive.keys().size());
+
+    for(int i=0;i<hashActive.keys().size();i++)
+    {
+        cmdKeys.append(hashActive.keys().at(i));
+        activeStime.append(stimeJob[hashActive.value(cmdKeys[i])]);
+
+        QTableWidgetItem *itemActivePname = new QTableWidgetItem(cmdKeys[i]);
+        QTableWidgetItem *itemActiveStime = new QTableWidgetItem(activeStime[i]);
+        ui->activeTable->setItem(i,0,itemActivePname);
+        ui->activeTable->setItem(i,1,itemActiveStime);
+
+        fActive.setFileName(priPathJob[hashActive.value(cmdKeys[i])]);
+        qDebug()<<fActive.fileName();
+        if(!fActive.open(QFile::ReadOnly))
+            qDebug()<<"open failure";
+        else
+            qDebug()<<"open success";
+
+        /// 显示相关信息
+        statement="";
+        progress="";
+        curProgress="";
+        allProgress="";
+        ltime="";
+
+        isCurrentTimeJob=false;
+        isStatementJob=false;
+        isCurrentProgressJob=false;
+        isWholeProgressJob=false;
+        isLeftTimeJob=false;
+
+        QXmlStreamReader stream(&fActive);
+        while (!stream.atEnd())
+        {
+            int a= stream.readNext();
+
+            if(a==0)
+            {
+                qDebug()<<"The reader has not yet read anything.\n";
+            }
+            if(a==1)
+            {
+                qDebug()<<"An error has occurred, reported in error() and errorString().\n";
+            }
+            if(a==2)
+            {
+                qDebug()<<stream.isStandaloneDocument();
+            }
+            if(a==3)
+            {
+                qDebug()<<stream.isStandaloneDocument();
+            }
+            if(a==4)
+            {
+                /// 无法读取后面的链接
+                qDebug()<<"a=4 stream.name"<<stream.name();      // 难办，开头项也是在这里被读出，不太好处理
+                QString name=stream.name().toString();
+                if(name=="Current_Time")
+                {
+                    isCurrentTimeJob=true;
+                }
+                if(name=="Statement")
+                {
+                    isStatementJob=true;
+                }
+                if(name=="Current_Progress")
+                {
+                    isCurrentProgressJob=true;
+                }
+                if(name=="Whole_Progress")
+                {
+                    isWholeProgressJob=true;
+                }
+                if(name=="Left_Time")
+                {
+                    isLeftTimeJob=true;
+                }
+            }
+            if(a==5)
+            {
+                qDebug()<<"a=5 stream.name"<<stream.name();
+            }
+            if(a==6)
+            {
+                qDebug()<<"a=6 stream.text"<<stream.text();
+                QString text=stream.text().toString();
+                if(isCurrentTimeJob==true)
+                {
+                    endtimeJob=text;
+                    isCurrentTimeJob=false;
+                }
+                if(isStatementJob==true)
+                {
+                    qDebug()<<"stat IN"<<text;
+                    statementJob=text;
+                    isStatementJob=false;
+                }
+                if(isCurrentProgressJob==true)
+                {
+                    curProgressJob=text;
+                    isCurrentProgressJob=false;
+                }
+                if(isWholeProgressJob==true)
+                {
+                    allProgressJob=text;
+                    isWholeProgressJob=false;
+                }
+                if(isLeftTimeJob==true)
+                {
+                    ltimeJob=text;
+                    isLeftTimeJob=false;
+                }
+            }
+        }
+        if (stream.hasError())
+        {
+            qDebug()<<"do error handling"<<stream.errorString();
+        }
+
+        fActive.close();
+
+        QTableWidgetItem *itemActiveStat = new QTableWidgetItem(statement);
+        QTableWidgetItem *itemActiveLtime = new QTableWidgetItem(ltime);
+
+        QProgressBar *itemActiveProgress=new QProgressBar();
+        itemActiveProgress->setMaximum(allProgress.toInt());
+        itemActiveProgress->setValue(curProgress.toInt());
+
+        ui->activeTable->setItem(i,2,itemActiveStat);
+        ui->activeTable->setCellWidget(i,3,itemActiveProgress);
+        ui->activeTable->setItem(i,4,itemActiveLtime);
+    }
+    ui->activeTable->resizeColumnsToContents();
+}
+
+void qjdProcessMainWindow::on_tabWidgetJob_selected(QString selected)
+{
+    // 不要尝试在判断中connect，和disconnect,会有逻辑错误
+    if(selected=="Active Task")
+    {
+        timerA->start(3000);
+    }
+    else
+    {
+        timerA->stop();
+    }
+}
+
+void qjdProcessMainWindow::closeEvent(QCloseEvent *)
+{
+    //备用
+    if(pubFile.isOpen())
+        pubFile.close();
+    if(priFile.isOpen())
+        priFile.close();
+    if(fHisArgu.isOpen())
+        fHisArgu.close();
+    if(fActArgu.isOpen())
+        fActArgu.close();
+    if(fActive.isOpen())
+        fActive.close();
+}
+
+void qjdProcessMainWindow::on_btnStart_clicked()
+{
+    startTask->show();
+}
+
+void qjdProcessMainWindow::on_btnRefresh_clicked()
+{
+    /// 刷新界面，比如新增加的作业，去除完成的不在运行作业
+    // 其实就是更新All Table和hashActive
+
+    // 更新all table
+    historyTableRowNumber=0;
+    pnameJob.clear();
+    priPathJob.clear();
+    stimeJob.clear();
+    setHistoryTableData();
+    ui->historyTable->resizeColumnsToContents();
+
+    // 更新active table
+    emit sigRefresh();      //发送信号，在mainwindow中接受并处理
+    ui->activeTable->resizeColumnsToContents();
 }

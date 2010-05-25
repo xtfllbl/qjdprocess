@@ -4,12 +4,17 @@
 #include <QMainWindow>
 #include "qjdproc.h"
 #include "qjdoptions.h"
-#include "qjdtask.h"
 #include <QTimer>
 #include <signal.h>
 #include <errno.h>
 #include <QStandardItemModel>
 #include <QKeyEvent>
+
+#include <QFile>
+#include <QTimer>
+#include <QProcess>
+#include <QtXml/QXmlStreamReader>
+#include <qjdstarttask.h>
 
 namespace Ui {
     class qjdProcessMainWindow;
@@ -28,7 +33,8 @@ public:
 
     qjdoptions *options;
     Proc *proc;
-    qjdTask *task;
+    qjdStartTask *startTask;
+
     QTimer *timer;
     QTimer *reportTimer;
     QMenu *menu;
@@ -165,12 +171,59 @@ public:
     QString allProgress;
     QString ltime;
     bool reportIsShow;
+
+    QHash<QString, int> hashActive;
+
+public slots:
+    void setActiveTableData();
+
+signals:
+    void sigRefresh();
+
 protected:
     void changeEvent(QEvent *e);
+
 private:
     Ui::qjdProcessMainWindow *ui;
+
+    QFile pubFile;
+    QFile priFile;
+    QFile argFile;
+
+    QFile fHisArgu;
+    QFile fActArgu;
+    QFile fActive;
+
+    QTimer *timerA;
+    QVector<QString> priPathJob;
+    QVector<QString> argPathJob;
+    QVector<QString> stimeJob;
+    QVector<QString> pnameJob;
+    bool isPnameJob;
+    bool isPriPathJob;
+    bool isArgPathJob;
+    bool isStimeJob;
+
+    bool isCurrentTimeJob;
+    bool isStatementJob;
+    bool isCurrentProgressJob;
+    bool isWholeProgressJob;
+    bool isLeftTimeJob;
+
+    QVector<QString> argumentsJob;
+    QString statementJob;
+    QString progressJob;
+    QString curProgressJob;
+    QString allProgressJob;
+    QString ltimeJob;
+    QString endtimeJob;
+
+    int historyTableRowNumber;
+    int historyTableColNumber;
+    int selectRowNum;
+    int selectRowNumA;
+
 private slots:
-    void on_actionTask_triggered();
     void on_actionStopRefresh_triggered(bool );
     void on_actionManualRefresh_triggered();
     void keyPress(QKeyEvent *);
@@ -189,8 +242,15 @@ private slots:
     void headerSort();
     void headerHandle(int);
     bool eventFilter(QObject *obj, QEvent *event);
-//   void setTable();
     void setFirstActiveTableData();
 
+/// -----------------------------------------
+    void on_btnRefresh_clicked();
+    void on_btnStart_clicked();
+    void on_activeTable_clicked(QModelIndex index);
+    void on_tabWidgetJob_selected(QString );
+    void on_historyTable_clicked(QModelIndex index);
+    void setHistoryTableData();
+    void closeEvent(QCloseEvent *);
 };
 #endif // QJDPROCESSMAINWINDOW_H
