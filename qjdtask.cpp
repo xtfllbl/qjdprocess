@@ -6,6 +6,7 @@
 #include <QMessageBox>
 #define lineWidth 256
 
+/// TODO:全面移植到主界面中去
 qjdTask::qjdTask(QWidget *parent) :
         QDialog(parent),
         ui(new Ui::qjdTask)
@@ -561,7 +562,6 @@ void qjdTask::on_btnClose_clicked()
 }
 
 /// TODO: Get value of a widget in tablewidget
-// mu zi ga xi
 void qjdTask::headerHandleH(int colNum)
 {
     qDebug()<<colNum;
@@ -605,13 +605,6 @@ void qjdTask::on_btnRefresh_clicked()
 void qjdTask::restartProgress()
 {
     /// 未完成
-    //    QString program = "/home/xtf/Code/notification/notification";
-    //    QStringList arguments;
-    //    arguments << "-style" << "motif";
-
-    //    QProcess *myProcess = new QProcess();
-    //    connect(myProcess,SIGNAL(error(QProcess::ProcessError)),this,SLOT(handleError(QProcess::ProcessError)));
-    //    myProcess->start(program,arguments);
 }
 
 void qjdTask::handleError(QProcess::ProcessError error)
