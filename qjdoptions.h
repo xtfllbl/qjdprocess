@@ -39,7 +39,8 @@ public:
 protected:
     void changeEvent(QEvent *e);
 
-private:
+signals:
+    void sigCloseTab();
 
 public slots:
     void on_btnApplyField_clicked();

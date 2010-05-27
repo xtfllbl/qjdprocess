@@ -224,11 +224,14 @@ private:
     int selectRowNumA;
 
 private slots:
-    void on_actionStopRefresh_triggered(bool );
-    void on_actionManualRefresh_triggered();
+    void on_historyTable_cellDoubleClicked(int row, int column);
+    void on_tableChoose_cellClicked(int row, int column);
+    void on_btnChooseField_pressed();
+    void on_btnRefresh_pressed();
+    void on_actionStart_Process_triggered();
     void keyPress(QKeyEvent *);
     void on_tblMain_pressed(QModelIndex );
-    void on_actionChoose_Field_triggered(bool );
+    void handleChooseField();
     void on_actionExit_triggered();
     void autoRefresh();
     void showContextMenu(QPoint);
@@ -245,12 +248,12 @@ private slots:
     void setFirstActiveTableData();
 
 /// -----------------------------------------
-    void on_btnRefresh_clicked();
-    void on_btnStart_clicked();
     void on_activeTable_clicked(QModelIndex index);
     void on_tabWidgetJob_selected(QString );
     void on_historyTable_clicked(QModelIndex index);
     void setHistoryTableData();
     void closeEvent(QCloseEvent *);
+
+    void closetab(int);
 };
 #endif // QJDPROCESSMAINWINDOW_H

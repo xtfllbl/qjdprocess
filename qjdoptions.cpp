@@ -25,16 +25,6 @@ qjdoptions::qjdoptions(QWidget *parent) :
     wchan=false;
     whichCpu=true;
 
-//    ui->chkCMD->setChecked(true);
-//    ui->chkNice->setChecked(true);
-//    ui->chkStartTime->setChecked(true);
-//    ui->chkMem->setChecked(true);
-//    ui->chkStackSize->setChecked(true);
-//    ui->chkWhichCPU->setChecked(true);
-//    ui->chkPCPU->setChecked(true);
-//    ui->chkUsrName->setChecked(true);
-//    ui->chkStat->setChecked(true);
-//    countCol=10;
     setWindowFlags(Qt::ToolTip);
 }
 
@@ -57,12 +47,12 @@ void qjdoptions::changeEvent(QEvent *e)
 
 void qjdoptions::on_btnApplyField_clicked()
 {
-    handleCheck();
+    emit sigCloseTab();  // 立即发出信号，说明要关闭此tab
 }
 
 void qjdoptions::handleCheck()
 {
-//    qDebug()<<"handle check";
+    qDebug()<<"handle check";
     countCol=0;
     if(ui->chkCMD->isChecked()==true)
     {

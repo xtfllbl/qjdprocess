@@ -138,7 +138,6 @@ qjdProcessMainWindow::qjdProcessMainWindow(QWidget *parent) :
     connect(this,SIGNAL(sigRefresh()),this,SLOT(setFirstActiveTableData()));
     /// --------------------------------------------------------------------------------------------------------///
 //    task=new qjdTask(this);  决定移植到这个类，不用初始化了
-    startTask=new qjdStartTask();
 
     ui->historyTable->setSortingEnabled(false);       //自动排序关闭
     ui->historyTable->horizontalHeader()->setSortIndicatorShown(true);
@@ -150,6 +149,83 @@ qjdProcessMainWindow::qjdProcessMainWindow(QWidget *parent) :
     setHistoryTableData();
     timerA=new QTimer();
     connect(timerA, SIGNAL(timeout()), this, SLOT(setActiveTableData()));
+
+    /// --------------------------------------------------------------------------------------------------------///
+    /// 可以删除一个tab，用处很大
+    /// 准备随时添加tab
+    options=new qjdoptions();
+    connect(options,SIGNAL(sigCloseTab()),this,SLOT(handleChooseField()));
+    if(cmd2==true)
+    {
+        options->ui->chkCMD->setChecked(true);
+    }
+    if(stat2==true)
+    {
+        options->ui->chkStat->setChecked(true);
+    }
+    if(nice2==true)
+    {
+        options->ui->chkNice->setChecked(true);
+    }
+    if(startTime2==true)
+    {
+        options->ui->chkStartTime->setChecked(true);
+    }
+    if(wchan2==true)
+    {
+        options->ui->chkWchan->setChecked(true);
+    }
+    if(whichCpu2==true)
+    {
+        options->ui->chkWhichCPU->setChecked(true);
+    }
+    if(mem2==true)
+    {
+        options->ui->chkMem->setChecked(true);
+    }
+    if(pmem2==true)
+    {
+        options->ui->chkPMem->setChecked(true);
+    }
+    if(sleepAvg2==true)
+    {
+        options->ui->chkSleepAvg->setChecked(true);
+    }
+    if(stackSize2==true)
+    {
+        options->ui->chkStackSize->setChecked(true);
+    }
+    if(ioRead2==true)
+    {
+        options->ui->chkIOREAD->setChecked(true);
+    }
+    if(ioWrite2==true)
+    {
+        options->ui->chkIOWRITE->setChecked(true);
+    }
+    if(pcpu2==true)
+    {
+        options->ui->chkPCPU->setChecked(true);
+    }
+    if(wcpu2==true)
+    {
+        options->ui->chkWCPU->setChecked(true);
+    }
+    if(cmdLine2==true)
+    {
+        options->ui->chkCMDline->setChecked(true);
+    }
+    if(uid2==true)
+    {
+        options->ui->chkUID->setChecked(true);
+    }
+    if(usrName2==true)
+    {
+        options->ui->chkUsrName->setChecked(true);
+    }
+
+    ui->tableChoose->setCurrentCell(0,0);
+    ui->stackedWidget->setCurrentIndex(0);
 }
 
 qjdProcessMainWindow::~qjdProcessMainWindow()
@@ -171,8 +247,11 @@ void qjdProcessMainWindow::changeEvent(QEvent *e)
 
 void qjdProcessMainWindow::setData()
 {
+//    qDebug()<<"setData";
     if(hasOptions==true)
     {
+//        qDebug()<<"has options IN";
+        hasOptions=false;
         colNum=options->countCol;
 
         cmd2=options->cmd;
@@ -645,96 +724,19 @@ void qjdProcessMainWindow::on_actionExit_triggered()
 
 
 
-void qjdProcessMainWindow::on_actionChoose_Field_triggered(bool checked)
+void qjdProcessMainWindow::handleChooseField()
 {
-    if(checked==true)
-    {
-        options=new qjdoptions();
+    qDebug()<<"handle choose field";
+    options->handleCheck();
+    hasOptions=true;
+    ui->tabWidgetSysProcess->removeTab(1);  //删除tab
 
-        if(cmd2==true)
-        {
-            options->ui->chkCMD->setChecked(true);
-        }
-        if(stat2==true)
-        {
-            options->ui->chkStat->setChecked(true);
-        }
-        if(nice2==true)
-        {
-            options->ui->chkNice->setChecked(true);
-        }
-        if(startTime2==true)
-        {
-            options->ui->chkStartTime->setChecked(true);
-        }
-        if(wchan2==true)
-        {
-            options->ui->chkWchan->setChecked(true);
-        }
-        if(whichCpu2==true)
-        {
-            options->ui->chkWhichCPU->setChecked(true);
-        }
-        if(mem2==true)
-        {
-            options->ui->chkMem->setChecked(true);
-        }
-        if(pmem2==true)
-        {
-            options->ui->chkPMem->setChecked(true);
-        }
-        if(sleepAvg2==true)
-        {
-            options->ui->chkSleepAvg->setChecked(true);
-        }
-        if(stackSize2==true)
-        {
-            options->ui->chkStackSize->setChecked(true);
-        }
-        if(ioRead2==true)
-        {
-            options->ui->chkIOREAD->setChecked(true);
-        }
-        if(ioWrite2==true)
-        {
-            options->ui->chkIOWRITE->setChecked(true);
-        }
-        if(pcpu2==true)
-        {
-            options->ui->chkPCPU->setChecked(true);
-        }
-        if(wcpu2==true)
-        {
-            options->ui->chkWCPU->setChecked(true);
-        }
-        if(cmdLine2==true)
-        {
-            options->ui->chkCMDline->setChecked(true);
-        }
-        if(uid2==true)
-        {
-            options->ui->chkUID->setChecked(true);
-        }
-        if(usrName2==true)
-        {
-            options->ui->chkUsrName->setChecked(true);
-        }
-        options->show();
-        options->handleCheck();
-        hasOptions=true;
-    }
-    if(checked==false)
-    {
-        delete options;
-        hasOptions=false;
-        ui->tblMain->resizeColumnsToContents();
-    }
+    ui->tblMain->resizeColumnsToContents();
 }
 
 void qjdProcessMainWindow::on_tblMain_pressed(QModelIndex index)
 {
     index = ui->tblMain->indexAt(ui->tblMain->viewport()->mapFromGlobal(QCursor::pos()));
-    //    index = qjdtable->indexAt(qjdtable->viewport()->mapFromGlobal(QCursor::pos()));
     selectRow=index.row();
     selectCol=index.column();
 
@@ -2229,31 +2231,6 @@ void qjdProcessMainWindow::headerHandle(int colNum)
     setData();
 }
 
-void qjdProcessMainWindow::on_actionManualRefresh_triggered()
-{
-    machineRefresh=true;
-    vectorClear();
-    proc->refresh();
-    if(flagSort==true)
-    {
-        headerSort();
-        setSortData();
-    }
-    setData();
-}
-
-void qjdProcessMainWindow::on_actionStopRefresh_triggered(bool checked)
-{
-    if(checked)
-    {
-        timer->stop();
-    }
-    if(checked==false)
-    {
-        timer->start(refreshInterval);
-    }
-}
-
 bool qjdProcessMainWindow::eventFilter(QObject *obj, QEvent *event)
 {
     if (event->type() == QEvent::KeyPress)
@@ -2372,10 +2349,14 @@ void qjdProcessMainWindow::setFirstActiveTableData()
     }
 
     // 使用hash，确保进程对应最新的日志
+    hashActive.clear();
+    ui->activeArguBrowser->clear();
     for(int i=0;i<tempCmd.size();i++)
     {
         hashActive[tempCmd[i]]=tempPname[i];
     }
+
+    /// 设置完毕后才调用设置表格数据
     setActiveTableData();
 }
 
@@ -2718,7 +2699,6 @@ void qjdProcessMainWindow::setActiveTableData()
     QVector<QString> activeStime;
 
     ui->activeTable->setRowCount(hashActive.keys().size());
-
     for(int i=0;i<hashActive.keys().size();i++)
     {
         cmdKeys.append(hashActive.keys().at(i));
@@ -2737,11 +2717,11 @@ void qjdProcessMainWindow::setActiveTableData()
             qDebug()<<"open success";
 
         /// 显示相关信息
-        statement="";
-        progress="";
-        curProgress="";
-        allProgress="";
-        ltime="";
+        statementJob="";
+        progressJob="";
+        curProgressJob="";
+        allProgressJob="";
+        ltimeJob="";
 
         isCurrentTimeJob=false;
         isStatementJob=false;
@@ -2839,12 +2819,12 @@ void qjdProcessMainWindow::setActiveTableData()
 
         fActive.close();
 
-        QTableWidgetItem *itemActiveStat = new QTableWidgetItem(statement);
-        QTableWidgetItem *itemActiveLtime = new QTableWidgetItem(ltime);
+        QTableWidgetItem *itemActiveStat = new QTableWidgetItem(statementJob);
+        QTableWidgetItem *itemActiveLtime = new QTableWidgetItem(ltimeJob);
 
         QProgressBar *itemActiveProgress=new QProgressBar();
-        itemActiveProgress->setMaximum(allProgress.toInt());
-        itemActiveProgress->setValue(curProgress.toInt());
+        itemActiveProgress->setMaximum(allProgressJob.toInt());
+        itemActiveProgress->setValue(curProgressJob.toInt());
 
         ui->activeTable->setItem(i,2,itemActiveStat);
         ui->activeTable->setCellWidget(i,3,itemActiveProgress);
@@ -2881,17 +2861,20 @@ void qjdProcessMainWindow::closeEvent(QCloseEvent *)
         fActive.close();
 }
 
-void qjdProcessMainWindow::on_btnStart_clicked()
+void qjdProcessMainWindow::on_actionStart_Process_triggered()
 {
-    startTask->show();
+    startTask=new qjdStartTask();
+    ui->stackedWidget->setCurrentIndex(1);
+    ui->tabWidgetJob->insertTab(2,startTask,"Start Task");
+    ui->tabWidgetJob->setCurrentIndex(2);
+    ui->tabWidgetJob->setTabsClosable(true);
+    connect(ui->tabWidgetJob,SIGNAL(tabCloseRequested(int)),this,SLOT(closetab(int)));
 }
 
-void qjdProcessMainWindow::on_btnRefresh_clicked()
+void qjdProcessMainWindow::on_btnRefresh_pressed()
 {
     /// 刷新界面，比如新增加的作业，去除完成的不在运行作业
     // 其实就是更新All Table和hashActive
-
-    // 更新all table
     historyTableRowNumber=0;
     pnameJob.clear();
     priPathJob.clear();
@@ -2902,4 +2885,43 @@ void qjdProcessMainWindow::on_btnRefresh_clicked()
     // 更新active table
     emit sigRefresh();      //发送信号，在mainwindow中接受并处理
     ui->activeTable->resizeColumnsToContents();
+}
+
+void qjdProcessMainWindow::on_btnChooseField_pressed()
+{
+    ui->tabWidgetSysProcess->insertTab(1,options,"Choose Field");
+    ui->tabWidgetSysProcess->setCurrentIndex(1);
+}
+
+void qjdProcessMainWindow::on_tableChoose_cellClicked(int row, int column)
+{
+    if(row==0)
+    {
+        ui->stackedWidget->setCurrentIndex(0);
+    }
+    if(row==1)
+    {
+        ui->stackedWidget->setCurrentIndex(1);
+    }
+}
+
+void qjdProcessMainWindow::on_historyTable_cellDoubleClicked(int row, int column)
+{
+    qDebug()<<row<<column;
+}
+
+void qjdProcessMainWindow::closetab(int index)
+{
+    qDebug()<<index;
+    if(index==2)
+    {
+        ui->tabWidgetJob->removeTab(index);
+    }
+    else
+    {
+        QMessageBox::warning(this,"Can`t do that","Sorry for the unconvience, but we can`t let you close it.");
+        return;
+    }
+    ui->tabWidgetJob->setTabsClosable(false);
+    disconnect(ui->tabWidgetJob,SIGNAL(tabCloseRequested(int)),this,SLOT(closetab(int)));
 }

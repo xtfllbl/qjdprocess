@@ -10,7 +10,11 @@ qjdStartTask::qjdStartTask(QWidget *parent) :
 
     process = new QProcess(this);
     connect(process,SIGNAL(error(QProcess::ProcessError)),this,SLOT(processError(QProcess::ProcessError)));
-    connect(process,SIGNAL(readyReadStandardError()),this,SLOT(readOutput()));}
+    connect(process,SIGNAL(readyReadStandardError()),this,SLOT(readOutput()));
+
+    // 设置窗口有最小化和关闭按钮
+    setWindowFlags(Qt::WindowMinimizeButtonHint|Qt::WindowCloseButtonHint);
+}
 
 qjdStartTask::~qjdStartTask()
 {
@@ -41,6 +45,7 @@ void qjdStartTask::on_btnStart_pressed()
     QString fileName=ui->lineFileName->text();
     process->start(fileName);
     ui->lblStat->setText("Already Start");
+//    setWindowState(Qt::WindowMinimized); //无用
 }
 
 void qjdStartTask::on_btnStop_pressed()
