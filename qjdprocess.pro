@@ -16,12 +16,15 @@ SOURCES += main.cpp \
     qjdproc.cpp \
     qjdmisc.cpp \
     qjdoptions.cpp \
-    qjdstarttask.cpp
+    qjdstarttask.cpp \
+    qjdrestarttask.cpp
 HEADERS += qjdprocessmainwindow.h \
     qjdproc.h \
     config.h \
     qjdoptions.h \
-    qjdstarttask.h
+    qjdstarttask.h \
+    qjdrestarttask.h
 FORMS += qjdprocessmainwindow.ui \
     qjdoptions.ui \
-    qjdstarttask.ui
+    qjdstarttask.ui \
+    qjdrestarttask.ui

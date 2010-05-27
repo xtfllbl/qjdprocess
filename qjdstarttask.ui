@@ -51,16 +51,35 @@
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="btnStart">
+      <widget class="QPushButton" name="btnStop">
        <property name="text">
-        <string>Start</string>
+        <string>Stop</string>
+       </property>
+       <property name="icon">
+        <iconset>
+         <normaloff>../../soft/pretty/iRaveH20 3 Lights Edition/48x48/actions/gtk-media-record.png</normaloff>../../soft/pretty/iRaveH20 3 Lights Edition/48x48/actions/gtk-media-record.png</iconset>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="btnStop">
+      <widget class="QPushButton" name="btnStart">
        <property name="text">
-        <string>Stop</string>
+        <string>Start</string>
+       </property>
+       <property name="icon">
+        <iconset>
+         <normaloff>../../soft/pretty/iRaveH20 3 Lights Edition/48x48/actions/gtk-media-play-ltr.png</normaloff>../../soft/pretty/iRaveH20 3 Lights Edition/48x48/actions/gtk-media-play-ltr.png</iconset>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="btnClose">
+       <property name="text">
+        <string>Close</string>
+       </property>
+       <property name="icon">
+        <iconset>
+         <normaloff>../../soft/pretty/iRaveH20 3 Lights Edition/48x48/actions/gtk-remove.png</normaloff>../../soft/pretty/iRaveH20 3 Lights Edition/48x48/actions/gtk-remove.png</iconset>
        </property>
       </widget>
      </item>

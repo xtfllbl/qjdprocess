@@ -134,8 +134,7 @@ qjdProcessMainWindow::qjdProcessMainWindow(QWidget *parent) :
     proc->refresh();
     setData();
 
-    setFirstActiveTableData();  /// 用来设置hash表的，既然移植过来了，看看可否去掉或者简化
-    connect(this,SIGNAL(sigRefresh()),this,SLOT(setFirstActiveTableData()));
+
     /// --------------------------------------------------------------------------------------------------------///
 //    task=new qjdTask(this);  决定移植到这个类，不用初始化了
 
@@ -148,8 +147,8 @@ qjdProcessMainWindow::qjdProcessMainWindow(QWidget *parent) :
     historyTableRowNumber=0;
     setHistoryTableData();
     timerA=new QTimer();
-    connect(timerA, SIGNAL(timeout()), this, SLOT(setActiveTableData()));
-
+    connect(timerA, SIGNAL(timeout()), this, SLOT(refreshTable()));
+    setFirstActiveTableData();  /// 用来设置hash表的，既然移植过来了，看看可否去掉或者简化
     /// --------------------------------------------------------------------------------------------------------///
     /// 可以删除一个tab，用处很大
     /// 准备随时添加tab
@@ -2299,6 +2298,7 @@ void qjdProcessMainWindow::keyPress(QKeyEvent *event)
 //  shit 这里也要用到这个文件。。。 通用性太差
 void qjdProcessMainWindow::setFirstActiveTableData()
 {
+    qDebug()<<"setFirstActiveTableData";
     QVector<QString> pname;
     bool isPname=false;
     fp.setFileName("/home/xtf/pathFile.index");
@@ -2355,7 +2355,6 @@ void qjdProcessMainWindow::setFirstActiveTableData()
     {
         hashActive[tempCmd[i]]=tempPname[i];
     }
-
     /// 设置完毕后才调用设置表格数据
     setActiveTableData();
 }
@@ -2437,29 +2436,13 @@ void qjdProcessMainWindow::setHistoryTableData()
                 isStimeJob=false;
             }
         }
-        if(a==7)
-        {
-            qDebug()<<"The reader reports a comment in text().\n";
-        }
-        if(a==8)
-        {
-            qDebug()<<"The reader reports a DTD in text().\n";
-        }
-        if(a==9)
-        {
-            qDebug()<<"The reader reports an entity reference that could not be resolved. \n";
-        }
-        if(a==10)
-        {
-            qDebug()<<"The reader reports a processing instruction in processingInstructionTarget() and processingInstructionData().\n";
-        }
     }
     if (stream.hasError())
     {
         qDebug()<<"do error handling";
     }
     pubFile.close();
-    qDebug()<<pnameJob<<priPathJob<<argPathJob<<stimeJob;
+//    qDebug()<<pnameJob<<priPathJob<<argPathJob<<stimeJob;
 
     /// ------------------------------------------------------------------------------------------------------------------- ///
     // 设置行数，不设置会显示不出
@@ -2474,11 +2457,9 @@ void qjdProcessMainWindow::setHistoryTableData()
         ui->historyTable->setItem(i,1,itemStime);
 
         priFile.setFileName(priPathJob[i]);
-        qDebug()<<priFile.fileName();
+//        qDebug()<<priFile.fileName();
         if(!priFile.open(QFile::ReadOnly))
             qDebug()<<"open failure";
-        else
-            qDebug()<<"open success";
 
         /// 需要点击才显示相关参数
         /// 显示相关信息
@@ -2596,7 +2577,7 @@ void qjdProcessMainWindow::on_historyTable_clicked(QModelIndex index)
         if(a==4)
         {
             /// 无法读取后面的链接
-            qDebug()<<"a=4 stream.name"<<stream.name();      // 难办，开头项也是在这里被读出，不太好处理
+//            qDebug()<<"a=4 stream.name"<<stream.name();      // 难办，开头项也是在这里被读出，不太好处理
             QString name=stream.name().toString();
             if(name.isEmpty()==false && name.isNull()==false)
             {
@@ -2655,7 +2636,7 @@ void qjdProcessMainWindow::on_activeTable_clicked(QModelIndex index)
         if(a==4)
         {
             /// 无法读取后面的链接
-            qDebug()<<"a=4 stream.name"<<stream.name();      // 难办，开头项也是在这里被读出，不太好处理
+//            qDebug()<<"a=4 stream.name"<<stream.name();      // 难办，开头项也是在这里被读出，不太好处理
             QString name=stream.name().toString();
             if(name.isEmpty()==false && name.isNull()==false)
             {
@@ -2702,19 +2683,20 @@ void qjdProcessMainWindow::setActiveTableData()
     for(int i=0;i<hashActive.keys().size();i++)
     {
         cmdKeys.append(hashActive.keys().at(i));
-        activeStime.append(stimeJob[hashActive.value(cmdKeys[i])]);
+        /// 错误多发地带
+        qDebug()<<stimeJob.size()<<hashActive.value(cmdKeys[i]);
+        qDebug()<<stimeJob[hashActive.value(cmdKeys[i])];
 
+        activeStime.append(stimeJob[hashActive.value(cmdKeys[i])]);
         QTableWidgetItem *itemActivePname = new QTableWidgetItem(cmdKeys[i]);
         QTableWidgetItem *itemActiveStime = new QTableWidgetItem(activeStime[i]);
         ui->activeTable->setItem(i,0,itemActivePname);
         ui->activeTable->setItem(i,1,itemActiveStime);
 
         fActive.setFileName(priPathJob[hashActive.value(cmdKeys[i])]);
-        qDebug()<<fActive.fileName();
+//        qDebug()<<fActive.fileName();
         if(!fActive.open(QFile::ReadOnly))
             qDebug()<<"open failure";
-        else
-            qDebug()<<"open success";
 
         /// 显示相关信息
         statementJob="";
@@ -2744,16 +2726,16 @@ void qjdProcessMainWindow::setActiveTableData()
             }
             if(a==2)
             {
-                qDebug()<<stream.isStandaloneDocument();
+//                qDebug()<<stream.isStandaloneDocument();
             }
             if(a==3)
             {
-                qDebug()<<stream.isStandaloneDocument();
+//                qDebug()<<stream.isStandaloneDocument();
             }
             if(a==4)
             {
                 /// 无法读取后面的链接
-                qDebug()<<"a=4 stream.name"<<stream.name();      // 难办，开头项也是在这里被读出，不太好处理
+//                qDebug()<<"a=4 stream.name"<<stream.name();      // 难办，开头项也是在这里被读出，不太好处理
                 QString name=stream.name().toString();
                 if(name=="Current_Time")
                 {
@@ -2778,11 +2760,11 @@ void qjdProcessMainWindow::setActiveTableData()
             }
             if(a==5)
             {
-                qDebug()<<"a=5 stream.name"<<stream.name();
+//                qDebug()<<"a=5 stream.name"<<stream.name();
             }
             if(a==6)
             {
-                qDebug()<<"a=6 stream.text"<<stream.text();
+//                qDebug()<<"a=6 stream.text"<<stream.text();
                 QString text=stream.text().toString();
                 if(isCurrentTimeJob==true)
                 {
@@ -2791,7 +2773,6 @@ void qjdProcessMainWindow::setActiveTableData()
                 }
                 if(isStatementJob==true)
                 {
-                    qDebug()<<"stat IN"<<text;
                     statementJob=text;
                     isStatementJob=false;
                 }
@@ -2867,25 +2848,9 @@ void qjdProcessMainWindow::on_actionStart_Process_triggered()
     ui->stackedWidget->setCurrentIndex(1);
     ui->tabWidgetJob->insertTab(2,startTask,"Start Task");
     ui->tabWidgetJob->setCurrentIndex(2);
-    ui->tabWidgetJob->setTabsClosable(true);
-    connect(ui->tabWidgetJob,SIGNAL(tabCloseRequested(int)),this,SLOT(closetab(int)));
+    connect(startTask,SIGNAL(sigCloseStartTask()),this,SLOT(closetab()));
 }
 
-void qjdProcessMainWindow::on_btnRefresh_pressed()
-{
-    /// 刷新界面，比如新增加的作业，去除完成的不在运行作业
-    // 其实就是更新All Table和hashActive
-    historyTableRowNumber=0;
-    pnameJob.clear();
-    priPathJob.clear();
-    stimeJob.clear();
-    setHistoryTableData();
-    ui->historyTable->resizeColumnsToContents();
-
-    // 更新active table
-    emit sigRefresh();      //发送信号，在mainwindow中接受并处理
-    ui->activeTable->resizeColumnsToContents();
-}
 
 void qjdProcessMainWindow::on_btnChooseField_pressed()
 {
@@ -2910,18 +2875,26 @@ void qjdProcessMainWindow::on_historyTable_cellDoubleClicked(int row, int column
     qDebug()<<row<<column;
 }
 
-void qjdProcessMainWindow::closetab(int index)
+void qjdProcessMainWindow::closetab()
 {
-    qDebug()<<index;
-    if(index==2)
-    {
-        ui->tabWidgetJob->removeTab(index);
-    }
-    else
-    {
-        QMessageBox::warning(this,"Can`t do that","Sorry for the unconvience, but we can`t let you close it.");
-        return;
-    }
-    ui->tabWidgetJob->setTabsClosable(false);
-    disconnect(ui->tabWidgetJob,SIGNAL(tabCloseRequested(int)),this,SLOT(closetab(int)));
+    ui->tabWidgetJob->removeTab(2);
+    disconnect(startTask,SIGNAL(sigCloseStartTask()),this,SLOT(closetab()));
+
+    delete startTask;
+}
+
+void qjdProcessMainWindow::refreshTable()
+{
+    /// 刷新界面，比如新增加的作业，去除完成的不在运行作业
+    // 其实就是更新All Table和hashActive
+    historyTableRowNumber=0;
+    pnameJob.clear();
+    priPathJob.clear();
+    stimeJob.clear();
+    setHistoryTableData();
+    ui->historyTable->resizeColumnsToContents();
+    ui->activeTable->resizeColumnsToContents();
+
+    setHistoryTableData();
+    setFirstActiveTableData();
 }

@@ -83,3 +83,8 @@ void qjdStartTask::readOutput()
 //    qDebug()<<"stdout::"<<process->readAllStandardOutput();
     qDebug()<<"stderr::"<<process->readAllStandardError();
 }
+
+void qjdStartTask::on_btnClose_pressed()
+{
+    emit sigCloseStartTask();
+}

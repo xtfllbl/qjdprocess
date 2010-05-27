@@ -23,7 +23,10 @@ private:
     Ui::qjdStartTask *ui;
 
     QProcess *process;
+signals:
+    void sigCloseStartTask();
 private slots:
+    void on_btnClose_pressed();
     void on_btnStop_pressed();
     void on_btnStart_pressed();
     void on_btnBrowse_pressed();

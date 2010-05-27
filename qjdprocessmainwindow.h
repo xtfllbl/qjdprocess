@@ -178,7 +178,6 @@ public slots:
     void setActiveTableData();
 
 signals:
-    void sigRefresh();
 
 protected:
     void changeEvent(QEvent *e);
@@ -227,7 +226,6 @@ private slots:
     void on_historyTable_cellDoubleClicked(int row, int column);
     void on_tableChoose_cellClicked(int row, int column);
     void on_btnChooseField_pressed();
-    void on_btnRefresh_pressed();
     void on_actionStart_Process_triggered();
     void keyPress(QKeyEvent *);
     void on_tblMain_pressed(QModelIndex );
@@ -254,6 +252,7 @@ private slots:
     void setHistoryTableData();
     void closeEvent(QCloseEvent *);
 
-    void closetab(int);
+    void closetab();
+    void refreshTable();
 };
 #endif // QJDPROCESSMAINWINDOW_H

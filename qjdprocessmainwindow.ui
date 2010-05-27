@@ -421,6 +421,9 @@ selection-background-color: qlineargradient(spread:pad, x1:1, y1:0, x2:0.623398,
             </item>
             <item row="3" column="1">
              <widget class="QPushButton" name="btnRestart">
+              <property name="enabled">
+               <bool>false</bool>
+              </property>
               <property name="minimumSize">
                <size>
                 <width>150</width>
@@ -498,40 +501,6 @@ selection-background-color: qlineargradient(spread:pad, x1:1, y1:0, x2:0.623398,
             </item>
             <item row="2" column="0" colspan="2">
              <widget class="QTextBrowser" name="activeArguBrowser"/>
-            </item>
-            <item row="3" column="1">
-             <layout class="QHBoxLayout" name="horizontalLayout">
-              <item>
-               <spacer name="horizontalSpacer_2">
-                <property name="orientation">
-                 <enum>Qt::Horizontal</enum>
-                </property>
-                <property name="sizeHint" stdset="0">
-                 <size>
-                  <width>88</width>
-                  <height>20</height>
-                 </size>
-                </property>
-               </spacer>
-              </item>
-              <item>
-               <widget class="QPushButton" name="btnRefresh">
-                <property name="minimumSize">
-                 <size>
-                  <width>150</width>
-                  <height>0</height>
-                 </size>
-                </property>
-                <property name="text">
-                 <string>Refresh</string>
-                </property>
-                <property name="icon">
-                 <iconset>
-                  <normaloff>../../soft/pretty/iRaveH20 3 Lights Edition/48x48/actions/gtk-refresh.png</normaloff>../../soft/pretty/iRaveH20 3 Lights Edition/48x48/actions/gtk-refresh.png</iconset>
-                </property>
-               </widget>
-              </item>
-             </layout>
             </item>
            </layout>
           </widget>
