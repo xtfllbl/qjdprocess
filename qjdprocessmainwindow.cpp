@@ -225,6 +225,11 @@ qjdProcessMainWindow::qjdProcessMainWindow(QWidget *parent) :
 
     ui->tableChoose->setCurrentCell(0,0);
     ui->stackedWidget->setCurrentIndex(0);
+    countRestartTimes=0;
+
+    ui->tableChoose->hideRow(2);
+    // 放在下面connect，如果不disconnect，会产生多次连接，直接导致槽函数的多次调用
+    connect(ui->tabWidgetLog,SIGNAL(tabCloseRequested(int)),this,SLOT(closeTabLog(int)));
 }
 
 qjdProcessMainWindow::~qjdProcessMainWindow()
@@ -406,7 +411,6 @@ void qjdProcessMainWindow::setData()
         aIoread=proc->ioreadVector.at(i);//
         aIowrite=proc->iowriteVector.at(i);//
         aPcpu=QString::number(proc->pcpuVector.at(i),10);
-        //        qDebug()<<aPcpu;
         aWcpu.sprintf("%f",proc->wcpuVector.at(i));//
         aCmdLine=proc->cmdlineVector.at(i);  //
         aUid=QString::number(proc->uidVector.at(i),10);//
@@ -2373,6 +2377,7 @@ void qjdProcessMainWindow::setHistoryTableData()
     isPnameJob=false;
     isPriPathJob=false;
     isArgPathJob=false;
+    isLogPathJob=false;
     isStimeJob=false;
 
     QXmlStreamReader stream(&pubFile);
@@ -2404,6 +2409,10 @@ void qjdProcessMainWindow::setHistoryTableData()
             {
                 isArgPathJob=true;
             }
+            if(name=="Log_File_Path")
+            {
+                isLogPathJob=true;
+            }
             if(name=="Start_Time")
             {
                 isStimeJob=true;
@@ -2429,6 +2438,11 @@ void qjdProcessMainWindow::setHistoryTableData()
             {
                 argPathJob<<text;
                 isArgPathJob=false;
+            }
+            if(isLogPathJob==true)
+            {
+                logPathJob<<text;
+                isLogPathJob=false;
             }
             if(isStimeJob==true)
             {
@@ -2611,6 +2625,9 @@ void qjdProcessMainWindow::on_historyTable_clicked(QModelIndex index)
     ui->historyArguBrowser->setText(hisArgu);
 
     fHisArgu.close();
+
+    ui->btnRestart->setEnabled(true);   //开启restart
+    ui->btnShowLog->setEnabled(true);
 }
 
 void qjdProcessMainWindow::on_activeTable_clicked(QModelIndex index)
@@ -2845,14 +2862,17 @@ void qjdProcessMainWindow::closeEvent(QCloseEvent *)
 void qjdProcessMainWindow::on_actionStart_Process_triggered()
 {
     startTask=new qjdStartTask();
+    startTask->setAttribute(Qt::WA_DeleteOnClose);  //添加这句以备删除,程序仍然会崩溃
+
     ui->stackedWidget->setCurrentIndex(1);
+    ui->tableChoose->setCurrentCell(1,0);
     ui->tabWidgetJob->insertTab(2,startTask,"Start Task");
     ui->tabWidgetJob->setCurrentIndex(2);
-    connect(startTask,SIGNAL(sigCloseStartTask()),this,SLOT(closetab()));
+    connect(startTask,SIGNAL(sigCloseStartTask()),this,SLOT(closeTabStartTask()));
 }
 
 
-void qjdProcessMainWindow::on_btnChooseField_pressed()
+void qjdProcessMainWindow::on_btnChooseField_clicked()
 {
     ui->tabWidgetSysProcess->insertTab(1,options,"Choose Field");
     ui->tabWidgetSysProcess->setCurrentIndex(1);
@@ -2868,6 +2888,10 @@ void qjdProcessMainWindow::on_tableChoose_cellClicked(int row, int column)
     {
         ui->stackedWidget->setCurrentIndex(1);
     }
+    if(row==2)
+    {
+        ui->stackedWidget->setCurrentIndex(2);
+    }
 }
 
 void qjdProcessMainWindow::on_historyTable_cellDoubleClicked(int row, int column)
@@ -2875,12 +2899,15 @@ void qjdProcessMainWindow::on_historyTable_cellDoubleClicked(int row, int column
     qDebug()<<row<<column;
 }
 
-void qjdProcessMainWindow::closetab()
+void qjdProcessMainWindow::closeTabStartTask()
 {
-    ui->tabWidgetJob->removeTab(2);
-    disconnect(startTask,SIGNAL(sigCloseStartTask()),this,SLOT(closetab()));
+//    /// 删除当前widget,仍然会导致崩溃
+//    qDebug()<<ui->tabWidgetJob->currentWidget();
+//    ui->tabWidgetJob->currentWidget()->close();
+    /// 目前仅仅是移出tab而已，原始的widget仍然存留在内存中
+    ui->tabWidgetJob->removeTab( ui->tabWidgetJob->currentIndex());
 
-    delete startTask;
+    disconnect(startTask,SIGNAL(sigCloseStartTask()),this,SLOT(closeTabStartTask()));
 }
 
 void qjdProcessMainWindow::refreshTable()
@@ -2898,3 +2925,50 @@ void qjdProcessMainWindow::refreshTable()
     setHistoryTableData();
     setFirstActiveTableData();
 }
+
+void qjdProcessMainWindow::closeTabRestartTask()
+{
+    ui->tabWidgetJob->removeTab(ui->tabWidgetJob->currentIndex());
+}
+
+void qjdProcessMainWindow::on_btnRestart_clicked()
+{
+    countRestartTimes++;
+    QString title;
+    title.append("Restart Task");
+    title.append(QString::number(countRestartTimes));
+    reStartTask=new qjdRestartTask();
+    ui->stackedWidget->setCurrentIndex(1);
+    ui->tabWidgetJob->insertTab(2,reStartTask,title);
+    ui->tabWidgetJob->setCurrentIndex(2);
+    connect(reStartTask,SIGNAL(sigCloseRestartTask()),this,SLOT(closeTabRestartTask()));
+
+}
+
+void qjdProcessMainWindow::on_btnShowLog_clicked()
+{
+    showLog=new qjdShowLog();
+
+    ui->tableChoose->showRow(2);
+    int a=ui->historyTable->currentRow();
+    showLog->showLog(logPathJob.at(a));
+    QString tabName=logPathJob.at(a);
+    ui->tabWidgetLog->insertTab(0,showLog,tabName);
+    ui->tableChoose->setCurrentCell(2,0);
+    ui->stackedWidget->setCurrentIndex(2);
+    ui->tabWidgetLog->setCurrentIndex(0);
+}
+
+void qjdProcessMainWindow::closeTabLog(int index)
+{
+    qDebug()<<"current widget:"<<ui->tabWidgetLog->currentWidget();
+    ui->tabWidgetLog->removeTab(index);
+    if(ui->tabWidgetLog->currentIndex()==-1)
+    {
+        ui->tableChoose->hideRow(2);
+        ui->stackedWidget->setCurrentIndex(1);
+    }
+}
+
+
+

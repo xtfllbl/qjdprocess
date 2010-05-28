@@ -15,6 +15,8 @@
 #include <QProcess>
 #include <QtXml/QXmlStreamReader>
 #include <qjdstarttask.h>
+#include <qjdrestarttask.h>
+#include <qjdshowlog.h>
 
 namespace Ui {
     class qjdProcessMainWindow;
@@ -34,6 +36,8 @@ public:
     qjdoptions *options;
     Proc *proc;
     qjdStartTask *startTask;
+    qjdRestartTask *reStartTask;
+    qjdShowLog *showLog;
 
     QTimer *timer;
     QTimer *reportTimer;
@@ -188,6 +192,7 @@ private:
     QFile pubFile;
     QFile priFile;
     QFile argFile;
+    QFile logFile;
 
     QFile fHisArgu;
     QFile fActArgu;
@@ -196,11 +201,14 @@ private:
     QTimer *timerA;
     QVector<QString> priPathJob;
     QVector<QString> argPathJob;
+    QVector<QString> logPathJob;
+
     QVector<QString> stimeJob;
     QVector<QString> pnameJob;
     bool isPnameJob;
     bool isPriPathJob;
     bool isArgPathJob;
+    bool isLogPathJob;
     bool isStimeJob;
 
     bool isCurrentTimeJob;
@@ -222,10 +230,13 @@ private:
     int selectRowNum;
     int selectRowNumA;
 
+    int countRestartTimes;
 private slots:
+    void on_btnShowLog_clicked();
+    void on_btnRestart_clicked();
     void on_historyTable_cellDoubleClicked(int row, int column);
     void on_tableChoose_cellClicked(int row, int column);
-    void on_btnChooseField_pressed();
+    void on_btnChooseField_clicked();
     void on_actionStart_Process_triggered();
     void keyPress(QKeyEvent *);
     void on_tblMain_pressed(QModelIndex );
@@ -252,7 +263,9 @@ private slots:
     void setHistoryTableData();
     void closeEvent(QCloseEvent *);
 
-    void closetab();
+    void closeTabStartTask();
+    void closeTabRestartTask();
+    void closeTabLog(int);
     void refreshTable();
 };
 #endif // QJDPROCESSMAINWINDOW_H

@@ -24,3 +24,8 @@ void qjdRestartTask::changeEvent(QEvent *e)
         break;
     }
 }
+
+void qjdRestartTask::on_btnClose_clicked()
+{
+    emit sigCloseRestartTask();
+}

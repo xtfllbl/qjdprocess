@@ -18,8 +18,13 @@ public:
 protected:
     void changeEvent(QEvent *e);
 
+signals:
+    void sigCloseRestartTask();
 private:
     Ui::qjdRestartTask *ui;
+
+private slots:
+    void on_btnClose_clicked();
 };
 
 #endif // QJDRESTARTTASK_H
