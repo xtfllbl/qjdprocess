@@ -56,8 +56,8 @@
         <string>Stop</string>
        </property>
        <property name="icon">
-        <iconset>
-         <normaloff>../../soft/pretty/iRaveH20 3 Lights Edition/48x48/actions/gtk-media-record.png</normaloff>../../soft/pretty/iRaveH20 3 Lights Edition/48x48/actions/gtk-media-record.png</iconset>
+        <iconset resource="image.qrc">
+         <normaloff>:/image/use/media-playback-stop.png</normaloff>:/image/use/media-playback-stop.png</iconset>
        </property>
       </widget>
      </item>
@@ -67,8 +67,8 @@
         <string>Start</string>
        </property>
        <property name="icon">
-        <iconset>
-         <normaloff>../../soft/pretty/iRaveH20 3 Lights Edition/48x48/actions/gtk-media-play-ltr.png</normaloff>../../soft/pretty/iRaveH20 3 Lights Edition/48x48/actions/gtk-media-play-ltr.png</iconset>
+        <iconset resource="image.qrc">
+         <normaloff>:/image/use/media-playback-start.png</normaloff>:/image/use/media-playback-start.png</iconset>
        </property>
       </widget>
      </item>
@@ -78,8 +78,8 @@
         <string>Close</string>
        </property>
        <property name="icon">
-        <iconset>
-         <normaloff>../../soft/pretty/iRaveH20 3 Lights Edition/48x48/actions/gtk-remove.png</normaloff>../../soft/pretty/iRaveH20 3 Lights Edition/48x48/actions/gtk-remove.png</iconset>
+        <iconset resource="image.qrc">
+         <normaloff>:/image/use/window-close.png</normaloff>:/image/use/window-close.png</iconset>
        </property>
       </widget>
      </item>
@@ -87,6 +87,8 @@
    </item>
   </layout>
  </widget>
- <resources/>
+ <resources>
+  <include location="image.qrc"/>
+ </resources>
  <connections/>
 </ui>

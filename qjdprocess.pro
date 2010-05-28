@@ -31,3 +31,6 @@ FORMS += qjdprocessmainwindow.ui \
     qjdstarttask.ui \
     qjdrestarttask.ui \
     qjdshowlog.ui
+
+RESOURCES += \
+    image.qrc

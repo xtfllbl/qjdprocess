@@ -148,6 +148,10 @@
        <property name="text">
         <string>Start</string>
        </property>
+       <property name="icon">
+        <iconset resource="image.qrc">
+         <normaloff>:/image/use/media-playback-start.png</normaloff>:/image/use/media-playback-start.png</iconset>
+       </property>
       </widget>
      </item>
      <item>
@@ -155,12 +159,20 @@
        <property name="text">
         <string>Stop</string>
        </property>
+       <property name="icon">
+        <iconset resource="image.qrc">
+         <normaloff>:/image/use/media-playback-stop.png</normaloff>:/image/use/media-playback-stop.png</iconset>
+       </property>
       </widget>
      </item>
      <item>
       <widget class="QPushButton" name="btnClose">
        <property name="text">
         <string>Close</string>
+       </property>
+       <property name="icon">
+        <iconset resource="image.qrc">
+         <normaloff>:/image/use/window-close.png</normaloff>:/image/use/window-close.png</iconset>
        </property>
       </widget>
      </item>
@@ -181,6 +193,8 @@
    </item>
   </layout>
  </widget>
- <resources/>
+ <resources>
+  <include location="image.qrc"/>
+ </resources>
  <connections/>
 </ui>

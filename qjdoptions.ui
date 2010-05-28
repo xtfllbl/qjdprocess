@@ -237,8 +237,8 @@
         <string>Apply</string>
        </property>
        <property name="icon">
-        <iconset>
-         <normaloff>../../soft/pretty/iRaveH20 3 Lights Edition/48x48/actions/dialog-ok.png</normaloff>../../soft/pretty/iRaveH20 3 Lights Edition/48x48/actions/dialog-ok.png</iconset>
+        <iconset resource="image.qrc">
+         <normaloff>:/image/use/package-installed-updated.png</normaloff>:/image/use/package-installed-updated.png</iconset>
        </property>
       </widget>
      </item>
@@ -285,6 +285,8 @@
    </item>
   </layout>
  </widget>
- <resources/>
+ <resources>
+  <include location="image.qrc"/>
+ </resources>
  <connections/>
 </ui>

@@ -1,0 +1,16 @@
+<RCC>
+    <qresource prefix="/">
+        <file>image/use/document-page-setup.png</file>
+        <file>image/use/edit-clear.png</file>
+        <file>image/use/evolution-calendar.png</file>
+        <file>image/use/format-justify-fill.png</file>
+        <file>image/use/media-playback-pause.png</file>
+        <file>image/use/media-playback-start.png</file>
+        <file>image/use/media-playback-stop.png</file>
+        <file>image/use/media-record.png</file>
+        <file>image/use/package-installed-updated.png</file>
+        <file>image/use/window-close.png</file>
+        <file>image/use/object-rotate-right.png</file>
+        <file>image/use/evolution-addressbook.png</file>
+    </qresource>
+</RCC>

@@ -434,8 +434,8 @@ selection-background-color: qlineargradient(spread:pad, x1:1, y1:0, x2:0.623398,
                <string>Restart</string>
               </property>
               <property name="icon">
-               <iconset>
-                <normaloff>../../soft/pretty/iRaveH20 3 Lights Edition/48x48/actions/revert.png</normaloff>../../soft/pretty/iRaveH20 3 Lights Edition/48x48/actions/revert.png</iconset>
+               <iconset resource="image.qrc">
+                <normaloff>:/image/use/object-rotate-right.png</normaloff>:/image/use/object-rotate-right.png</iconset>
               </property>
              </widget>
             </item>
@@ -446,6 +446,10 @@ selection-background-color: qlineargradient(spread:pad, x1:1, y1:0, x2:0.623398,
               </property>
               <property name="text">
                <string>Show Detail Log</string>
+              </property>
+              <property name="icon">
+               <iconset resource="image.qrc">
+                <normaloff>:/image/use/evolution-addressbook.png</normaloff>:/image/use/evolution-addressbook.png</iconset>
               </property>
              </widget>
             </item>
@@ -622,8 +626,8 @@ selection-background-color: qlineargradient(spread:pad, x1:1, y1:0, x2:0.623398,
         </font>
        </property>
        <property name="icon">
-        <iconset>
-         <normaloff>../../soft/pretty/iRaveH20 3 Lights Edition/72x72/actions/document-page-setup.png</normaloff>../../soft/pretty/iRaveH20 3 Lights Edition/72x72/actions/document-page-setup.png</iconset>
+        <iconset resource="image.qrc">
+         <normaloff>:/image/use/document-page-setup.png</normaloff>:/image/use/document-page-setup.png</iconset>
        </property>
        <property name="flags">
         <set>ItemIsSelectable|ItemIsEnabled</set>
@@ -634,8 +638,8 @@ selection-background-color: qlineargradient(spread:pad, x1:1, y1:0, x2:0.623398,
         <string>Job Control</string>
        </property>
        <property name="icon">
-        <iconset>
-         <normaloff>../../soft/pretty/iRaveH20 3 Lights Edition/48x48/apps/evolution-calendar.png</normaloff>../../soft/pretty/iRaveH20 3 Lights Edition/48x48/apps/evolution-calendar.png</iconset>
+        <iconset resource="image.qrc">
+         <normaloff>:/image/use/evolution-calendar.png</normaloff>:/image/use/evolution-calendar.png</iconset>
        </property>
        <property name="flags">
         <set>ItemIsSelectable|ItemIsEnabled</set>
@@ -646,8 +650,8 @@ selection-background-color: qlineargradient(spread:pad, x1:1, y1:0, x2:0.623398,
         <string>Detail Log</string>
        </property>
        <property name="icon">
-        <iconset>
-         <normaloff>../../soft/pretty/iRaveH20 3 Lights Edition/48x48/actions/centrejust.png</normaloff>../../soft/pretty/iRaveH20 3 Lights Edition/48x48/actions/centrejust.png</iconset>
+        <iconset resource="image.qrc">
+         <normaloff>:/image/use/format-justify-fill.png</normaloff>:/image/use/format-justify-fill.png</iconset>
        </property>
        <property name="flags">
         <set>ItemIsSelectable|ItemIsEnabled</set>
@@ -715,6 +719,8 @@ selection-background-color: qlineargradient(spread:pad, x1:1, y1:0, x2:0.623398,
   <tabstop>tblMain</tabstop>
   <tabstop>comboProcess</tabstop>
  </tabstops>
- <resources/>
+ <resources>
+  <include location="image.qrc"/>
+ </resources>
  <connections/>
 </ui>
