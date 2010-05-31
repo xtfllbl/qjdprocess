@@ -17,7 +17,8 @@
 #include <qjdstarttask.h>
 #include <qjdrestarttask.h>
 #include <qjdshowlog.h>
-
+#include <qjdfilterlineedit.h>
+#include <QTableWidgetItem>
 namespace Ui {
     class qjdProcessMainWindow;
 }
@@ -33,11 +34,13 @@ public:
     void vectorClear();
     void flagClear();
 
+    /// 自有类定义区
     qjdoptions *options;
     Proc *proc;
     qjdStartTask *startTask;
     qjdRestartTask *reStartTask;
     qjdShowLog *showLog;
+    qjdFilterLineEdit *filterEdit;
 
     QTimer *timer;
     QTimer *reportTimer;
@@ -71,6 +74,7 @@ public:
     QString aCmdLine;  //cmdlineVector
     QString aUid;
     QString aUsrName;
+    QString filterText;
 
     QStandardItem *itemPid;
     QStandardItem *itemCmd;
@@ -231,12 +235,13 @@ private:
     int selectRowNumA;
 
     int countRestartTimes;
+
+    /// -----------------------------///
 private slots:
+    void on_tableChoose_itemClicked(QTableWidgetItem* item);
+    void on_tabWidgetSysProcess_selected(QString );
     void on_btnShowLog_clicked();
-    void on_btnRestart_clicked();
     void on_historyTable_cellDoubleClicked(int row, int column);
-    void on_tableChoose_cellClicked(int row, int column);
-    void on_btnChooseField_clicked();
     void on_actionStart_Process_triggered();
     void keyPress(QKeyEvent *);
     void on_tblMain_pressed(QModelIndex );
@@ -256,6 +261,8 @@ private slots:
     bool eventFilter(QObject *obj, QEvent *event);
     void setFirstActiveTableData();
 
+    void filterProcess();
+    void closeOption();
 /// -----------------------------------------
     void on_activeTable_clicked(QModelIndex index);
     void on_tabWidgetJob_selected(QString );

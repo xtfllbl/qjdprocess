@@ -41,10 +41,12 @@ protected:
 
 signals:
     void sigCloseTab();
+    void sigCloseOption();
 
 public slots:
-    void on_btnApplyField_clicked();
     void handleCheck();
+
+private slots:
 };
 
 #endif // QJDOPTIONS_H

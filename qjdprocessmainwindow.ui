@@ -6,9 +6,15 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>741</width>
-    <height>617</height>
+    <width>800</width>
+    <height>613</height>
    </rect>
+  </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
   </property>
   <property name="focusPolicy">
    <enum>Qt::StrongFocus</enum>
@@ -33,295 +39,278 @@
        <number>1</number>
       </property>
       <widget class="QWidget" name="pageSys">
-       <layout class="QGridLayout" name="gridLayout_6">
+       <layout class="QGridLayout" name="gridLayout_3">
         <item row="0" column="0">
-         <layout class="QGridLayout" name="gridLayout_3">
-          <item row="1" column="0">
-           <widget class="QTabWidget" name="tabWidgetSysProcess">
-            <property name="currentIndex">
-             <number>0</number>
+         <layout class="QHBoxLayout" name="horizontalLayoutSys">
+          <item>
+           <widget class="QComboBox" name="comboProcess">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
             </property>
-            <property name="tabsClosable">
-             <bool>false</bool>
+            <property name="minimumSize">
+             <size>
+              <width>300</width>
+              <height>0</height>
+             </size>
             </property>
-            <widget class="QWidget" name="tabTblMain">
-             <attribute name="title">
-              <string>Sys Process</string>
-             </attribute>
-             <layout class="QGridLayout" name="gridLayout">
-              <item row="0" column="0">
-               <widget class="QTableView" name="tblMain">
-                <property name="minimumSize">
-                 <size>
-                  <width>0</width>
-                  <height>0</height>
-                 </size>
-                </property>
-                <property name="palette">
-                 <palette>
-                  <active>
-                   <colorrole role="Highlight">
-                    <brush brushstyle="LinearGradientPattern">
-                     <gradient startx="1.000000000000000" starty="0.000000000000000" endx="0.623398000000000" endy="0.983000000000000" type="LinearGradient" spread="PadSpread" coordinatemode="ObjectBoundingMode">
-                      <gradientstop position="0.000000000000000">
-                       <color alpha="255">
-                        <red>80</red>
-                        <green>170</green>
-                        <blue>255</blue>
-                       </color>
-                      </gradientstop>
-                      <gradientstop position="1.000000000000000">
-                       <color alpha="255">
-                        <red>85</red>
-                        <green>85</green>
-                        <blue>255</blue>
-                       </color>
-                      </gradientstop>
-                     </gradient>
-                    </brush>
-                   </colorrole>
-                   <colorrole role="HighlightedText">
-                    <brush brushstyle="SolidPattern">
-                     <color alpha="255">
-                      <red>255</red>
-                      <green>255</green>
-                      <blue>255</blue>
-                     </color>
-                    </brush>
-                   </colorrole>
-                   <colorrole role="AlternateBase">
-                    <brush brushstyle="SolidPattern">
-                     <color alpha="255">
-                      <red>255</red>
-                      <green>255</green>
-                      <blue>220</blue>
-                     </color>
-                    </brush>
-                   </colorrole>
-                  </active>
-                  <inactive>
-                   <colorrole role="Highlight">
-                    <brush brushstyle="LinearGradientPattern">
-                     <gradient startx="1.000000000000000" starty="0.000000000000000" endx="0.623398000000000" endy="0.983000000000000" type="LinearGradient" spread="PadSpread" coordinatemode="ObjectBoundingMode">
-                      <gradientstop position="0.000000000000000">
-                       <color alpha="255">
-                        <red>80</red>
-                        <green>170</green>
-                        <blue>255</blue>
-                       </color>
-                      </gradientstop>
-                      <gradientstop position="1.000000000000000">
-                       <color alpha="255">
-                        <red>85</red>
-                        <green>85</green>
-                        <blue>255</blue>
-                       </color>
-                      </gradientstop>
-                     </gradient>
-                    </brush>
-                   </colorrole>
-                   <colorrole role="HighlightedText">
-                    <brush brushstyle="SolidPattern">
-                     <color alpha="255">
-                      <red>255</red>
-                      <green>255</green>
-                      <blue>255</blue>
-                     </color>
-                    </brush>
-                   </colorrole>
-                   <colorrole role="AlternateBase">
-                    <brush brushstyle="SolidPattern">
-                     <color alpha="255">
-                      <red>255</red>
-                      <green>255</green>
-                      <blue>220</blue>
-                     </color>
-                    </brush>
-                   </colorrole>
-                  </inactive>
-                  <disabled>
-                   <colorrole role="Highlight">
-                    <brush brushstyle="LinearGradientPattern">
-                     <gradient startx="1.000000000000000" starty="0.000000000000000" endx="0.623398000000000" endy="0.983000000000000" type="LinearGradient" spread="PadSpread" coordinatemode="ObjectBoundingMode">
-                      <gradientstop position="0.000000000000000">
-                       <color alpha="255">
-                        <red>80</red>
-                        <green>170</green>
-                        <blue>255</blue>
-                       </color>
-                      </gradientstop>
-                      <gradientstop position="1.000000000000000">
-                       <color alpha="255">
-                        <red>85</red>
-                        <green>85</green>
-                        <blue>255</blue>
-                       </color>
-                      </gradientstop>
-                     </gradient>
-                    </brush>
-                   </colorrole>
-                   <colorrole role="HighlightedText">
-                    <brush brushstyle="SolidPattern">
-                     <color alpha="255">
-                      <red>255</red>
-                      <green>255</green>
-                      <blue>255</blue>
-                     </color>
-                    </brush>
-                   </colorrole>
-                   <colorrole role="AlternateBase">
-                    <brush brushstyle="SolidPattern">
-                     <color alpha="255">
-                      <red>255</red>
-                      <green>255</green>
-                      <blue>220</blue>
-                     </color>
-                    </brush>
-                   </colorrole>
-                  </disabled>
-                 </palette>
-                </property>
-                <property name="font">
-                 <font>
-                  <family>微软雅黑</family>
-                  <pointsize>10</pointsize>
-                  <weight>50</weight>
-                  <italic>false</italic>
-                  <bold>false</bold>
-                 </font>
-                </property>
-                <property name="focusPolicy">
-                 <enum>Qt::StrongFocus</enum>
-                </property>
-                <property name="styleSheet">
-                 <string notr="true">gridline-color: rgb(200, 200, 200);
-selection-color: rgb(255, 255, 255);
-selection-background-color: qlineargradient(spread:pad, x1:1, y1:0, x2:0.623398, y2:0.983, stop:0 rgba(80, 170, 255, 255), stop:1 rgba(85, 85, 255, 255));</string>
-                </property>
-                <property name="frameShape">
-                 <enum>QFrame::Panel</enum>
-                </property>
-                <property name="frameShadow">
-                 <enum>QFrame::Raised</enum>
-                </property>
-                <property name="autoScroll">
-                 <bool>false</bool>
-                </property>
-                <property name="editTriggers">
-                 <set>QAbstractItemView::NoEditTriggers</set>
-                </property>
-                <property name="alternatingRowColors">
-                 <bool>true</bool>
-                </property>
-                <property name="selectionMode">
-                 <enum>QAbstractItemView::SingleSelection</enum>
-                </property>
-                <property name="selectionBehavior">
-                 <enum>QAbstractItemView::SelectRows</enum>
-                </property>
-                <property name="textElideMode">
-                 <enum>Qt::ElideRight</enum>
-                </property>
-                <property name="showGrid">
-                 <bool>true</bool>
-                </property>
-                <property name="gridStyle">
-                 <enum>Qt::SolidLine</enum>
-                </property>
-                <property name="sortingEnabled">
-                 <bool>false</bool>
-                </property>
-                <property name="wordWrap">
-                 <bool>true</bool>
-                </property>
-                <property name="cornerButtonEnabled">
-                 <bool>true</bool>
-                </property>
-                <attribute name="horizontalHeaderVisible">
-                 <bool>false</bool>
-                </attribute>
-                <attribute name="horizontalHeaderShowSortIndicator" stdset="0">
-                 <bool>false</bool>
-                </attribute>
-                <attribute name="verticalHeaderVisible">
-                 <bool>false</bool>
-                </attribute>
-                <attribute name="verticalHeaderShowSortIndicator" stdset="0">
-                 <bool>false</bool>
-                </attribute>
-                <attribute name="verticalHeaderVisible">
-                 <bool>false</bool>
-                </attribute>
-                <attribute name="horizontalHeaderShowSortIndicator" stdset="0">
-                 <bool>false</bool>
-                </attribute>
-                <attribute name="horizontalHeaderVisible">
-                 <bool>false</bool>
-                </attribute>
-                <attribute name="verticalHeaderShowSortIndicator" stdset="0">
-                 <bool>false</bool>
-                </attribute>
-               </widget>
-              </item>
-             </layout>
-            </widget>
-           </widget>
-          </item>
-          <item row="0" column="0">
-           <layout class="QHBoxLayout" name="horizontalLayout_2">
+            <property name="focusPolicy">
+             <enum>Qt::NoFocus</enum>
+            </property>
+            <property name="toolTip">
+             <string>Choose Processes</string>
+            </property>
             <item>
-             <widget class="QComboBox" name="comboProcess">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="minimumSize">
-               <size>
-                <width>300</width>
-                <height>0</height>
-               </size>
-              </property>
-              <property name="focusPolicy">
-               <enum>Qt::NoFocus</enum>
-              </property>
-              <property name="toolTip">
-               <string>Choose Processes</string>
-              </property>
-              <item>
-               <property name="text">
-                <string>All Processes</string>
-               </property>
-              </item>
-              <item>
-               <property name="text">
-                <string>Non-root Processes</string>
-               </property>
-              </item>
-              <item>
-               <property name="text">
-                <string>Running Processes</string>
-               </property>
-              </item>
-             </widget>
+             <property name="text">
+              <string>All Processes</string>
+             </property>
             </item>
             <item>
-             <widget class="QPushButton" name="btnChooseField">
+             <property name="text">
+              <string>Non-root Processes</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Running Processes</string>
+             </property>
+            </item>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item row="1" column="0">
+         <widget class="QTabWidget" name="tabWidgetSysProcess">
+          <property name="currentIndex">
+           <number>0</number>
+          </property>
+          <property name="tabsClosable">
+           <bool>false</bool>
+          </property>
+          <widget class="QWidget" name="tabTblMain">
+           <attribute name="title">
+            <string>Sys Process</string>
+           </attribute>
+           <layout class="QGridLayout" name="gridLayout">
+            <item row="0" column="0">
+             <widget class="QTableView" name="tblMain">
               <property name="minimumSize">
                <size>
-                <width>200</width>
+                <width>0</width>
                 <height>0</height>
                </size>
               </property>
-              <property name="text">
-               <string>Choose Field</string>
+              <property name="palette">
+               <palette>
+                <active>
+                 <colorrole role="Highlight">
+                  <brush brushstyle="LinearGradientPattern">
+                   <gradient startx="1.000000000000000" starty="0.000000000000000" endx="0.623398000000000" endy="0.983000000000000" type="LinearGradient" spread="PadSpread" coordinatemode="ObjectBoundingMode">
+                    <gradientstop position="0.000000000000000">
+                     <color alpha="255">
+                      <red>80</red>
+                      <green>170</green>
+                      <blue>255</blue>
+                     </color>
+                    </gradientstop>
+                    <gradientstop position="1.000000000000000">
+                     <color alpha="255">
+                      <red>85</red>
+                      <green>85</green>
+                      <blue>255</blue>
+                     </color>
+                    </gradientstop>
+                   </gradient>
+                  </brush>
+                 </colorrole>
+                 <colorrole role="HighlightedText">
+                  <brush brushstyle="SolidPattern">
+                   <color alpha="255">
+                    <red>255</red>
+                    <green>255</green>
+                    <blue>255</blue>
+                   </color>
+                  </brush>
+                 </colorrole>
+                 <colorrole role="AlternateBase">
+                  <brush brushstyle="SolidPattern">
+                   <color alpha="255">
+                    <red>255</red>
+                    <green>255</green>
+                    <blue>220</blue>
+                   </color>
+                  </brush>
+                 </colorrole>
+                </active>
+                <inactive>
+                 <colorrole role="Highlight">
+                  <brush brushstyle="LinearGradientPattern">
+                   <gradient startx="1.000000000000000" starty="0.000000000000000" endx="0.623398000000000" endy="0.983000000000000" type="LinearGradient" spread="PadSpread" coordinatemode="ObjectBoundingMode">
+                    <gradientstop position="0.000000000000000">
+                     <color alpha="255">
+                      <red>80</red>
+                      <green>170</green>
+                      <blue>255</blue>
+                     </color>
+                    </gradientstop>
+                    <gradientstop position="1.000000000000000">
+                     <color alpha="255">
+                      <red>85</red>
+                      <green>85</green>
+                      <blue>255</blue>
+                     </color>
+                    </gradientstop>
+                   </gradient>
+                  </brush>
+                 </colorrole>
+                 <colorrole role="HighlightedText">
+                  <brush brushstyle="SolidPattern">
+                   <color alpha="255">
+                    <red>255</red>
+                    <green>255</green>
+                    <blue>255</blue>
+                   </color>
+                  </brush>
+                 </colorrole>
+                 <colorrole role="AlternateBase">
+                  <brush brushstyle="SolidPattern">
+                   <color alpha="255">
+                    <red>255</red>
+                    <green>255</green>
+                    <blue>220</blue>
+                   </color>
+                  </brush>
+                 </colorrole>
+                </inactive>
+                <disabled>
+                 <colorrole role="Highlight">
+                  <brush brushstyle="LinearGradientPattern">
+                   <gradient startx="1.000000000000000" starty="0.000000000000000" endx="0.623398000000000" endy="0.983000000000000" type="LinearGradient" spread="PadSpread" coordinatemode="ObjectBoundingMode">
+                    <gradientstop position="0.000000000000000">
+                     <color alpha="255">
+                      <red>80</red>
+                      <green>170</green>
+                      <blue>255</blue>
+                     </color>
+                    </gradientstop>
+                    <gradientstop position="1.000000000000000">
+                     <color alpha="255">
+                      <red>85</red>
+                      <green>85</green>
+                      <blue>255</blue>
+                     </color>
+                    </gradientstop>
+                   </gradient>
+                  </brush>
+                 </colorrole>
+                 <colorrole role="HighlightedText">
+                  <brush brushstyle="SolidPattern">
+                   <color alpha="255">
+                    <red>255</red>
+                    <green>255</green>
+                    <blue>255</blue>
+                   </color>
+                  </brush>
+                 </colorrole>
+                 <colorrole role="AlternateBase">
+                  <brush brushstyle="SolidPattern">
+                   <color alpha="255">
+                    <red>255</red>
+                    <green>255</green>
+                    <blue>220</blue>
+                   </color>
+                  </brush>
+                 </colorrole>
+                </disabled>
+               </palette>
               </property>
+              <property name="font">
+               <font>
+                <family>微软雅黑</family>
+                <pointsize>10</pointsize>
+                <weight>50</weight>
+                <italic>false</italic>
+                <bold>false</bold>
+               </font>
+              </property>
+              <property name="focusPolicy">
+               <enum>Qt::StrongFocus</enum>
+              </property>
+              <property name="styleSheet">
+               <string notr="true">gridline-color: rgb(200, 200, 200);
+selection-color: rgb(255, 255, 255);
+selection-background-color: qlineargradient(spread:pad, x1:1, y1:0, x2:0.623398, y2:0.983, stop:0 rgba(80, 170, 255, 255), stop:1 rgba(85, 85, 255, 255));</string>
+              </property>
+              <property name="frameShape">
+               <enum>QFrame::Panel</enum>
+              </property>
+              <property name="frameShadow">
+               <enum>QFrame::Raised</enum>
+              </property>
+              <property name="autoScroll">
+               <bool>false</bool>
+              </property>
+              <property name="editTriggers">
+               <set>QAbstractItemView::NoEditTriggers</set>
+              </property>
+              <property name="alternatingRowColors">
+               <bool>true</bool>
+              </property>
+              <property name="selectionMode">
+               <enum>QAbstractItemView::SingleSelection</enum>
+              </property>
+              <property name="selectionBehavior">
+               <enum>QAbstractItemView::SelectRows</enum>
+              </property>
+              <property name="textElideMode">
+               <enum>Qt::ElideRight</enum>
+              </property>
+              <property name="showGrid">
+               <bool>true</bool>
+              </property>
+              <property name="gridStyle">
+               <enum>Qt::SolidLine</enum>
+              </property>
+              <property name="sortingEnabled">
+               <bool>false</bool>
+              </property>
+              <property name="wordWrap">
+               <bool>true</bool>
+              </property>
+              <property name="cornerButtonEnabled">
+               <bool>true</bool>
+              </property>
+              <attribute name="horizontalHeaderVisible">
+               <bool>false</bool>
+              </attribute>
+              <attribute name="horizontalHeaderShowSortIndicator" stdset="0">
+               <bool>false</bool>
+              </attribute>
+              <attribute name="verticalHeaderVisible">
+               <bool>false</bool>
+              </attribute>
+              <attribute name="verticalHeaderShowSortIndicator" stdset="0">
+               <bool>false</bool>
+              </attribute>
+              <attribute name="verticalHeaderVisible">
+               <bool>false</bool>
+              </attribute>
+              <attribute name="horizontalHeaderShowSortIndicator" stdset="0">
+               <bool>false</bool>
+              </attribute>
+              <attribute name="horizontalHeaderVisible">
+               <bool>false</bool>
+              </attribute>
+              <attribute name="verticalHeaderShowSortIndicator" stdset="0">
+               <bool>false</bool>
+              </attribute>
              </widget>
             </item>
            </layout>
-          </item>
-         </layout>
+          </widget>
+         </widget>
         </item>
        </layout>
       </widget>
@@ -343,115 +332,132 @@ selection-background-color: qlineargradient(spread:pad, x1:1, y1:0, x2:0.623398,
             <string>All Task</string>
            </attribute>
            <layout class="QGridLayout" name="gridLayout_2">
-            <item row="0" column="0" colspan="4">
-             <widget class="QTableWidget" name="historyTable">
-              <property name="styleSheet">
-               <string notr="true">gridline-color: rgb(200, 200, 200);
+            <item row="0" column="0">
+             <layout class="QVBoxLayout" name="verticalLayout">
+              <item>
+               <widget class="QTableWidget" name="historyTable">
+                <property name="styleSheet">
+                 <string notr="true">gridline-color: rgb(200, 200, 200);
 selection-color: rgb(255, 255, 255);
 selection-background-color: qlineargradient(spread:pad, x1:1, y1:0, x2:0.623398, y2:0.983, stop:0 rgba(80, 170, 255, 255), stop:1 rgba(85, 85, 255, 255));</string>
-              </property>
-              <property name="editTriggers">
-               <set>QAbstractItemView::NoEditTriggers</set>
-              </property>
-              <property name="alternatingRowColors">
-               <bool>true</bool>
-              </property>
-              <property name="selectionMode">
-               <enum>QAbstractItemView::SingleSelection</enum>
-              </property>
-              <property name="selectionBehavior">
-               <enum>QAbstractItemView::SelectRows</enum>
-              </property>
-              <property name="sortingEnabled">
-               <bool>false</bool>
-              </property>
-              <column>
-               <property name="text">
-                <string>Process Name</string>
-               </property>
-              </column>
-              <column>
-               <property name="text">
-                <string>Start Time</string>
-               </property>
-              </column>
-              <column>
-               <property name="text">
-                <string>End Time</string>
-               </property>
-              </column>
-              <column>
-               <property name="text">
-                <string>Progress</string>
-               </property>
-              </column>
-              <column>
-               <property name="text">
-                <string>End Stat</string>
-               </property>
-              </column>
-             </widget>
+                </property>
+                <property name="editTriggers">
+                 <set>QAbstractItemView::NoEditTriggers</set>
+                </property>
+                <property name="alternatingRowColors">
+                 <bool>true</bool>
+                </property>
+                <property name="selectionMode">
+                 <enum>QAbstractItemView::SingleSelection</enum>
+                </property>
+                <property name="selectionBehavior">
+                 <enum>QAbstractItemView::SelectRows</enum>
+                </property>
+                <property name="sortingEnabled">
+                 <bool>false</bool>
+                </property>
+                <column>
+                 <property name="text">
+                  <string>Process Name</string>
+                 </property>
+                </column>
+                <column>
+                 <property name="text">
+                  <string>Start Time</string>
+                 </property>
+                </column>
+                <column>
+                 <property name="text">
+                  <string>End Time</string>
+                 </property>
+                </column>
+                <column>
+                 <property name="text">
+                  <string>Progress</string>
+                 </property>
+                </column>
+                <column>
+                 <property name="text">
+                  <string>End Stat</string>
+                 </property>
+                </column>
+               </widget>
+              </item>
+              <item>
+               <layout class="QHBoxLayout" name="horizontalLayout">
+                <item>
+                 <widget class="QLabel" name="label_2">
+                  <property name="maximumSize">
+                   <size>
+                    <width>100</width>
+                    <height>16777215</height>
+                   </size>
+                  </property>
+                  <property name="text">
+                   <string>Arguments:</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QLabel" name="labelArguFileName">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
+                  <property name="minimumSize">
+                   <size>
+                    <width>400</width>
+                    <height>0</height>
+                   </size>
+                  </property>
+                  <property name="text">
+                   <string/>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </item>
+              <item>
+               <widget class="QTextBrowser" name="historyArguBrowser">
+                <property name="enabled">
+                 <bool>true</bool>
+                </property>
+               </widget>
+              </item>
+             </layout>
             </item>
             <item row="1" column="0">
-             <widget class="QLabel" name="label_2">
-              <property name="text">
-               <string>Arguments:</string>
-              </property>
-             </widget>
-            </item>
-            <item row="2" column="0" colspan="4">
-             <widget class="QTextBrowser" name="historyArguBrowser">
-              <property name="enabled">
-               <bool>true</bool>
-              </property>
-             </widget>
-            </item>
-            <item row="3" column="0">
-             <spacer name="horizontalSpacer">
-              <property name="orientation">
-               <enum>Qt::Horizontal</enum>
-              </property>
-              <property name="sizeHint" stdset="0">
-               <size>
-                <width>40</width>
-                <height>20</height>
-               </size>
-              </property>
-             </spacer>
-            </item>
-            <item row="3" column="2">
-             <widget class="QPushButton" name="btnRestart">
-              <property name="enabled">
-               <bool>false</bool>
-              </property>
-              <property name="minimumSize">
-               <size>
-                <width>150</width>
-                <height>0</height>
-               </size>
-              </property>
-              <property name="text">
-               <string>Restart</string>
-              </property>
-              <property name="icon">
-               <iconset resource="image.qrc">
-                <normaloff>:/image/use/object-rotate-right.png</normaloff>:/image/use/object-rotate-right.png</iconset>
-              </property>
-             </widget>
-            </item>
-            <item row="3" column="1">
-             <widget class="QPushButton" name="btnShowLog">
-              <property name="enabled">
-               <bool>false</bool>
-              </property>
-              <property name="text">
-               <string>Show Detail Log</string>
-              </property>
-              <property name="icon">
-               <iconset resource="image.qrc">
-                <normaloff>:/image/use/evolution-addressbook.png</normaloff>:/image/use/evolution-addressbook.png</iconset>
-              </property>
-             </widget>
+             <layout class="QHBoxLayout" name="horizontalLayout_3">
+              <item>
+               <spacer name="horizontalSpacer">
+                <property name="orientation">
+                 <enum>Qt::Horizontal</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>40</width>
+                  <height>20</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
+              <item>
+               <widget class="QPushButton" name="btnShowLog">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
+                <property name="text">
+                 <string>Show Detail Log</string>
+                </property>
+                <property name="icon">
+                 <iconset resource="image.qrc">
+                  <normaloff>:/image/use/evolution-addressbook.png</normaloff>:/image/use/evolution-addressbook.png</iconset>
+                </property>
+               </widget>
+              </item>
+             </layout>
             </item>
            </layout>
           </widget>
@@ -537,6 +543,12 @@ selection-background-color: qlineargradient(spread:pad, x1:1, y1:0, x2:0.623398,
     </item>
     <item row="0" column="0">
      <widget class="QTableWidget" name="tableChoose">
+      <property name="minimumSize">
+       <size>
+        <width>120</width>
+        <height>0</height>
+       </size>
+      </property>
       <property name="maximumSize">
        <size>
         <width>120</width>
@@ -547,6 +559,15 @@ selection-background-color: qlineargradient(spread:pad, x1:1, y1:0, x2:0.623398,
        <font>
         <pointsize>12</pointsize>
        </font>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">background-color: qlineargradient(spread:pad, x1:1, y1:0, x2:0, y2:0.988636, stop:0 rgba(229, 245, 255, 255), stop:1 rgba(237, 233, 227, 255));</string>
+      </property>
+      <property name="frameShape">
+       <enum>QFrame::Panel</enum>
+      </property>
+      <property name="frameShadow">
+       <enum>QFrame::Raised</enum>
       </property>
       <property name="selectionMode">
        <enum>QAbstractItemView::SingleSelection</enum>
@@ -654,7 +675,7 @@ selection-background-color: qlineargradient(spread:pad, x1:1, y1:0, x2:0.623398,
          <normaloff>:/image/use/format-justify-fill.png</normaloff>:/image/use/format-justify-fill.png</iconset>
        </property>
        <property name="flags">
-        <set>ItemIsSelectable|ItemIsEnabled</set>
+        <set>NoItemFlags</set>
        </property>
       </item>
      </widget>
@@ -666,7 +687,7 @@ selection-background-color: qlineargradient(spread:pad, x1:1, y1:0, x2:0.623398,
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>741</width>
+     <width>800</width>
      <height>28</height>
     </rect>
    </property>
@@ -716,8 +737,16 @@ selection-background-color: qlineargradient(spread:pad, x1:1, y1:0, x2:0.623398,
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <tabstops>
+  <tabstop>tabWidgetSysProcess</tabstop>
   <tabstop>tblMain</tabstop>
-  <tabstop>comboProcess</tabstop>
+  <tabstop>historyTable</tabstop>
+  <tabstop>historyArguBrowser</tabstop>
+  <tabstop>btnShowLog</tabstop>
+  <tabstop>activeTable</tabstop>
+  <tabstop>activeArguBrowser</tabstop>
+  <tabstop>tabWidgetLog</tabstop>
+  <tabstop>tableChoose</tabstop>
+  <tabstop>tabWidgetJob</tabstop>
  </tabstops>
  <resources>
   <include location="image.qrc"/>

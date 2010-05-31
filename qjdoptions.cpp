@@ -45,11 +45,6 @@ void qjdoptions::changeEvent(QEvent *e)
     }
 }
 
-void qjdoptions::on_btnApplyField_clicked()
-{
-    emit sigCloseTab();  // 立即发出信号，说明要关闭此tab
-}
-
 void qjdoptions::handleCheck()
 {
     qDebug()<<"handle check";

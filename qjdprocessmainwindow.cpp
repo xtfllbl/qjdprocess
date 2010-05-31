@@ -8,6 +8,7 @@
 
 #include <QProgressBar>
 #include <QProcess>
+#include <QLineEdit>
 
 #define refreshInterval 3000
 #define swapInt(x,y,t)((t)=(x),(x)=(y),(y)=(t))
@@ -19,8 +20,11 @@ qjdProcessMainWindow::qjdProcessMainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
     ui->tblMain->installEventFilter(this);
-    ui->tblMain->resize(640,480);
     ui->tblMain->setFocusPolicy(Qt::StrongFocus);
+
+    filterEdit=new qjdFilterLineEdit();     // 自有LineEdit
+    ui->horizontalLayoutSys->insertWidget(0,filterEdit);
+    connect(filterEdit,SIGNAL(returnPressed()),this,SLOT(filterProcess()));
     /// 自定义排序
     ui->tblMain->setSortingEnabled(false);       //自动排序关闭
     ui->tblMain->horizontalHeader()->setSortIndicatorShown(true);
@@ -29,7 +33,7 @@ qjdProcessMainWindow::qjdProcessMainWindow(QWidget *parent) :
 
     proc=new Proc();
 
-    colNum=11;
+    colNum=11;  //初始默认值
 
     cmd2=true;
     cmdLine2=false;
@@ -132,6 +136,7 @@ qjdProcessMainWindow::qjdProcessMainWindow(QWidget *parent) :
     connect(ui->comboProcess,SIGNAL(currentIndexChanged(int)),this,SLOT(autoRefresh()));
 
     proc->refresh();
+    filterText="";
     setData();
 
 
@@ -153,7 +158,8 @@ qjdProcessMainWindow::qjdProcessMainWindow(QWidget *parent) :
     /// 可以删除一个tab，用处很大
     /// 准备随时添加tab
     options=new qjdoptions();
-    connect(options,SIGNAL(sigCloseTab()),this,SLOT(handleChooseField()));
+    ui->tabWidgetSysProcess->insertTab(1,options,"Choose Field");
+
     if(cmd2==true)
     {
         options->ui->chkCMD->setChecked(true);
@@ -224,10 +230,11 @@ qjdProcessMainWindow::qjdProcessMainWindow(QWidget *parent) :
     }
 
     ui->tableChoose->setCurrentCell(0,0);
+    ui->tableChoose->item(2,0)->setFlags(Qt::NoItemFlags);
+
     ui->stackedWidget->setCurrentIndex(0);
     countRestartTimes=0;
 
-    ui->tableChoose->hideRow(2);
     // 放在下面connect，如果不disconnect，会产生多次连接，直接导致槽函数的多次调用
     connect(ui->tabWidgetLog,SIGNAL(tabCloseRequested(int)),this,SLOT(closeTabLog(int)));
 }
@@ -251,10 +258,8 @@ void qjdProcessMainWindow::changeEvent(QEvent *e)
 
 void qjdProcessMainWindow::setData()
 {
-//    qDebug()<<"setData";
     if(hasOptions==true)
     {
-//        qDebug()<<"has options IN";
         hasOptions=false;
         colNum=options->countCol;
 
@@ -284,7 +289,6 @@ void qjdProcessMainWindow::setData()
     if(pid2==true)
     {
         model->setHeaderData(countField, Qt::Horizontal, tr("pid"));
-        //        qDebug()<<model->horizontalHeaderItem(countField)->text();
         countField++;
     }
     if(cmd2==true)
@@ -374,12 +378,12 @@ void qjdProcessMainWindow::setData()
     }
 
     // 向表格中输入数据
-    /// 在此筛选?
+    /// 在此筛选,重要循环
     int countRow=0;
     for(int i=0;i<proc->pidVector.size();i++)
     {
         aPid=QString::number(proc->pidVector.at(i),10);
-        aCmd=proc->cmdVector.at(i);
+        aCmd=proc->cmdVector.at(i);     // 通过cmd对过滤器作出反应
         if(proc->statVector.at(i)=="S")
         {
             aStat="Sleep";
@@ -402,38 +406,38 @@ void qjdProcessMainWindow::setData()
         }
         aNice=QString::number(proc->niceVector.at(i),10);
         aStartTime=proc->starttimeVector.at(i);
-        aWchan=proc->wchanVector.at(i);//
+        aWchan=proc->wchanVector.at(i);
         aWhichCpu=QString::number(proc->whichcpuVector.at(i),10);
         aMem=proc->memVector.at(i);
-        aPmem.sprintf("%f",proc->pmemVector.at(i));//
-        aSleepAvg=QString::number(proc->slpavgVector.at(i),10);//
+        aPmem.sprintf("%f",proc->pmemVector.at(i));
+        aSleepAvg=QString::number(proc->slpavgVector.at(i),10);
         aStack=QString::number(proc->stackVector.at(i),10);
-        aIoread=proc->ioreadVector.at(i);//
-        aIowrite=proc->iowriteVector.at(i);//
+        aIoread=proc->ioreadVector.at(i);
+        aIowrite=proc->iowriteVector.at(i);
         aPcpu=QString::number(proc->pcpuVector.at(i),10);
-        aWcpu.sprintf("%f",proc->wcpuVector.at(i));//
-        aCmdLine=proc->cmdlineVector.at(i);  //
-        aUid=QString::number(proc->uidVector.at(i),10);//
+        aWcpu.sprintf("%f",proc->wcpuVector.at(i));
+        aCmdLine=proc->cmdlineVector.at(i);
+        aUid=QString::number(proc->uidVector.at(i),10);
         aUsrName=proc->usernameVector.at(i);
 
-        // valgrind 判断此处问题多多，真的会回收么,有一小部分泄漏
+        // valgrind 判断此处问题多多，真的会回收么,有一小部分泄漏[已解决]
         itemPid=new QStandardItem(aPid);
         itemCmd=new QStandardItem(aCmd);
         itemStat=new QStandardItem(aStat);
         itemNice=new QStandardItem(aNice);
         itemStartTime=new QStandardItem(aStartTime);
-        itemWchan=new QStandardItem(aWchan);//
+        itemWchan=new QStandardItem(aWchan);
         itemWhichCpu=new QStandardItem(aWhichCpu);
         itemMem=new QStandardItem(aMem);
-        itemPmem=new QStandardItem(aPmem);//
-        itemSleepAvg=new QStandardItem(aSleepAvg);//
+        itemPmem=new QStandardItem(aPmem);
+        itemSleepAvg=new QStandardItem(aSleepAvg);
         itemStack=new QStandardItem(aStack);
-        itemIoread=new QStandardItem(aIoread);//
-        itemIowrite=new QStandardItem(aIowrite);//
+        itemIoread=new QStandardItem(aIoread);
+        itemIowrite=new QStandardItem(aIowrite);
         itemPcpu=new QStandardItem(aPcpu);
-        itemWcpu=new QStandardItem(aWcpu);//
-        itemCmdLine=new QStandardItem(aCmdLine);//
-        itemUid=new QStandardItem(aUid);//
+        itemWcpu=new QStandardItem(aWcpu);
+        itemCmdLine=new QStandardItem(aCmdLine);
+        itemUid=new QStandardItem(aUid);
         itemUsrName=new QStandardItem(aUsrName);
 
         /// 插入中间判断，符合要求，则插入数据
@@ -455,6 +459,18 @@ void qjdProcessMainWindow::setData()
         if(ui->comboProcess->currentIndex()==2)
         {
             if(proc->statVector.at(i)=="R")
+            {
+                flagUse=true;
+            }
+            else
+            {
+                flagUse=false;
+            }
+        }
+        /// 加入过滤器
+        if(filterText!="")
+        {
+            if(itemCmd->text().contains(filterText,Qt::CaseInsensitive))
             {
                 flagUse=true;
             }
@@ -726,14 +742,11 @@ void qjdProcessMainWindow::on_actionExit_triggered()
 }
 
 
-
+// 处理选择的项目
 void qjdProcessMainWindow::handleChooseField()
 {
-    qDebug()<<"handle choose field";
     options->handleCheck();
     hasOptions=true;
-    ui->tabWidgetSysProcess->removeTab(1);  //删除tab
-
     ui->tblMain->resizeColumnsToContents();
 }
 
@@ -2574,6 +2587,7 @@ void qjdProcessMainWindow::on_historyTable_clicked(QModelIndex index)
     selectRowNum=index.row();
     //    setHistoryTableArguments();
     fHisArgu.setFileName(argPathJob[selectRowNum]);
+    ui->labelArguFileName->setText(argPathJob[selectRowNum]);
     if(!fHisArgu.open(QFile::ReadOnly))
         qDebug()<<"open histable argu failure";
     else
@@ -2626,7 +2640,7 @@ void qjdProcessMainWindow::on_historyTable_clicked(QModelIndex index)
 
     fHisArgu.close();
 
-    ui->btnRestart->setEnabled(true);   //开启restart
+//    ui->btnRestart->setEnabled(true);   //开启restart
     ui->btnShowLog->setEnabled(true);
 }
 
@@ -2871,29 +2885,6 @@ void qjdProcessMainWindow::on_actionStart_Process_triggered()
     connect(startTask,SIGNAL(sigCloseStartTask()),this,SLOT(closeTabStartTask()));
 }
 
-
-void qjdProcessMainWindow::on_btnChooseField_clicked()
-{
-    ui->tabWidgetSysProcess->insertTab(1,options,"Choose Field");
-    ui->tabWidgetSysProcess->setCurrentIndex(1);
-}
-
-void qjdProcessMainWindow::on_tableChoose_cellClicked(int row, int column)
-{
-    if(row==0)
-    {
-        ui->stackedWidget->setCurrentIndex(0);
-    }
-    if(row==1)
-    {
-        ui->stackedWidget->setCurrentIndex(1);
-    }
-    if(row==2)
-    {
-        ui->stackedWidget->setCurrentIndex(2);
-    }
-}
-
 void qjdProcessMainWindow::on_historyTable_cellDoubleClicked(int row, int column)
 {
     qDebug()<<row<<column;
@@ -2931,25 +2922,11 @@ void qjdProcessMainWindow::closeTabRestartTask()
     ui->tabWidgetJob->removeTab(ui->tabWidgetJob->currentIndex());
 }
 
-void qjdProcessMainWindow::on_btnRestart_clicked()
-{
-    countRestartTimes++;
-    QString title;
-    title.append("Restart Task");
-    title.append(QString::number(countRestartTimes));
-    reStartTask=new qjdRestartTask();
-    ui->stackedWidget->setCurrentIndex(1);
-    ui->tabWidgetJob->insertTab(2,reStartTask,title);
-    ui->tabWidgetJob->setCurrentIndex(2);
-    connect(reStartTask,SIGNAL(sigCloseRestartTask()),this,SLOT(closeTabRestartTask()));
-
-}
-
 void qjdProcessMainWindow::on_btnShowLog_clicked()
 {
     showLog=new qjdShowLog();
 
-    ui->tableChoose->showRow(2);
+    ui->tableChoose->item(2,0)->setFlags(Qt::ItemIsEnabled|Qt::ItemIsSelectable);
     int a=ui->historyTable->currentRow();
     showLog->showLog(logPathJob.at(a));
     QString tabName=logPathJob.at(a);
@@ -2965,10 +2942,65 @@ void qjdProcessMainWindow::closeTabLog(int index)
     ui->tabWidgetLog->removeTab(index);
     if(ui->tabWidgetLog->currentIndex()==-1)
     {
-        ui->tableChoose->hideRow(2);
+        ui->tableChoose->item(2,0)->setFlags(Qt::NoItemFlags);
+        ui->tableChoose->setCurrentCell(1,0);
         ui->stackedWidget->setCurrentIndex(1);
     }
 }
 
+void qjdProcessMainWindow::filterProcess()
+{
+    /// 筛选进程名称
+    filterText=filterEdit->text();
+    // 拿此text与cmd作对比,重新setData，有才显示,如果没全部不显示
+    machineRefresh=true;
+    vectorClear();
+    proc->refresh();        //refresh 就开始泄漏了
+    if(flagSort==true)
+    {
+        headerSort();
+        setSortData();
+    }
+    setData();
+}
 
+void qjdProcessMainWindow::closeOption()
+{
+    ui->tabWidgetSysProcess->removeTab(1);  //删除tab
+    ui->tblMain->resizeColumnsToContents();
+}
 
+void qjdProcessMainWindow::on_tabWidgetSysProcess_selected(QString title)
+{
+    if(title=="Sys Process")
+    {
+        handleChooseField();
+        machineRefresh=true;
+        vectorClear();
+        proc->refresh();        //refresh 就开始泄漏了
+        if(flagSort==true)
+        {
+            headerSort();
+            setSortData();
+        }
+        setData();
+    }
+}
+
+void qjdProcessMainWindow::on_tableChoose_itemClicked(QTableWidgetItem* item)
+{
+//    qDebug()<<item;
+    if(item->row()==0)
+    {
+        ui->stackedWidget->setCurrentIndex(0);
+    }
+    if(item->row()==1)
+    {
+        ui->stackedWidget->setCurrentIndex(1);
+    }
+    /// 真是让人难看的写法。。。
+    if(item->row()==2 && item->flags()==(Qt::ItemIsSelectable|Qt::ItemIsEnabled))
+    {
+        ui->stackedWidget->setCurrentIndex(2);
+    }
+}
