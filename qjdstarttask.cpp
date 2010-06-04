@@ -2,6 +2,7 @@
 #include "ui_qjdstarttask.h"
 #include <QDebug>
 
+/// 提供个人便利，马上便会无用化
 qjdStartTask::qjdStartTask(QWidget *parent) :
     QDialog(parent),
     ui(new Ui::qjdStartTask)

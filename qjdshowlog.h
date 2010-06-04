@@ -24,8 +24,12 @@ private:
     Ui::qjdShowLog *ui;
 
     QFile showFile;
+signals:
+//    void sigCloseLog(); //无法解决多重对象问题
+private slots:
 
 private slots:
+//    void on_btnClose_clicked();
 };
 
 #endif // QJDSHOWLOG_H

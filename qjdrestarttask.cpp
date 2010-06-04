@@ -1,6 +1,7 @@
 #include "qjdrestarttask.h"
 #include "ui_qjdrestarttask.h"
 
+/// 遗弃－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－///
 qjdRestartTask::qjdRestartTask(QWidget *parent) :
     QDialog(parent),
     ui(new Ui::qjdRestartTask)

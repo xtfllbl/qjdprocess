@@ -7,19 +7,50 @@
     <x>0</x>
     <y>0</y>
     <width>590</width>
-    <height>477</height>
+    <height>417</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Dialog</string>
   </property>
   <layout class="QGridLayout" name="gridLayout_2">
-   <item row="0" column="0">
+   <item row="0" column="0" colspan="2">
+    <widget class="QLabel" name="label">
+     <property name="font">
+      <font>
+       <pointsize>14</pointsize>
+      </font>
+     </property>
+     <property name="text">
+      <string>Choose Field Which Shown In System Process:</string>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="0">
+    <spacer name="verticalSpacer_2">
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>17</width>
+       <height>12</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
+   <item row="2" column="0" colspan="2">
     <layout class="QGridLayout" name="gridLayout">
      <item row="0" column="0">
       <widget class="QCheckBox" name="chkPID">
        <property name="enabled">
         <bool>false</bool>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>300</width>
+         <height>16777215</height>
+        </size>
        </property>
        <property name="toolTip">
         <string>The task’s unique process ID, which periodically wraps, though never restarting at zero.
@@ -41,6 +72,12 @@
      </item>
      <item row="0" column="1">
       <widget class="QCheckBox" name="chkIOREAD">
+       <property name="maximumSize">
+        <size>
+         <width>300</width>
+         <height>16777215</height>
+        </size>
+       </property>
        <property name="text">
         <string>IO_READ</string>
        </property>
@@ -54,6 +91,12 @@
        <property name="enabled">
         <bool>false</bool>
        </property>
+       <property name="maximumSize">
+        <size>
+         <width>300</width>
+         <height>16777215</height>
+        </size>
+       </property>
        <property name="text">
         <string>Process Name</string>
        </property>
@@ -64,6 +107,12 @@
      </item>
      <item row="1" column="1">
       <widget class="QCheckBox" name="chkIOWRITE">
+       <property name="maximumSize">
+        <size>
+         <width>300</width>
+         <height>16777215</height>
+        </size>
+       </property>
        <property name="text">
         <string>IO_WRITE</string>
        </property>
@@ -74,6 +123,12 @@
      </item>
      <item row="2" column="0">
       <widget class="QCheckBox" name="chkNice">
+       <property name="maximumSize">
+        <size>
+         <width>300</width>
+         <height>16777215</height>
+        </size>
+       </property>
        <property name="toolTip">
         <string>The nice value of the task.  A negative nice value means higher pri-ority,  whereas a positive nice value means lower priority.  Zero in this field simply means priority will not be adjusted in determining a task`s dispatchability.
 </string>
@@ -88,6 +143,12 @@
      </item>
      <item row="2" column="1">
       <widget class="QCheckBox" name="chkPCPU">
+       <property name="maximumSize">
+        <size>
+         <width>300</width>
+         <height>16777215</height>
+        </size>
+       </property>
        <property name="toolTip">
         <string>The  task’s  share  of  the  elapsed  CPU time since the last screen update, expressed as a percentage of total CPU time.  In a true  SMP environment,  if  ’Irix  mode’  is Off, top will operate in ’Solaris mode’ where a task’s cpu usage will be divided by the  total  number of  CPUs.   You toggle ’Irix/Solaris’ modes with the ’I’ interactive command.
 </string>
@@ -102,6 +163,12 @@
      </item>
      <item row="3" column="0">
       <widget class="QCheckBox" name="chkStartTime">
+       <property name="maximumSize">
+        <size>
+         <width>300</width>
+         <height>16777215</height>
+        </size>
+       </property>
        <property name="toolTip">
         <string>Total CPU time the task has used since it started.  When ’Cumulative mode’  is  On,  each process is listed with the cpu time that it and its dead children has used.  You toggle ’Cumulative mode’ with  ’S’, which  is a command-line option and an interactive command.  See the ’S’ interactive command for additional  information  regarding  this mode.
 </string>
@@ -116,6 +183,12 @@
      </item>
      <item row="3" column="1">
       <widget class="QCheckBox" name="chkWCPU">
+       <property name="maximumSize">
+        <size>
+         <width>300</width>
+         <height>16777215</height>
+        </size>
+       </property>
        <property name="text">
         <string>%WCPU</string>
        </property>
@@ -126,6 +199,12 @@
      </item>
      <item row="4" column="0">
       <widget class="QCheckBox" name="chkMem">
+       <property name="maximumSize">
+        <size>
+         <width>300</width>
+         <height>16777215</height>
+        </size>
+       </property>
        <property name="text">
         <string>Memory</string>
        </property>
@@ -136,6 +215,12 @@
      </item>
      <item row="4" column="1">
       <widget class="QCheckBox" name="chkCMDline">
+       <property name="maximumSize">
+        <size>
+         <width>300</width>
+         <height>16777215</height>
+        </size>
+       </property>
        <property name="toolTip">
         <string>Display the command line used to start a task or  the  name  of  the associated  program.   You toggle between command line and name with’c’, which is both a command-line option and an interactive command.
 </string>
@@ -150,6 +235,12 @@
      </item>
      <item row="5" column="0">
       <widget class="QCheckBox" name="chkPMem">
+       <property name="maximumSize">
+        <size>
+         <width>300</width>
+         <height>16777215</height>
+        </size>
+       </property>
        <property name="toolTip">
         <string>A task’s currently used share of available physical memory.
 </string>
@@ -164,6 +255,12 @@
      </item>
      <item row="5" column="1">
       <widget class="QCheckBox" name="chkUID">
+       <property name="maximumSize">
+        <size>
+         <width>300</width>
+         <height>16777215</height>
+        </size>
+       </property>
        <property name="toolTip">
         <string>The effective user ID of the task’s owner.
 </string>
@@ -178,6 +275,12 @@
      </item>
      <item row="6" column="0">
       <widget class="QCheckBox" name="chkStackSize">
+       <property name="maximumSize">
+        <size>
+         <width>300</width>
+         <height>16777215</height>
+        </size>
+       </property>
        <property name="text">
         <string>Stack size</string>
        </property>
@@ -188,6 +291,12 @@
      </item>
      <item row="6" column="1">
       <widget class="QCheckBox" name="chkUsrName">
+       <property name="maximumSize">
+        <size>
+         <width>300</width>
+         <height>16777215</height>
+        </size>
+       </property>
        <property name="toolTip">
         <string>The effective user name of the task’s owner.
 </string>
@@ -202,6 +311,12 @@
      </item>
      <item row="7" column="0">
       <widget class="QCheckBox" name="chkWchan">
+       <property name="maximumSize">
+        <size>
+         <width>300</width>
+         <height>16777215</height>
+        </size>
+       </property>
        <property name="toolTip">
         <string>Depending on the availability of the kernel link map (’System.map’), this field will show the name or the address of the kernel  function in which the task is currently sleeping.  Running tasks will display a dash (’-’) in this column.
 </string>
@@ -216,6 +331,12 @@
      </item>
      <item row="7" column="1">
       <widget class="QCheckBox" name="chkSleepAvg">
+       <property name="maximumSize">
+        <size>
+         <width>300</width>
+         <height>16777215</height>
+        </size>
+       </property>
        <property name="text">
         <string>sleep average</string>
        </property>
@@ -226,6 +347,12 @@
      </item>
      <item row="8" column="0">
       <widget class="QCheckBox" name="chkWhichCPU">
+       <property name="maximumSize">
+        <size>
+         <width>300</width>
+         <height>16777215</height>
+        </size>
+       </property>
        <property name="toolTip">
         <string>A  number representing the last used processor.  In a true SMP environment this will likely change frequently since the  kernel  intentionally  uses weak affinity.  Also, the very act of running top may break this weak affinity and cause more  processes  to  change  CPUs more often (because of the extra demand for cpu time).
 </string>
@@ -242,6 +369,12 @@
       <widget class="QCheckBox" name="chkStat">
        <property name="enabled">
         <bool>true</bool>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>300</width>
+         <height>16777215</height>
+        </size>
        </property>
        <property name="toolTip">
         <string>The status of the task which can be one of:
@@ -262,24 +395,99 @@
      </item>
     </layout>
    </item>
-   <item row="1" column="0">
-    <layout class="QHBoxLayout" name="horizontalLayout"/>
-   </item>
-   <item row="2" column="0">
-    <spacer name="verticalSpacer">
-     <property name="orientation">
-      <enum>Qt::Vertical</enum>
-     </property>
-     <property name="sizeHint" stdset="0">
-      <size>
-       <width>20</width>
-       <height>40</height>
-      </size>
-     </property>
-    </spacer>
+   <item row="3" column="1">
+    <layout class="QVBoxLayout" name="verticalLayout">
+     <item>
+      <spacer name="verticalSpacer_3">
+       <property name="orientation">
+        <enum>Qt::Vertical</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>20</width>
+         <height>40</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <layout class="QHBoxLayout" name="horizontalLayout">
+       <item>
+        <spacer name="horizontalSpacer">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeType">
+          <enum>QSizePolicy::Preferred</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>150</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item>
+        <widget class="QPushButton" name="btnApply">
+         <property name="minimumSize">
+          <size>
+           <width>150</width>
+           <height>0</height>
+          </size>
+         </property>
+         <property name="maximumSize">
+          <size>
+           <width>150</width>
+           <height>16777215</height>
+          </size>
+         </property>
+         <property name="text">
+          <string>Apply</string>
+         </property>
+         <property name="icon">
+          <iconset resource="image.qrc">
+           <normaloff>:/image/use/package-installed-updated.png</normaloff>:/image/use/package-installed-updated.png</iconset>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <spacer name="horizontalSpacer_2">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeType">
+          <enum>QSizePolicy::Preferred</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>40</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+      </layout>
+     </item>
+     <item>
+      <spacer name="verticalSpacer">
+       <property name="orientation">
+        <enum>Qt::Vertical</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>20</width>
+         <height>40</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+    </layout>
    </item>
   </layout>
  </widget>
- <resources/>
+ <resources>
+  <include location="image.qrc"/>
+ </resources>
  <connections/>
 </ui>

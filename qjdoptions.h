@@ -40,13 +40,15 @@ protected:
     void changeEvent(QEvent *e);
 
 signals:
-    void sigCloseTab();
     void sigCloseOption();
 
 public slots:
     void handleCheck();
 
 private slots:
+
+private slots:
+    void on_btnApply_clicked();
 };
 
 #endif // QJDOPTIONS_H

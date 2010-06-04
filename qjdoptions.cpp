@@ -159,3 +159,8 @@ void qjdoptions::handleCheck()
     if(ui->chkWhichCPU->isChecked()==false)    whichCpu  =false;
 
 }
+
+void qjdoptions::on_btnApply_clicked()
+{
+    emit sigCloseOption();
+}

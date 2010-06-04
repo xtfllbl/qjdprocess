@@ -12,5 +12,6 @@
         <file>image/use/window-close.png</file>
         <file>image/use/object-rotate-right.png</file>
         <file>image/use/evolution-addressbook.png</file>
+        <file>image/use/gtk-edit.png</file>
     </qresource>
 </RCC>

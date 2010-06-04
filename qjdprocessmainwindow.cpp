@@ -21,6 +21,7 @@ qjdProcessMainWindow::qjdProcessMainWindow(QWidget *parent) :
     ui->setupUi(this);
     ui->tblMain->installEventFilter(this);
     ui->tblMain->setFocusPolicy(Qt::StrongFocus);
+    ui->actionSystemProcess->setChecked(true);
 
     filterEdit=new qjdFilterLineEdit();     // 自有LineEdit
     ui->horizontalLayoutSys->insertWidget(0,filterEdit);
@@ -55,6 +56,8 @@ qjdProcessMainWindow::qjdProcessMainWindow(QWidget *parent) :
     whichCpu2=true;
 
     hasOptions=false;
+
+    willRemoveRecord=false;
     //    qjdtable=new qjdTable(this);
     //    setTable(); //设置table
 
@@ -117,10 +120,22 @@ qjdProcessMainWindow::qjdProcessMainWindow(QWidget *parent) :
     menu=NULL;
     ui->tblMain->setContextMenuPolicy(Qt::CustomContextMenu);
     connect(ui->tblMain, SIGNAL(customContextMenuRequested(const QPoint&)),
-            this, SLOT(showContextMenu(const QPoint&)));//this是datatable所在窗口
+            this, SLOT(showContextMenuTblMain(const QPoint&)));
+
+    menu2=NULL;
+    ui->tableJob->setContextMenuPolicy(Qt::CustomContextMenu);
+    /// 同时要连接2个信号和2个槽
+    // 目前为止按找顺序执行，不知更换平台后会发生什么
+    connect(ui->tableJob, SIGNAL(customContextMenuRequested(const QPoint&)),this, SLOT(prepareToShowTableJob())); // must run 1st
+    connect(ui->tableJob, SIGNAL(cellClicked(int,int)),this, SLOT(showContextMenuTableJob(int,int))); // must run 2nd
+
+    menuShowLog=NULL;
+    ui->historyTable->setContextMenuPolicy(Qt::CustomContextMenu);
+    connect(ui->historyTable, SIGNAL(customContextMenuRequested(const QPoint&)),this, SLOT(prepareToShowLog())); // must run 1st
+    connect(ui->historyTable, SIGNAL(cellClicked(int,int)),this, SLOT(showContextMenuHistoryTable(int,int))); // must run 2nd
 
     //设置右键显示的内容,以及执行槽
-    menu = new QMenu(ui->tblMain);
+    menu = new QMenu(ui->tblMain); //设置为tblMain的菜单
     actStop = menu->addAction("Stop");
     actCon = menu->addAction("Continue");
     actTer = menu->addAction("Terminate");
@@ -132,6 +147,19 @@ qjdProcessMainWindow::qjdProcessMainWindow(QWidget *parent) :
     connect(actStop, SIGNAL(triggered()), this, SLOT(stopProcess()));
     connect(actCon, SIGNAL(triggered()), this, SLOT(conProcess()));
 
+    menu2 = new QMenu(ui->tableJob); //设置为tableJob的菜单
+    actSaveAs = menu2->addAction("Save As...");
+    //    actRefresh = menu2->addAction("Refresh");
+    actClose = menu2->addAction("Close");
+    connect(actSaveAs, SIGNAL(triggered()), this, SLOT(saveLog()));
+    //    connect(actRefresh, SIGNAL(triggered()), this, SLOT(refreshLog()));
+    connect(actClose, SIGNAL(triggered()), this, SLOT(closeLog()));
+
+    menuShowLog = new QMenu(ui->historyTable); //设置为tableJob的菜单
+    actShowLog = menuShowLog->addAction("Show Detail Log");
+    delLog = menuShowLog->addAction("Delete this Record");
+    connect(actShowLog, SIGNAL(triggered()), this, SLOT(on_btnShowLog_clicked()));
+    connect(delLog, SIGNAL(triggered()), this, SLOT(deleteLog()));
     // 按要求显示进程名称
     connect(ui->comboProcess,SIGNAL(currentIndexChanged(int)),this,SLOT(autoRefresh()));
 
@@ -139,9 +167,9 @@ qjdProcessMainWindow::qjdProcessMainWindow(QWidget *parent) :
     filterText="";
     setData();
 
-
     /// --------------------------------------------------------------------------------------------------------///
-//    task=new qjdTask(this);  决定移植到这个类，不用初始化了
+
+    importFileName="/home/xtf/pathFile.index"; // 默认索引文件位置
 
     ui->historyTable->setSortingEnabled(false);       //自动排序关闭
     ui->historyTable->horizontalHeader()->setSortIndicatorShown(true);
@@ -155,10 +183,17 @@ qjdProcessMainWindow::qjdProcessMainWindow(QWidget *parent) :
     connect(timerA, SIGNAL(timeout()), this, SLOT(refreshTable()));
     setFirstActiveTableData();  /// 用来设置hash表的，既然移植过来了，看看可否去掉或者简化
     /// --------------------------------------------------------------------------------------------------------///
+
+    hashLog.insert(0,1);
+    hashLog.insert(1,2);
+
     /// 可以删除一个tab，用处很大
     /// 准备随时添加tab
+
     options=new qjdoptions();
-    ui->tabWidgetSysProcess->insertTab(1,options,"Choose Field");
+    optionsIndex=ui->stackedWidgetPage->addWidget(options);
+    connect(options,SIGNAL(sigCloseOption()),this,SLOT(closeOption()));
+    //    options->setMouseTracking(true);
 
     if(cmd2==true)
     {
@@ -229,14 +264,14 @@ qjdProcessMainWindow::qjdProcessMainWindow(QWidget *parent) :
         options->ui->chkUsrName->setChecked(true);
     }
 
-    ui->tableChoose->setCurrentCell(0,0);
-    ui->tableChoose->item(2,0)->setFlags(Qt::NoItemFlags);
+    ui->tableSys->setCurrentCell(0,0);
+    ui->stackedWidgetTable->setCurrentIndex(0);
+    ui->stackedWidgetPage->setCurrentIndex(0);
+    ui->actionSystem_Monitor->setChecked(true);
 
-    ui->stackedWidget->setCurrentIndex(0);
     countRestartTimes=0;
 
-    // 放在下面connect，如果不disconnect，会产生多次连接，直接导致槽函数的多次调用
-    connect(ui->tabWidgetLog,SIGNAL(tabCloseRequested(int)),this,SLOT(closeTabLog(int)));
+    qDebug()<<"gou zao wan cheng";
 }
 
 qjdProcessMainWindow::~qjdProcessMainWindow()
@@ -444,12 +479,36 @@ void qjdProcessMainWindow::setData()
         if(ui->comboProcess->currentIndex()==0)
         {
             flagUse=true;       //所有情况全部符合
+            /// 加入过滤器
+            if(filterText!="")
+            {
+                if(itemCmd->text().contains(filterText,Qt::CaseInsensitive))
+                {
+                    flagUse=true;
+                }
+                else
+                {
+                    flagUse=false;
+                }
+            }
         }
         if(ui->comboProcess->currentIndex()==1)
         {
             if(proc->uidVector.at(i)>=500)
             {
                 flagUse=true;
+                /// 加入过滤器
+                if(filterText!="")
+                {
+                    if(itemCmd->text().contains(filterText,Qt::CaseInsensitive))
+                    {
+                        flagUse=true;
+                    }
+                    else
+                    {
+                        flagUse=false;
+                    }
+                }
             }
             else
             {
@@ -461,18 +520,18 @@ void qjdProcessMainWindow::setData()
             if(proc->statVector.at(i)=="R")
             {
                 flagUse=true;
-            }
-            else
-            {
-                flagUse=false;
-            }
-        }
-        /// 加入过滤器
-        if(filterText!="")
-        {
-            if(itemCmd->text().contains(filterText,Qt::CaseInsensitive))
-            {
-                flagUse=true;
+                /// 加入过滤器
+                if(filterText!="")
+                {
+                    if(itemCmd->text().contains(filterText,Qt::CaseInsensitive))
+                    {
+                        flagUse=true;
+                    }
+                    else
+                    {
+                        flagUse=false;
+                    }
+                }
             }
             else
             {
@@ -764,12 +823,46 @@ void qjdProcessMainWindow::on_tblMain_pressed(QModelIndex index)
     else selfID=0;
 }
 
-void qjdProcessMainWindow::showContextMenu(QPoint )
+void qjdProcessMainWindow::showContextMenuTblMain(QPoint )
 {
     if(menu)
     {
         menu->exec(QCursor::pos());
     }
+}
+
+void qjdProcessMainWindow::prepareToShowTableJob()
+{
+    //    qDebug()<<"IN 1";
+    rightClick=true;
+}
+
+void qjdProcessMainWindow::showContextMenuTableJob(int a,int b)
+{
+    //    qDebug()<<"IN 2";
+    //    savedRow=a;
+    if(menu2 && a>2 && rightClick==true)
+    {        
+        menu2->exec(QCursor::pos());
+    }
+    rightClick=false;
+}
+
+void qjdProcessMainWindow::prepareToShowLog()
+{
+    //    qDebug()<<"IN 1";
+    rightClick2=true;
+}
+
+void qjdProcessMainWindow::showContextMenuHistoryTable(int a,int b)
+{
+    //    qDebug()<<"IN 2";
+    //    savedRow=a;
+    if(rightClick2==true)
+    {
+        menuShowLog->exec(QCursor::pos());
+    }
+    rightClick2=false;
 }
 
 void qjdProcessMainWindow::killProcess()
@@ -2346,7 +2439,7 @@ void qjdProcessMainWindow::setFirstActiveTableData()
     }
     if (stream.hasError())
     {
-          qDebug()<<"do error handling";
+        qDebug()<<"do error handling";
     }
     fp.close();
 
@@ -2384,7 +2477,7 @@ void qjdProcessMainWindow::setHistoryTableData()
     // 由于是append，所以为读取到最后一个为准
     /// TODO:文件变大之后非常缓慢，函数需要分离,遍历的事情只要做一边
     /// 这个设置公共文件的路径想办法弄一下
-    pubFile.setFileName("/home/xtf/pathFile.index");
+    pubFile.setFileName(importFileName);
     pubFile.open(QFile::ReadOnly);
 
     isPnameJob=false;
@@ -2392,6 +2485,13 @@ void qjdProcessMainWindow::setHistoryTableData()
     isArgPathJob=false;
     isLogPathJob=false;
     isStimeJob=false;
+    isRecordJob=false;
+    tempRecordJob.clear();
+    pnameJob.clear();
+    priPathJob.clear();
+    argPathJob.clear();
+    logPathJob.clear();
+    stimeJob.clear();
 
     QXmlStreamReader stream(&pubFile);
     while (!stream.atEnd())
@@ -2410,6 +2510,10 @@ void qjdProcessMainWindow::setHistoryTableData()
         {
             /// 无法读取后面的链接
             QString name=stream.name().toString();
+            if(name=="Record")
+            {
+                isRecordJob=true;
+            }
             if(name=="Process_Name")
             {
                 isPnameJob=true;
@@ -2437,6 +2541,11 @@ void qjdProcessMainWindow::setHistoryTableData()
         if(a==6)
         {
             QString text=stream.text().toString();
+            if(isRecordJob==true)
+            {
+                tempRecordJob<<text;
+                isRecordJob=false;
+            }
             if(isPnameJob==true)
             {
                 pnameJob<<text;
@@ -2469,7 +2578,7 @@ void qjdProcessMainWindow::setHistoryTableData()
         qDebug()<<"do error handling";
     }
     pubFile.close();
-//    qDebug()<<pnameJob<<priPathJob<<argPathJob<<stimeJob;
+    //    qDebug()<<pnameJob<<priPathJob<<argPathJob<<stimeJob;
 
     /// ------------------------------------------------------------------------------------------------------------------- ///
     // 设置行数，不设置会显示不出
@@ -2484,7 +2593,7 @@ void qjdProcessMainWindow::setHistoryTableData()
         ui->historyTable->setItem(i,1,itemStime);
 
         priFile.setFileName(priPathJob[i]);
-//        qDebug()<<priFile.fileName();
+        //        qDebug()<<priFile.fileName();
         if(!priFile.open(QFile::ReadOnly))
             qDebug()<<"open failure";
 
@@ -2584,64 +2693,72 @@ void qjdProcessMainWindow::setHistoryTableData()
 
 void qjdProcessMainWindow::on_historyTable_clicked(QModelIndex index)
 {
-    selectRowNum=index.row();
-    //    setHistoryTableArguments();
-    fHisArgu.setFileName(argPathJob[selectRowNum]);
-    ui->labelArguFileName->setText(argPathJob[selectRowNum]);
-    if(!fHisArgu.open(QFile::ReadOnly))
-        qDebug()<<"open histable argu failure";
-    else
-        qDebug()<<"open histable argu success";
-    /// 需要点击才显示相关参数
-    // TODO:现在仍然是全部显示，没有任何的解析，最好通过解析参数文件，自行生成界面！！！！
-    bool isArgu=false;
-    QVector<QString> arguName;
-    QVector<QString> arguMents;
-    QXmlStreamReader stream(&fHisArgu);
-    while (!stream.atEnd())
+    if(willRemoveRecord==true)
     {
-        int a= stream.readNext();
-
-        if(a==4)
+        willRemoveRecord=false;
+        return;
+    }
+    if(willRemoveRecord==false)
+    {
+        selectRowNum=index.row();
+        //    setHistoryTableArguments();
+        fHisArgu.setFileName(argPathJob[selectRowNum]);
+        ui->labelArguFileName->setText(argPathJob[selectRowNum]);
+        if(!fHisArgu.open(QFile::ReadOnly))
+            qDebug()<<"open histable argu failure";
+        else
+            qDebug()<<"open histable argu success";
+        /// 需要点击才显示相关参数
+        // TODO:现在仍然是全部显示，没有任何的解析，最好通过解析参数文件，自行生成界面！！！！
+        bool isArgu=false;
+        QVector<QString> arguName;
+        QVector<QString> arguMents;
+        QXmlStreamReader stream(&fHisArgu);
+        while (!stream.atEnd())
         {
-            /// 无法读取后面的链接
-//            qDebug()<<"a=4 stream.name"<<stream.name();      // 难办，开头项也是在这里被读出，不太好处理
-            QString name=stream.name().toString();
-            if(name.isEmpty()==false && name.isNull()==false)
+            int a= stream.readNext();
+
+            if(a==4)
             {
-                isArgu=true;
-                arguName<<name;
+                /// 无法读取后面的链接
+                //            qDebug()<<"a=4 stream.name"<<stream.name();      // 难办，开头项也是在这里被读出，不太好处理
+                QString name=stream.name().toString();
+                if(name.isEmpty()==false && name.isNull()==false)
+                {
+                    isArgu=true;
+                    arguName<<name;
+                }
+            }
+            if(a==6)
+            {
+                QString text=stream.text().toString();
+                if(isArgu==true)
+                {
+                    isArgu=false;
+                    arguMents<<text;
+                }
             }
         }
-        if(a==6)
+        if (stream.hasError())
         {
-            QString text=stream.text().toString();
-            if(isArgu==true)
-            {
-                isArgu=false;
-                arguMents<<text;
-            }
+            qDebug()<<"do error handling"<<stream.errorString();
         }
-    }
-    if (stream.hasError())
-    {
-        qDebug()<<"do error handling"<<stream.errorString();
-    }
 
-    QByteArray hisArgu;
-    for(int i=0;i<arguName.size();i++)
-    {
-        hisArgu.append(arguName[i]);
-        hisArgu.append(":");
-        hisArgu.append(arguMents[i]);
-        hisArgu.append("\n");
+        QByteArray hisArgu;
+        for(int i=0;i<arguName.size();i++)
+        {
+            hisArgu.append(arguName[i]);
+            hisArgu.append(":");
+            hisArgu.append(arguMents[i]);
+            hisArgu.append("\n");
+        }
+        ui->historyArguBrowser->setText(hisArgu);
+
+        fHisArgu.close();
+
+        //    ui->btnRestart->setEnabled(true);   //开启restart
+        ui->btnShowLog->setEnabled(true);
     }
-    ui->historyArguBrowser->setText(hisArgu);
-
-    fHisArgu.close();
-
-//    ui->btnRestart->setEnabled(true);   //开启restart
-    ui->btnShowLog->setEnabled(true);
 }
 
 void qjdProcessMainWindow::on_activeTable_clicked(QModelIndex index)
@@ -2667,7 +2784,7 @@ void qjdProcessMainWindow::on_activeTable_clicked(QModelIndex index)
         if(a==4)
         {
             /// 无法读取后面的链接
-//            qDebug()<<"a=4 stream.name"<<stream.name();      // 难办，开头项也是在这里被读出，不太好处理
+            //            qDebug()<<"a=4 stream.name"<<stream.name();      // 难办，开头项也是在这里被读出，不太好处理
             QString name=stream.name().toString();
             if(name.isEmpty()==false && name.isNull()==false)
             {
@@ -2725,7 +2842,7 @@ void qjdProcessMainWindow::setActiveTableData()
         ui->activeTable->setItem(i,1,itemActiveStime);
 
         fActive.setFileName(priPathJob[hashActive.value(cmdKeys[i])]);
-//        qDebug()<<fActive.fileName();
+        //        qDebug()<<fActive.fileName();
         if(!fActive.open(QFile::ReadOnly))
             qDebug()<<"open failure";
 
@@ -2757,16 +2874,16 @@ void qjdProcessMainWindow::setActiveTableData()
             }
             if(a==2)
             {
-//                qDebug()<<stream.isStandaloneDocument();
+                //                qDebug()<<stream.isStandaloneDocument();
             }
             if(a==3)
             {
-//                qDebug()<<stream.isStandaloneDocument();
+                //                qDebug()<<stream.isStandaloneDocument();
             }
             if(a==4)
             {
                 /// 无法读取后面的链接
-//                qDebug()<<"a=4 stream.name"<<stream.name();      // 难办，开头项也是在这里被读出，不太好处理
+                //                qDebug()<<"a=4 stream.name"<<stream.name();      // 难办，开头项也是在这里被读出，不太好处理
                 QString name=stream.name().toString();
                 if(name=="Current_Time")
                 {
@@ -2791,11 +2908,11 @@ void qjdProcessMainWindow::setActiveTableData()
             }
             if(a==5)
             {
-//                qDebug()<<"a=5 stream.name"<<stream.name();
+                //                qDebug()<<"a=5 stream.name"<<stream.name();
             }
             if(a==6)
             {
-//                qDebug()<<"a=6 stream.text"<<stream.text();
+                //                qDebug()<<"a=6 stream.text"<<stream.text();
                 QString text=stream.text().toString();
                 if(isCurrentTimeJob==true)
                 {
@@ -2845,19 +2962,6 @@ void qjdProcessMainWindow::setActiveTableData()
     ui->activeTable->resizeColumnsToContents();
 }
 
-void qjdProcessMainWindow::on_tabWidgetJob_selected(QString selected)
-{
-    // 不要尝试在判断中connect，和disconnect,会有逻辑错误
-    if(selected=="Active Task")
-    {
-        timerA->start(3000);
-    }
-    else
-    {
-        timerA->stop();
-    }
-}
-
 void qjdProcessMainWindow::closeEvent(QCloseEvent *)
 {
     //备用
@@ -2875,30 +2979,20 @@ void qjdProcessMainWindow::closeEvent(QCloseEvent *)
 
 void qjdProcessMainWindow::on_actionStart_Process_triggered()
 {
-    startTask=new qjdStartTask();
-    startTask->setAttribute(Qt::WA_DeleteOnClose);  //添加这句以备删除,程序仍然会崩溃
+    /// 什么也不做
+    //    startTask=new qjdStartTask();
+    //    startTask->setAttribute(Qt::WA_DeleteOnClose);  //添加这句以备删除,程序仍然会崩溃
 
-    ui->stackedWidget->setCurrentIndex(1);
-    ui->tableChoose->setCurrentCell(1,0);
-    ui->tabWidgetJob->insertTab(2,startTask,"Start Task");
-    ui->tabWidgetJob->setCurrentIndex(2);
-    connect(startTask,SIGNAL(sigCloseStartTask()),this,SLOT(closeTabStartTask()));
+    //    ui->stackedWidgetPage->setCurrentIndex(1);
+    //    ui->tableSys->setCurrentCell(1,0);
+    ////    ui->tabWidgetJob->insertTab(2,startTask,"Start Task");
+    ////    ui->tabWidgetJob->setCurrentIndex(2);
+    //    connect(startTask,SIGNAL(sigCloseStartTask()),this,SLOT(closeTabStartTask()));
 }
 
 void qjdProcessMainWindow::on_historyTable_cellDoubleClicked(int row, int column)
 {
     qDebug()<<row<<column;
-}
-
-void qjdProcessMainWindow::closeTabStartTask()
-{
-//    /// 删除当前widget,仍然会导致崩溃
-//    qDebug()<<ui->tabWidgetJob->currentWidget();
-//    ui->tabWidgetJob->currentWidget()->close();
-    /// 目前仅仅是移出tab而已，原始的widget仍然存留在内存中
-    ui->tabWidgetJob->removeTab( ui->tabWidgetJob->currentIndex());
-
-    disconnect(startTask,SIGNAL(sigCloseStartTask()),this,SLOT(closeTabStartTask()));
 }
 
 void qjdProcessMainWindow::refreshTable()
@@ -2917,35 +3011,36 @@ void qjdProcessMainWindow::refreshTable()
     setFirstActiveTableData();
 }
 
-void qjdProcessMainWindow::closeTabRestartTask()
-{
-    ui->tabWidgetJob->removeTab(ui->tabWidgetJob->currentIndex());
-}
 
 void qjdProcessMainWindow::on_btnShowLog_clicked()
 {
+    /// 如此创建对象，则connect多次，引起错误
+    // 未解决
     showLog=new qjdShowLog();
 
-    ui->tableChoose->item(2,0)->setFlags(Qt::ItemIsEnabled|Qt::ItemIsSelectable);
     int a=ui->historyTable->currentRow();
-    showLog->showLog(logPathJob.at(a));
+    showLog->showLog(logPathJob.at(a)); // 调用函数显示
     QString tabName=logPathJob.at(a);
-    ui->tabWidgetLog->insertTab(0,showLog,tabName);
-    ui->tableChoose->setCurrentCell(2,0);
-    ui->stackedWidget->setCurrentIndex(2);
-    ui->tabWidgetLog->setCurrentIndex(0);
-}
+    tabName=tabName.left(tabName.indexOf(".log"));
+    qDebug()<<tabName.lastIndexOf("/");
+    tabName=tabName.right(tabName.size()-1-tabName.lastIndexOf("/"));   //由于是index所以size要减一
+    tabName.replace("_"," ");
+    hashFileName.insert(tabName,logPathJob.at(a));  //保存显示名字于真实路径的关系
 
-void qjdProcessMainWindow::closeTabLog(int index)
-{
-    qDebug()<<"current widget:"<<ui->tabWidgetLog->currentWidget();
-    ui->tabWidgetLog->removeTab(index);
-    if(ui->tabWidgetLog->currentIndex()==-1)
-    {
-        ui->tableChoose->item(2,0)->setFlags(Qt::NoItemFlags);
-        ui->tableChoose->setCurrentCell(1,0);
-        ui->stackedWidget->setCurrentIndex(1);
-    }
+    int temp=ui->stackedWidgetPage->addWidget(showLog);
+    ui->stackedWidgetPage->setCurrentIndex(temp);
+
+    /// 在table中添加widget用来显示,还没解决对应问题,哈西表》
+    QTableWidgetItem *newItem = new QTableWidgetItem();
+    newItem->setText(tabName);      //名称太长，必须精简
+    ui->tableJob->setRowCount(ui->tableJob->rowCount()+1);      //加一行
+    ui->tableJob->setItem(ui->tableJob->rowCount()-1, 0, newItem);  //减一成为index
+    ui->tableJob->setCurrentCell(ui->tableJob->rowCount()-1,0); //理由同上
+
+    /// 保存table于widget之间的对应关系
+    // <table.index, stack.index>
+    hashLog.insert(ui->tableJob->currentRow(),ui->stackedWidgetPage->currentIndex());
+    qDebug()<<hashLog;
 }
 
 void qjdProcessMainWindow::filterProcess()
@@ -2966,14 +3061,33 @@ void qjdProcessMainWindow::filterProcess()
 
 void qjdProcessMainWindow::closeOption()
 {
-    ui->tabWidgetSysProcess->removeTab(1);  //删除tab
+    handleChooseField();
+    machineRefresh=true;
+    vectorClear();
+    proc->refresh();        //refresh 就开始泄漏了
+    if(flagSort==true)
+    {
+        headerSort();
+        setSortData();
+    }
+    setData();
+
     ui->tblMain->resizeColumnsToContents();
+    ui->tableSys->setCurrentCell(0,0);
+    ui->stackedWidgetPage->setCurrentIndex(0);
 }
 
-void qjdProcessMainWindow::on_tabWidgetSysProcess_selected(QString title)
+void qjdProcessMainWindow::on_tableSys_itemClicked(QTableWidgetItem* item)
 {
-    if(title=="Sys Process")
+    if(item->row()==0)
     {
+        ui->stackedWidgetPage->setCurrentIndex(0);
+        ui->actionSystem_Monitor->setChecked(true);
+        ui->actionChoose_Field->setChecked(false);
+        ui->actionAll_task->setChecked(false);
+        ui->actionActive_Task->setChecked(false);
+
+        /// 完成选项的选择
         handleChooseField();
         machineRefresh=true;
         vectorClear();
@@ -2985,22 +3099,360 @@ void qjdProcessMainWindow::on_tabWidgetSysProcess_selected(QString title)
         }
         setData();
     }
+    if(item->row()==1)
+    {
+        ui->stackedWidgetPage->setCurrentIndex(optionsIndex);
+        ui->actionSystem_Monitor->setChecked(false);
+        ui->actionChoose_Field->setChecked(true);
+        ui->actionAll_task->setChecked(false);
+        ui->actionActive_Task->setChecked(false);    }
 }
 
-void qjdProcessMainWindow::on_tableChoose_itemClicked(QTableWidgetItem* item)
+void qjdProcessMainWindow::on_actionSystemProcess_triggered(bool check)
 {
-//    qDebug()<<item;
-    if(item->row()==0)
+    if(check==true || check==false)
     {
-        ui->stackedWidget->setCurrentIndex(0);
+        qDebug()<<"check sys true or false";
+        ui->actionSystemProcess->setChecked(true);
+        ui->actionJobControl->setChecked(false);
+
+        ui->stackedWidgetTable->setCurrentIndex(0);
+        ui->stackedWidgetPage->setCurrentIndex(0);
+        ui->tableSys->setCurrentCell(0,0);
+
+        ui->actionSystem_Monitor->setChecked(true);
+        ui->actionChoose_Field->setChecked(false);
+        ui->actionAll_task->setChecked(false);
+        ui->actionActive_Task->setChecked(false);
+    }
+}
+
+void qjdProcessMainWindow::on_actionJobControl_triggered(bool check)
+{
+    if(check==true || check==false)
+    {
+        qDebug()<<"check job true or false";
+        ui->actionJobControl->setChecked(true);
+        ui->actionSystemProcess->setChecked(false);
+
+        ui->stackedWidgetTable->setCurrentIndex(1);
+        ui->stackedWidgetPage->setCurrentIndex(1);
+        ui->tableJob->setCurrentCell(0,0);
+
+        ui->actionSystem_Monitor->setChecked(false);
+        ui->actionChoose_Field->setChecked(false);
+        ui->actionAll_task->setChecked(true);
+        ui->actionActive_Task->setChecked(false);
+    }
+}
+
+void qjdProcessMainWindow::on_tableJob_itemClicked(QTableWidgetItem* item)
+{
+    int rowToShow=item->row();
+    qDebug()<<ui->tableJob->currentRow()<<item->row();
+    if(item->row()==2)
+    {
+        rowToShow=ui->tableJob->currentRow();  //保证横线不被错误索引显示
     }
     if(item->row()==1)
     {
-        ui->stackedWidget->setCurrentIndex(1);
+        timerA->start(3000);    //开始了就不暂停了
     }
-    /// 真是让人难看的写法。。。
-    if(item->row()==2 && item->flags()==(Qt::ItemIsSelectable|Qt::ItemIsEnabled))
+    ui->stackedWidgetPage->setCurrentIndex(hashLog.value(rowToShow));
+    if(rowToShow==0)
     {
-        ui->stackedWidget->setCurrentIndex(2);
+        ui->actionSystem_Monitor->setChecked(false);
+        ui->actionChoose_Field->setChecked(false);
+        ui->actionAll_task->setChecked(true);
+        ui->actionActive_Task->setChecked(false);
+    }
+    if(rowToShow==1)
+    {
+        ui->actionSystem_Monitor->setChecked(false);
+        ui->actionChoose_Field->setChecked(false);
+        ui->actionAll_task->setChecked(false);
+        ui->actionActive_Task->setChecked(true);
     }
 }
+
+void qjdProcessMainWindow::saveLog()
+{
+    qDebug()<<"save log";
+    /// 直接有方法，不需要手工复制
+    QString saveFileName=QFileDialog::getSaveFileName(this,tr("Save As..."), "/home/xtf", tr("Log Files (*.log *.txt )"));
+    QString originFileName=hashFileName.value(ui->tableJob->currentItem()->text());
+
+    if(!QFile::copy(originFileName,saveFileName))
+        qDebug()<<"Save As... Failed";
+}
+
+void qjdProcessMainWindow::refreshLog()
+{
+    /// 更新原有showLog，产生一定的麻烦,不如关闭再开来的实在
+    // 使源程序自带刷新？
+    qDebug()<<"TODO:refresh log";
+    //    ui->stackedWidgetPage->currentWidget()->
+}
+
+void qjdProcessMainWindow::closeLog()
+{
+    /// 仅仅是关闭窗口而已
+    qDebug()<<"close log";
+    ui->stackedWidgetPage->removeWidget(ui->stackedWidgetPage->currentWidget());
+    // 关闭之后的后续工作
+    //    hashLog.remove(ui->tableJob->currentRow()); // 不能删除，因为之前的对应关系还会正确，这是由于直接把widget remove掉了，而不是hide
+    ui->tableJob->removeRow(ui->tableJob->currentRow());  //移除被关闭的项目
+
+    if(ui->tableJob->currentRow()<=2)
+    {
+        ui->stackedWidgetPage->setCurrentIndex(2);
+    }
+}
+
+void qjdProcessMainWindow::deleteLog()
+{
+    qDebug()<<"del Log";
+    // 此处需要弹出对话框，表示谨慎删除
+    QMessageBox msgBox;
+    msgBox.setText("The record you choose will be deleted.");
+    msgBox.setInformativeText("Do you really want to delete it?");
+    msgBox.setIcon(QMessageBox::Warning);
+    /// 暂时不使用保存，请选择导出功能
+    msgBox.setStandardButtons(/*QMessageBox::Save |*/ QMessageBox::Ok | QMessageBox::Cancel);
+    msgBox.setDefaultButton(QMessageBox::Cancel);
+    int ret = msgBox.exec();
+    switch (ret)
+    {
+        //    case QMessageBox::Save:
+        //        qDebug()<<"save this record";  //保存文件
+        //        break;
+    case QMessageBox::Ok:
+        deleteRecord();  //删除文件
+        break;
+    case QMessageBox::Cancel:
+        // Cancel was clicked
+        return;
+        break;
+    default:
+        qDebug()<<" should never be reached";
+        break;
+    }
+
+
+}
+
+void qjdProcessMainWindow::deleteRecord()
+{
+    int index=ui->historyTable->currentRow();
+    /// 删除一条记录的所有文件
+    /// 1. 删除相关的3个log文件
+    if(!QFile::remove(priPathJob.at(index)))
+        qDebug()<<"remove pri file failed, may be it dosen`t existed at all";
+    if(!QFile::remove(argPathJob.at(index)))
+        qDebug()<<"remove pri file failed, may be it dosen`t existed at all";
+    if(!QFile::remove(logPathJob.at(index)))
+        qDebug()<<"remove pri file failed, may be it dosen`t existed at all";
+
+    /// 2.删除公共文件中的记录(麻烦，需要解析xml，判断位置)
+    // 2.1 删除相关记录
+    pnameJob.remove(index);
+    priPathJob.remove(index);
+    argPathJob.remove(index);
+    logPathJob.remove(index);
+    stimeJob.remove(index);
+
+    // 2.2 准备重写文件
+    pubFile.setFileName(importFileName);
+    if(!pubFile.open(QFile::WriteOnly))
+        qDebug()<<"pubFile open failed";
+
+    QXmlStreamWriter writer(&pubFile);
+    writer.setAutoFormatting(true);
+    writer.writeStartDocument();            //写个开头，不过在已经有开头的文件不需要再写一边开头
+
+    // start end element不能随便使用，使用了便成为整个xml文件的开头和结束
+    /// TODO：考虑中间插入节点
+    writer.writeStartElement("Path_File");
+
+    for(int i=0;i<pnameJob.size();i++)
+    {
+        writer.writeStartElement("Record");
+        writer.writeTextElement("Process_Name",pnameJob[i]);
+        writer.writeTextElement("Private_File_Path",priPathJob[i]);
+        writer.writeTextElement("Argument_File_Path",argPathJob[i]);
+        writer.writeTextElement("Log_File_Path",logPathJob[i]);
+        writer.writeTextElement("Start_Time",stimeJob[i]);
+        writer.writeEndElement();
+    }
+    writer.writeEndDocument();
+    pubFile.close();
+
+    /// 3.删除此条table中的记录,界面中的应该最后删除，等一切链接断开之后再做删除
+    willRemoveRecord=true;
+    setHistoryTableData();  // 最后整个刷新一下table
+}
+
+void qjdProcessMainWindow::saveRecord()
+{
+    /// 保存什么捏？
+}
+
+/// 导入索引文件
+void qjdProcessMainWindow::on_actionImport_triggered()
+{
+    importFileName=QFileDialog::getOpenFileName(this,tr("Import index file"), "/home/xtf", tr("Index Files (*.index)"));
+    qDebug()<<importFileName;
+    setHistoryTableData();  // 最后整个刷新一下table
+}
+
+/// 导出索引文件
+void qjdProcessMainWindow::on_actionExport_Main_File_triggered()
+{
+    QString exportFileName=QFileDialog::getSaveFileName(this,tr("Export index file"), "/home/xtf", tr("Index Files (*.index)"));
+    if(!QFile::copy(importFileName,exportFileName))
+        qDebug()<<"Export Failed";
+}
+
+/// 导出所有日志文件
+void qjdProcessMainWindow::on_actionExport_Log_File_triggered()
+{
+    QString saveToDirName=QFileDialog::getExistingDirectory(this, tr("Choose a Directory to Export Log Files"),
+                                                            "/home/xtf",
+                                                            QFileDialog::ShowDirsOnly|QFileDialog::DontResolveSymlinks);
+    if(saveToDirName=="")
+    {
+        QMessageBox::warning(this, "Choose One",  "You must choose a dir to export...");
+    }
+    else
+    {
+        QDir saveToDir;
+        saveToDir.setPath(saveToDirName);
+        QVector<QString> priPathCopy;
+        QVector<QString> argPathCopy;
+        QVector<QString> logPathCopy;
+        for(int i=0;i<priPathJob.size();i++)
+        {
+            priPathCopy<<priPathJob[i].right(priPathJob[i].size()-1-priPathJob[i].lastIndexOf("/"));
+            argPathCopy<<argPathJob[i].right(argPathJob[i].size()-1-argPathJob[i].lastIndexOf("/"));
+            logPathCopy<<logPathJob[i].right(logPathJob[i].size()-1-logPathJob[i].lastIndexOf("/"));
+        }
+
+        // 开始复制
+        bool failed=false;
+        for(int i=0;i<priPathJob.size();i++)
+        {
+            if(!QFile::copy(priPathJob[i],saveToDir.absoluteFilePath(priPathCopy[i])))
+            {
+                qDebug()<<"Copy priPath file failed"<<priPathJob[i];
+                failed=true;
+            }
+            if(!QFile::copy(argPathJob[i],saveToDir.absoluteFilePath(argPathCopy[i])))
+            {
+                qDebug()<<"Copy argPath file failed"<<argPathJob[i];
+                failed=true;
+            }
+            if(!QFile::copy(logPathJob[i],saveToDir.absoluteFilePath(logPathCopy[i])))
+            {
+                qDebug()<<"Copy logPath file failed"<<logPathJob[i];
+                failed=true;
+            }
+        }
+        if(failed==false)
+        {
+            QMessageBox::information(this, "Success",  "Export log file success complete");
+        }
+        if(failed==true)
+        {
+            QMessageBox::warning(this, "Something wrong",
+                                 "May be there were already have some same name file existed in the dir that can`t be overwrited!");
+        }
+    }
+}
+
+/// 菜单切换显示
+// 切换多次会存在显示问题。。。
+void qjdProcessMainWindow::on_actionSystem_Monitor_triggered(bool checked)
+{
+    if(checked==true)
+    {
+        ui->actionSystemProcess->setChecked(true);
+        ui->actionJobControl->setChecked(false);
+
+        ui->actionChoose_Field->setChecked(false);
+        ui->actionAll_task->setChecked(false);
+        ui->actionActive_Task->setChecked(false);
+
+        ui->stackedWidgetTable->setCurrentIndex(0);
+        ui->tableSys->setCurrentCell(0,0);
+        ui->stackedWidgetPage->setCurrentIndex(0);
+    }
+    if(checked==false)
+    {
+        ui->actionSystem_Monitor->setChecked(true);
+    }
+}
+
+void qjdProcessMainWindow::on_actionChoose_Field_triggered(bool checked)
+{
+    if(checked==true)
+    {
+        ui->actionSystemProcess->setChecked(true);
+        ui->actionJobControl->setChecked(false);
+
+        ui->actionSystem_Monitor->setChecked(false);
+        ui->actionAll_task->setChecked(false);
+        ui->actionActive_Task->setChecked(false);
+
+        ui->stackedWidgetTable->setCurrentIndex(0);
+        ui->tableSys->setCurrentCell(1,0);
+        ui->stackedWidgetPage->setCurrentIndex(optionsIndex);
+    }
+    if(checked==false)
+    {
+        ui->actionChoose_Field->setChecked(true);
+    }
+}
+
+void qjdProcessMainWindow::on_actionAll_task_triggered(bool checked)
+{
+    if( checked==true)
+    {
+        ui->actionSystemProcess->setChecked(false);
+        ui->actionJobControl->setChecked(true);
+
+        ui->actionSystem_Monitor->setChecked(false);
+        ui->actionChoose_Field->setChecked(false);
+        ui->actionActive_Task->setChecked(false);
+
+        ui->stackedWidgetTable->setCurrentIndex(1);
+        ui->tableJob->setCurrentCell(0,0);
+        ui->stackedWidgetPage->setCurrentIndex(1);
+    }
+    if(checked==false)
+    {
+        ui->actionAll_task->setChecked(true);
+    }
+}
+
+void qjdProcessMainWindow::on_actionActive_Task_triggered(bool checked)
+{
+    if( checked==true)
+    {
+        ui->actionSystemProcess->setChecked(false);
+        ui->actionJobControl->setChecked(true);
+
+        ui->actionSystem_Monitor->setChecked(false);
+        ui->actionChoose_Field->setChecked(false);
+        ui->actionAll_task->setChecked(false);
+
+        ui->stackedWidgetTable->setCurrentIndex(1);
+        ui->tableJob->setCurrentCell(1,0);
+        ui->stackedWidgetPage->setCurrentIndex(2);
+    }
+    if(checked==false)
+    {
+        ui->actionActive_Task->setChecked(true);
+    }
+}
+
+

@@ -41,6 +41,13 @@ void qjdShowLog::showLog(QString fileName)
     QTextCodec *codec = QTextCodec::codecForName("UTF-8");
     QString string = codec->toUnicode(a);
 
+    ui->labelFullPath->setText(fileName);
     ui->logBrowser->setText(string);
 
 }
+
+//void qjdShowLog::on_btnClose_clicked()
+//{
+//    /// 哪个发出的,无法解决多重对象的判别以及对象删除的问题
+////    emit sigCloseLog();
+//}
