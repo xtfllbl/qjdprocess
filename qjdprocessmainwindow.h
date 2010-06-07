@@ -37,9 +37,9 @@ public:
     /// 自有类定义区
     qjdoptions *options;
     Proc *proc;
-    qjdStartTask *startTask;
-    qjdRestartTask *reStartTask;
-    qjdShowLog *showLog;
+//    qjdStartTask *startTask;
+//    qjdRestartTask *reStartTask;
+//    qjdShowLog *showLog;
     qjdFilterLineEdit *filterEdit;
 
     QTimer *timer;
@@ -56,14 +56,17 @@ public:
     QAction *actHan;
     QAction *actView;
 
-    QMenu *menu2;
-    QAction *actSaveAs;
-    QAction *actRefresh;
-    QAction *actClose;
+//    QMenu *menu2;
+//    QAction *actSaveAs;
+//    QAction *actRefresh;
+//    QAction *actClose;
 
     QMenu *menuShowLog;
-    QAction *actShowLog;
-    QAction *delLog;
+//    QAction *actShowLog;
+    QAction *actDelLog;
+
+    QMenu *menuActiveLogBrowser;
+    QAction *actRefreshLog;
 
     QString aPid;
     QString aCmd;
@@ -210,6 +213,7 @@ private:
     QFile logFile;
 
     QFile fHisArgu;
+    QFile showFile;
     QFile fActArgu;
     QFile fActive;
 
@@ -242,6 +246,8 @@ private:
     QString ltimeJob;
     QString endtimeJob;
 
+    QString savedOpendActiveLogFileName;
+
     int historyTableRowNumber;
     int historyTableColNumber;
     int selectRowNum;
@@ -252,7 +258,7 @@ private:
     /// -----------------------------///
     int optionsIndex;
     QHash<int,int> hashLog;
-    QHash<QString,QString> hashFileName;
+//    QHash<QString,QString> hashFileName;
     bool rightClick;
     bool rightClick2;
     bool willRemoveRecord;
@@ -260,31 +266,30 @@ private:
 
     QString importFileName; //记录着索引文件的路径
 private slots:
+    void on_actionExport_triggered();
     void on_actionActive_Task_triggered(bool);
     void on_actionAll_task_triggered(bool);
     void on_actionChoose_Field_triggered(bool);
     void on_actionSystem_Monitor_triggered(bool);
 
-    void on_actionExport_Log_File_triggered();
-    void on_actionExport_Main_File_triggered();
     void on_actionImport_triggered();
     void on_tableJob_itemClicked(QTableWidgetItem* item);
     void on_actionJobControl_triggered(bool );
     void on_actionSystemProcess_triggered(bool );
     void on_tableSys_itemClicked(QTableWidgetItem* item);
-    void on_btnShowLog_clicked();
     void on_historyTable_cellDoubleClicked(int row, int column);
-    void on_actionStart_Process_triggered();
+//    void on_actionStart_Process_triggered();
     void keyPress(QKeyEvent *);
     void on_tblMain_pressed(QModelIndex );
     void handleChooseField();
     void on_actionExit_triggered();
     void autoRefresh();
     void showContextMenuTblMain(QPoint);
-    void showContextMenuTableJob(int,int);
+//    void showContextMenuTableJob(int,int);
     void showContextMenuHistoryTable(int,int);
-    void prepareToShowTableJob();
+//    void prepareToShowTableJob();
     void prepareToShowLog();
+    void showActiveLogMenu();
 
     void killProcess();
     void terProcess();
@@ -308,12 +313,13 @@ private slots:
 
     void refreshTable();
 
-    void saveLog();
-    void refreshLog();
-    void closeLog();
+//    void saveLog();
+//    void refreshLog();
+//    void closeLog();
     void deleteLog();
 
     void deleteRecord();
     void saveRecord();
+    void refreshActiveLog();
 };
 #endif // QJDPROCESSMAINWINDOW_H

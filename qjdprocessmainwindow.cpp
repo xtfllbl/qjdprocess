@@ -122,17 +122,21 @@ qjdProcessMainWindow::qjdProcessMainWindow(QWidget *parent) :
     connect(ui->tblMain, SIGNAL(customContextMenuRequested(const QPoint&)),
             this, SLOT(showContextMenuTblMain(const QPoint&)));
 
-    menu2=NULL;
-    ui->tableJob->setContextMenuPolicy(Qt::CustomContextMenu);
-    /// 同时要连接2个信号和2个槽
-    // 目前为止按找顺序执行，不知更换平台后会发生什么
-    connect(ui->tableJob, SIGNAL(customContextMenuRequested(const QPoint&)),this, SLOT(prepareToShowTableJob())); // must run 1st
-    connect(ui->tableJob, SIGNAL(cellClicked(int,int)),this, SLOT(showContextMenuTableJob(int,int))); // must run 2nd
+//    menu2=NULL;
+//    ui->tableJob->setContextMenuPolicy(Qt::CustomContextMenu);
+//    /// 同时要连接2个信号和2个槽
+//    // 目前为止按找顺序执行，不知更换平台后会发生什么
+//    connect(ui->tableJob, SIGNAL(customContextMenuRequested(const QPoint&)),this, SLOT(prepareToShowTableJob())); // must run 1st
+//    connect(ui->tableJob, SIGNAL(cellClicked(int,int)),this, SLOT(showContextMenuTableJob(int,int))); // must run 2nd
 
     menuShowLog=NULL;
     ui->historyTable->setContextMenuPolicy(Qt::CustomContextMenu);
     connect(ui->historyTable, SIGNAL(customContextMenuRequested(const QPoint&)),this, SLOT(prepareToShowLog())); // must run 1st
     connect(ui->historyTable, SIGNAL(cellClicked(int,int)),this, SLOT(showContextMenuHistoryTable(int,int))); // must run 2nd
+
+    menuActiveLogBrowser=NULL;
+    ui->activeLogBrowser->setContextMenuPolicy(Qt::CustomContextMenu);
+    connect(ui->activeLogBrowser, SIGNAL(customContextMenuRequested(const QPoint&)),this, SLOT(showActiveLogMenu())); // must run 1st
 
     //设置右键显示的内容,以及执行槽
     menu = new QMenu(ui->tblMain); //设置为tblMain的菜单
@@ -147,20 +151,23 @@ qjdProcessMainWindow::qjdProcessMainWindow(QWidget *parent) :
     connect(actStop, SIGNAL(triggered()), this, SLOT(stopProcess()));
     connect(actCon, SIGNAL(triggered()), this, SLOT(conProcess()));
 
-    menu2 = new QMenu(ui->tableJob); //设置为tableJob的菜单
-    actSaveAs = menu2->addAction("Save As...");
-    //    actRefresh = menu2->addAction("Refresh");
-    actClose = menu2->addAction("Close");
-    connect(actSaveAs, SIGNAL(triggered()), this, SLOT(saveLog()));
-    //    connect(actRefresh, SIGNAL(triggered()), this, SLOT(refreshLog()));
-    connect(actClose, SIGNAL(triggered()), this, SLOT(closeLog()));
+//    menu2 = new QMenu(ui->tableJob); //设置为tableJob的菜单
+//    actSaveAs = menu2->addAction("Save As...");
+//    actClose = menu2->addAction("Close");
+//    connect(actSaveAs, SIGNAL(triggered()), this, SLOT(saveLog()));
+//    connect(actClose, SIGNAL(triggered()), this, SLOT(closeLog()));
 
     menuShowLog = new QMenu(ui->historyTable); //设置为tableJob的菜单
-    actShowLog = menuShowLog->addAction("Show Detail Log");
-    delLog = menuShowLog->addAction("Delete this Record");
-    connect(actShowLog, SIGNAL(triggered()), this, SLOT(on_btnShowLog_clicked()));
-    connect(delLog, SIGNAL(triggered()), this, SLOT(deleteLog()));
-    // 按要求显示进程名称
+//    actShowLog = menuShowLog->addAction("Show Detail Log");
+    actDelLog = menuShowLog->addAction("Delete this Record");
+    connect(actDelLog, SIGNAL(triggered()), this, SLOT(deleteLog()));
+
+    menuActiveLogBrowser=new QMenu(ui->activeLogBrowser);
+    actRefreshLog=menuActiveLogBrowser->addAction("Refresh this log");
+    connect(actRefreshLog, SIGNAL(triggered()), this, SLOT(refreshActiveLog()));
+
+
+    /// 按要求显示进程名称
     connect(ui->comboProcess,SIGNAL(currentIndexChanged(int)),this,SLOT(autoRefresh()));
 
     proc->refresh();
@@ -831,22 +838,22 @@ void qjdProcessMainWindow::showContextMenuTblMain(QPoint )
     }
 }
 
-void qjdProcessMainWindow::prepareToShowTableJob()
-{
-    //    qDebug()<<"IN 1";
-    rightClick=true;
-}
+//void qjdProcessMainWindow::prepareToShowTableJob()
+//{
+//    //    qDebug()<<"IN 1";
+//    rightClick=true;
+//}
 
-void qjdProcessMainWindow::showContextMenuTableJob(int a,int b)
-{
+//void qjdProcessMainWindow::showContextMenuTableJob(int a,int b)
+//{
     //    qDebug()<<"IN 2";
     //    savedRow=a;
-    if(menu2 && a>2 && rightClick==true)
-    {        
-        menu2->exec(QCursor::pos());
-    }
-    rightClick=false;
-}
+//    if(menu2 && a>2 && rightClick==true)
+//    {
+//        menu2->exec(QCursor::pos());
+//    }
+//    rightClick=false;
+//}
 
 void qjdProcessMainWindow::prepareToShowLog()
 {
@@ -865,6 +872,13 @@ void qjdProcessMainWindow::showContextMenuHistoryTable(int a,int b)
     rightClick2=false;
 }
 
+void qjdProcessMainWindow::showActiveLogMenu()
+{
+    if(menuActiveLogBrowser)
+    {
+        menuActiveLogBrowser->exec(QCursor::pos());
+    }
+}
 void qjdProcessMainWindow::killProcess()
 {
     send_to_selected(SIGKILL);
@@ -2460,7 +2474,7 @@ void qjdProcessMainWindow::setFirstActiveTableData()
 
     // 使用hash，确保进程对应最新的日志
     hashActive.clear();
-    ui->activeArguBrowser->clear();
+//    ui->activeArguBrowser->clear();
     for(int i=0;i<tempCmd.size();i++)
     {
         hashActive[tempCmd[i]]=tempPname[i];
@@ -2700,10 +2714,12 @@ void qjdProcessMainWindow::on_historyTable_clicked(QModelIndex index)
     }
     if(willRemoveRecord==false)
     {
+        /// ---------------------显示参数文件-------------------- ///
         selectRowNum=index.row();
         //    setHistoryTableArguments();
         fHisArgu.setFileName(argPathJob[selectRowNum]);
-        ui->labelArguFileName->setText(argPathJob[selectRowNum]);
+        QString groupName=argPathJob[selectRowNum].left(argPathJob[selectRowNum].indexOf(".arg"));
+        ui->labelArguFileName->setText(groupName);
         if(!fHisArgu.open(QFile::ReadOnly))
             qDebug()<<"open histable argu failure";
         else
@@ -2757,7 +2773,20 @@ void qjdProcessMainWindow::on_historyTable_clicked(QModelIndex index)
         fHisArgu.close();
 
         //    ui->btnRestart->setEnabled(true);   //开启restart
-        ui->btnShowLog->setEnabled(true);
+
+        /// --------------------显示日志文件-------------------------- ///
+        showFile.setFileName(logPathJob[selectRowNum]);
+        if(!showFile.open(QFile::ReadOnly))
+            qDebug()<<"show File open failed";
+
+        QByteArray a=showFile.readAll();
+
+        QTextCodec *codec = QTextCodec::codecForName("UTF-8");
+        QString string = codec->toUnicode(a);
+
+        ui->historyLogBrowser->setText(string);
+
+        showFile.close();
     }
 }
 
@@ -2816,8 +2845,22 @@ void qjdProcessMainWindow::on_activeTable_clicked(QModelIndex index)
         actArgu.append("\n");
     }
     ui->activeArguBrowser->setText(actArgu);
-
     fActArgu.close();
+
+    /// --------------------显示日志文件-------------------------- ///
+    showFile.setFileName(logPathJob[hashActive.value(hashActive.keys().at(index.row()))]);
+    if(!showFile.open(QFile::ReadOnly))
+        qDebug()<<"show File open failed";
+
+    savedOpendActiveLogFileName=showFile.fileName();  // 保存一下，用来刷新
+    QByteArray a=showFile.readAll();
+
+    QTextCodec *codec = QTextCodec::codecForName("UTF-8");
+    QString string = codec->toUnicode(a);
+
+    ui->activeLogBrowser->setText(string);
+
+    showFile.close();
 }
 
 void qjdProcessMainWindow::setActiveTableData()
@@ -2977,9 +3020,8 @@ void qjdProcessMainWindow::closeEvent(QCloseEvent *)
         fActive.close();
 }
 
-void qjdProcessMainWindow::on_actionStart_Process_triggered()
-{
-    /// 什么也不做
+//void qjdProcessMainWindow::on_actionStart_Process_triggered()
+//{
     //    startTask=new qjdStartTask();
     //    startTask->setAttribute(Qt::WA_DeleteOnClose);  //添加这句以备删除,程序仍然会崩溃
 
@@ -2988,7 +3030,7 @@ void qjdProcessMainWindow::on_actionStart_Process_triggered()
     ////    ui->tabWidgetJob->insertTab(2,startTask,"Start Task");
     ////    ui->tabWidgetJob->setCurrentIndex(2);
     //    connect(startTask,SIGNAL(sigCloseStartTask()),this,SLOT(closeTabStartTask()));
-}
+//}
 
 void qjdProcessMainWindow::on_historyTable_cellDoubleClicked(int row, int column)
 {
@@ -3009,38 +3051,6 @@ void qjdProcessMainWindow::refreshTable()
 
     setHistoryTableData();
     setFirstActiveTableData();
-}
-
-
-void qjdProcessMainWindow::on_btnShowLog_clicked()
-{
-    /// 如此创建对象，则connect多次，引起错误
-    // 未解决
-    showLog=new qjdShowLog();
-
-    int a=ui->historyTable->currentRow();
-    showLog->showLog(logPathJob.at(a)); // 调用函数显示
-    QString tabName=logPathJob.at(a);
-    tabName=tabName.left(tabName.indexOf(".log"));
-    qDebug()<<tabName.lastIndexOf("/");
-    tabName=tabName.right(tabName.size()-1-tabName.lastIndexOf("/"));   //由于是index所以size要减一
-    tabName.replace("_"," ");
-    hashFileName.insert(tabName,logPathJob.at(a));  //保存显示名字于真实路径的关系
-
-    int temp=ui->stackedWidgetPage->addWidget(showLog);
-    ui->stackedWidgetPage->setCurrentIndex(temp);
-
-    /// 在table中添加widget用来显示,还没解决对应问题,哈西表》
-    QTableWidgetItem *newItem = new QTableWidgetItem();
-    newItem->setText(tabName);      //名称太长，必须精简
-    ui->tableJob->setRowCount(ui->tableJob->rowCount()+1);      //加一行
-    ui->tableJob->setItem(ui->tableJob->rowCount()-1, 0, newItem);  //减一成为index
-    ui->tableJob->setCurrentCell(ui->tableJob->rowCount()-1,0); //理由同上
-
-    /// 保存table于widget之间的对应关系
-    // <table.index, stack.index>
-    hashLog.insert(ui->tableJob->currentRow(),ui->stackedWidgetPage->currentIndex());
-    qDebug()<<hashLog;
 }
 
 void qjdProcessMainWindow::filterProcess()
@@ -3175,39 +3185,40 @@ void qjdProcessMainWindow::on_tableJob_itemClicked(QTableWidgetItem* item)
     }
 }
 
-void qjdProcessMainWindow::saveLog()
-{
-    qDebug()<<"save log";
-    /// 直接有方法，不需要手工复制
-    QString saveFileName=QFileDialog::getSaveFileName(this,tr("Save As..."), "/home/xtf", tr("Log Files (*.log *.txt )"));
-    QString originFileName=hashFileName.value(ui->tableJob->currentItem()->text());
+//void qjdProcessMainWindow::saveLog()
+//{
+//    qDebug()<<"save log";
+//    /// 直接有方法，不需要手工复制
+//    QString saveFileName=QFileDialog::getSaveFileName(this,tr("Save As..."), "/home/xtf", tr("Log Files (*.log *.txt )"));
+////    QString originFileName=hashFileName.value(ui->tableJob->currentItem()->text());
 
-    if(!QFile::copy(originFileName,saveFileName))
-        qDebug()<<"Save As... Failed";
-}
+//    if(!QFile::copy(originFileName,saveFileName))
+//        qDebug()<<"Save As... Failed";
+//}
 
-void qjdProcessMainWindow::refreshLog()
-{
-    /// 更新原有showLog，产生一定的麻烦,不如关闭再开来的实在
-    // 使源程序自带刷新？
-    qDebug()<<"TODO:refresh log";
-    //    ui->stackedWidgetPage->currentWidget()->
-}
+//void qjdProcessMainWindow::refreshLog()
+//{
+//    /// 更新原有showLog，产生一定的麻烦,不如关闭再开来的实在
+//    // 使源程序自带刷新？
+//    qDebug()<<"TODO:refresh log";
+//    //    ui->stackedWidgetPage->currentWidget()->
+//}
 
-void qjdProcessMainWindow::closeLog()
-{
-    /// 仅仅是关闭窗口而已
-    qDebug()<<"close log";
-    ui->stackedWidgetPage->removeWidget(ui->stackedWidgetPage->currentWidget());
-    // 关闭之后的后续工作
-    //    hashLog.remove(ui->tableJob->currentRow()); // 不能删除，因为之前的对应关系还会正确，这是由于直接把widget remove掉了，而不是hide
-    ui->tableJob->removeRow(ui->tableJob->currentRow());  //移除被关闭的项目
+//void qjdProcessMainWindow::closeLog()
+//{
+//    /// 仅仅是关闭窗口而已
+//    qDebug()<<"close log";
+//    ui->stackedWidgetPage->removeWidget(ui->stackedWidgetPage->currentWidget());
+//    // 关闭之后的后续工作
+//    //    hashLog.remove(ui->tableJob->currentRow());
+// 不能删除，因为之前的对应关系还会正确，这是由于直接把widget remove掉了，而不是hide
+//    ui->tableJob->removeRow(ui->tableJob->currentRow());  //移除被关闭的项目
 
-    if(ui->tableJob->currentRow()<=2)
-    {
-        ui->stackedWidgetPage->setCurrentIndex(2);
-    }
-}
+//    if(ui->tableJob->currentRow()<=2)
+//    {
+//        ui->stackedWidgetPage->setCurrentIndex(2);
+//    }
+//}
 
 void qjdProcessMainWindow::deleteLog()
 {
@@ -3304,71 +3315,6 @@ void qjdProcessMainWindow::on_actionImport_triggered()
     qDebug()<<importFileName;
     setHistoryTableData();  // 最后整个刷新一下table
 }
-
-/// 导出索引文件
-void qjdProcessMainWindow::on_actionExport_Main_File_triggered()
-{
-    QString exportFileName=QFileDialog::getSaveFileName(this,tr("Export index file"), "/home/xtf", tr("Index Files (*.index)"));
-    if(!QFile::copy(importFileName,exportFileName))
-        qDebug()<<"Export Failed";
-}
-
-/// 导出所有日志文件
-void qjdProcessMainWindow::on_actionExport_Log_File_triggered()
-{
-    QString saveToDirName=QFileDialog::getExistingDirectory(this, tr("Choose a Directory to Export Log Files"),
-                                                            "/home/xtf",
-                                                            QFileDialog::ShowDirsOnly|QFileDialog::DontResolveSymlinks);
-    if(saveToDirName=="")
-    {
-        QMessageBox::warning(this, "Choose One",  "You must choose a dir to export...");
-    }
-    else
-    {
-        QDir saveToDir;
-        saveToDir.setPath(saveToDirName);
-        QVector<QString> priPathCopy;
-        QVector<QString> argPathCopy;
-        QVector<QString> logPathCopy;
-        for(int i=0;i<priPathJob.size();i++)
-        {
-            priPathCopy<<priPathJob[i].right(priPathJob[i].size()-1-priPathJob[i].lastIndexOf("/"));
-            argPathCopy<<argPathJob[i].right(argPathJob[i].size()-1-argPathJob[i].lastIndexOf("/"));
-            logPathCopy<<logPathJob[i].right(logPathJob[i].size()-1-logPathJob[i].lastIndexOf("/"));
-        }
-
-        // 开始复制
-        bool failed=false;
-        for(int i=0;i<priPathJob.size();i++)
-        {
-            if(!QFile::copy(priPathJob[i],saveToDir.absoluteFilePath(priPathCopy[i])))
-            {
-                qDebug()<<"Copy priPath file failed"<<priPathJob[i];
-                failed=true;
-            }
-            if(!QFile::copy(argPathJob[i],saveToDir.absoluteFilePath(argPathCopy[i])))
-            {
-                qDebug()<<"Copy argPath file failed"<<argPathJob[i];
-                failed=true;
-            }
-            if(!QFile::copy(logPathJob[i],saveToDir.absoluteFilePath(logPathCopy[i])))
-            {
-                qDebug()<<"Copy logPath file failed"<<logPathJob[i];
-                failed=true;
-            }
-        }
-        if(failed==false)
-        {
-            QMessageBox::information(this, "Success",  "Export log file success complete");
-        }
-        if(failed==true)
-        {
-            QMessageBox::warning(this, "Something wrong",
-                                 "May be there were already have some same name file existed in the dir that can`t be overwrited!");
-        }
-    }
-}
-
 /// 菜单切换显示
 // 切换多次会存在显示问题。。。
 void qjdProcessMainWindow::on_actionSystem_Monitor_triggered(bool checked)
@@ -3456,3 +3402,102 @@ void qjdProcessMainWindow::on_actionActive_Task_triggered(bool checked)
 }
 
 
+
+void qjdProcessMainWindow::on_actionExport_triggered()
+{
+    /// 导出所有日志文件
+    QString saveToDirName=QFileDialog::getExistingDirectory(this, tr("Choose a Directory to Export Index & ALL Log Files"),
+                                                            "/home/xtf",
+                                                            QFileDialog::ShowDirsOnly|QFileDialog::DontResolveSymlinks);
+    if(saveToDirName=="")
+    {
+        QMessageBox::warning(this, "Choose One",  "You must choose a dir to export...");
+    }
+    else
+    {
+        QDir saveToDir;
+        saveToDir.setPath(saveToDirName);
+        /// 处理索引文件
+        QString exportFileName=saveToDir.absoluteFilePath(importFileName.right(importFileName.size()-1-importFileName.lastIndexOf("/")));
+
+        // 处理日志文件目录地址
+        QVector<QString> priPathCopy;
+        QVector<QString> argPathCopy;
+        QVector<QString> logPathCopy;
+        for(int i=0;i<priPathJob.size();i++)
+        {
+            priPathCopy<<saveToDir.absoluteFilePath(priPathJob[i].right(priPathJob[i].size()-1-priPathJob[i].lastIndexOf("/")));
+            argPathCopy<<saveToDir.absoluteFilePath(argPathJob[i].right(argPathJob[i].size()-1-argPathJob[i].lastIndexOf("/")));
+            logPathCopy<<saveToDir.absoluteFilePath(logPathJob[i].right(logPathJob[i].size()-1-logPathJob[i].lastIndexOf("/")));
+        }
+        pubFile.setFileName(exportFileName);
+        if(!pubFile.open(QFile::WriteOnly))
+            qDebug()<<"pubFile open failed";
+
+        QXmlStreamWriter writer(&pubFile);
+        writer.setAutoFormatting(true);
+        writer.writeStartDocument();            //写个开头，不过在已经有开头的文件不需要再写一边开头
+
+        // start end element不能随便使用，使用了便成为整个xml文件的开头和结束
+        /// TODO：考虑中间插入节点
+        writer.writeStartElement("Path_File");
+
+        for(int i=0;i<pnameJob.size();i++)
+        {
+            writer.writeStartElement("Record");
+            writer.writeTextElement("Process_Name",pnameJob[i]);
+            writer.writeTextElement("Private_File_Path",priPathCopy[i]);
+            writer.writeTextElement("Argument_File_Path",argPathCopy[i]);
+            writer.writeTextElement("Log_File_Path",logPathCopy[i]);
+            writer.writeTextElement("Start_Time",stimeJob[i]);
+            writer.writeEndElement();
+        }
+        writer.writeEndDocument();
+        pubFile.close();
+
+        // 开始复制日志文件
+        bool failed=false;
+        for(int i=0;i<priPathJob.size();i++)
+        {
+            if(!QFile::copy(priPathJob[i],priPathCopy[i]))
+            {
+                qDebug()<<"Copy priPath file failed"<<priPathJob[i];
+                failed=true;
+            }
+            if(!QFile::copy(argPathJob[i],argPathCopy[i]))
+            {
+                qDebug()<<"Copy argPath file failed"<<argPathJob[i];
+                failed=true;
+            }
+            if(!QFile::copy(logPathJob[i],logPathCopy[i]))
+            {
+                qDebug()<<"Copy logPath file failed"<<logPathJob[i];
+                failed=true;
+            }
+        }
+        if(failed==false)
+        {
+            QMessageBox::information(this, "Success",  "Export log file success complete");
+        }
+        if(failed==true)
+        {
+            QMessageBox::warning(this, "Something happend in the exec",
+                                 "May be there were already have some same name file existed in the dir that can`t be overwrited!");
+        }
+    }
+}
+
+void qjdProcessMainWindow::refreshActiveLog()
+{
+    ui->activeLogBrowser->clear();
+
+    showFile.setFileName(savedOpendActiveLogFileName);
+    if(!showFile.open(QFile::ReadOnly))
+        qDebug()<<"show File open failed";
+
+    QByteArray a=showFile.readAll();
+    QTextCodec *codec = QTextCodec::codecForName("UTF-8");
+    QString string = codec->toUnicode(a);
+    ui->activeLogBrowser->setText(string);
+    showFile.close();
+}

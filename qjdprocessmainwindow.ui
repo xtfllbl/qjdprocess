@@ -326,7 +326,7 @@
        <number>1</number>
       </property>
       <property name="currentIndex">
-       <number>1</number>
+       <number>2</number>
       </property>
       <widget class="QWidget" name="pageSys">
        <layout class="QGridLayout" name="gridLayout_3">
@@ -590,174 +590,216 @@ selection-background-color: qlineargradient(spread:pad, x1:1, y1:0, x2:0.623398,
       <widget class="QWidget" name="pageAllJob">
        <layout class="QGridLayout" name="gridLayout_5">
         <item row="0" column="0">
-         <layout class="QVBoxLayout" name="verticalLayout">
-          <item>
-           <widget class="QTableWidget" name="historyTable">
-            <property name="styleSheet">
-             <string notr="true">gridline-color: rgb(200, 200, 200);
+         <widget class="QSplitter" name="splitter_2">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+          <widget class="QTableWidget" name="historyTable">
+           <property name="styleSheet">
+            <string notr="true">gridline-color: rgb(200, 200, 200);
 selection-color: rgb(255, 255, 255);
 selection-background-color: qlineargradient(spread:pad, x1:1, y1:0, x2:0.623398, y2:0.983, stop:0 rgba(80, 170, 255, 255), stop:1 rgba(85, 85, 255, 255));</string>
+           </property>
+           <property name="editTriggers">
+            <set>QAbstractItemView::NoEditTriggers</set>
+           </property>
+           <property name="alternatingRowColors">
+            <bool>true</bool>
+           </property>
+           <property name="selectionMode">
+            <enum>QAbstractItemView::SingleSelection</enum>
+           </property>
+           <property name="selectionBehavior">
+            <enum>QAbstractItemView::SelectRows</enum>
+           </property>
+           <property name="sortingEnabled">
+            <bool>false</bool>
+           </property>
+           <column>
+            <property name="text">
+             <string>Process Name</string>
             </property>
-            <property name="editTriggers">
-             <set>QAbstractItemView::NoEditTriggers</set>
+           </column>
+           <column>
+            <property name="text">
+             <string>Start Time</string>
             </property>
-            <property name="alternatingRowColors">
+           </column>
+           <column>
+            <property name="text">
+             <string>End Time</string>
+            </property>
+           </column>
+           <column>
+            <property name="text">
+             <string>Progress</string>
+            </property>
+           </column>
+           <column>
+            <property name="text">
+             <string>End Stat</string>
+            </property>
+           </column>
+          </widget>
+          <widget class="QSplitter" name="splitter">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <widget class="QTextBrowser" name="historyArguBrowser">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>225</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>5000</width>
+              <height>16777215</height>
+             </size>
+            </property>
+           </widget>
+           <widget class="QTextBrowser" name="historyLogBrowser">
+            <property name="enabled">
              <bool>true</bool>
             </property>
-            <property name="selectionMode">
-             <enum>QAbstractItemView::SingleSelection</enum>
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>0</height>
+             </size>
             </property>
-            <property name="selectionBehavior">
-             <enum>QAbstractItemView::SelectRows</enum>
+           </widget>
+          </widget>
+         </widget>
+        </item>
+        <item row="1" column="0">
+         <layout class="QHBoxLayout" name="horizontalLayout">
+          <item>
+           <widget class="QLabel" name="label_2">
+            <property name="maximumSize">
+             <size>
+              <width>100</width>
+              <height>16777215</height>
+             </size>
             </property>
-            <property name="sortingEnabled">
-             <bool>false</bool>
+            <property name="text">
+             <string>File Name:</string>
             </property>
-            <column>
-             <property name="text">
-              <string>Process Name</string>
-             </property>
-            </column>
-            <column>
-             <property name="text">
-              <string>Start Time</string>
-             </property>
-            </column>
-            <column>
-             <property name="text">
-              <string>End Time</string>
-             </property>
-            </column>
-            <column>
-             <property name="text">
-              <string>Progress</string>
-             </property>
-            </column>
-            <column>
-             <property name="text">
-              <string>End Stat</string>
-             </property>
-            </column>
            </widget>
           </item>
           <item>
-           <layout class="QHBoxLayout" name="horizontalLayout">
-            <item>
-             <widget class="QLabel" name="label_2">
-              <property name="maximumSize">
-               <size>
-                <width>100</width>
-                <height>16777215</height>
-               </size>
-              </property>
-              <property name="text">
-               <string>Arguments:</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QLabel" name="labelArguFileName">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="minimumSize">
-               <size>
-                <width>400</width>
-                <height>0</height>
-               </size>
-              </property>
-              <property name="text">
-               <string/>
-              </property>
-             </widget>
-            </item>
-           </layout>
-          </item>
-          <item>
-           <widget class="QTextBrowser" name="historyArguBrowser">
-            <property name="enabled">
-             <bool>true</bool>
+           <widget class="QLabel" name="labelArguFileName">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="minimumSize">
+             <size>
+              <width>400</width>
+              <height>0</height>
+             </size>
+            </property>
+            <property name="text">
+             <string/>
             </property>
            </widget>
           </item>
          </layout>
-        </item>
-        <item row="1" column="0">
-         <widget class="QPushButton" name="btnShowLog">
-          <property name="enabled">
-           <bool>false</bool>
-          </property>
-          <property name="text">
-           <string>Show Detail Log</string>
-          </property>
-          <property name="icon">
-           <iconset resource="image.qrc">
-            <normaloff>:/image/use/evolution-addressbook.png</normaloff>:/image/use/evolution-addressbook.png</iconset>
-          </property>
-         </widget>
         </item>
        </layout>
       </widget>
       <widget class="QWidget" name="pageActiveJob">
        <layout class="QGridLayout" name="gridLayout">
         <item row="0" column="0">
-         <widget class="QTableWidget" name="activeTable">
-          <property name="styleSheet">
-           <string notr="true">gridline-color: rgb(200, 200, 200);
+         <widget class="QSplitter" name="splitter_4">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+          <widget class="QTableWidget" name="activeTable">
+           <property name="styleSheet">
+            <string notr="true">gridline-color: rgb(200, 200, 200);
 selection-color: rgb(255, 255, 255);
 selection-background-color: qlineargradient(spread:pad, x1:1, y1:0, x2:0.623398, y2:0.983, stop:0 rgba(80, 170, 255, 255), stop:1 rgba(85, 85, 255, 255));</string>
-          </property>
-          <property name="editTriggers">
-           <set>QAbstractItemView::NoEditTriggers</set>
-          </property>
-          <property name="alternatingRowColors">
-           <bool>true</bool>
-          </property>
-          <property name="selectionMode">
-           <enum>QAbstractItemView::SingleSelection</enum>
-          </property>
-          <property name="selectionBehavior">
-           <enum>QAbstractItemView::SelectRows</enum>
-          </property>
-          <column>
-           <property name="text">
-            <string>Process Name</string>
            </property>
-          </column>
-          <column>
-           <property name="text">
-            <string>Start Time</string>
+           <property name="editTriggers">
+            <set>QAbstractItemView::NoEditTriggers</set>
            </property>
-          </column>
-          <column>
-           <property name="text">
-            <string>Statements</string>
+           <property name="alternatingRowColors">
+            <bool>true</bool>
            </property>
-          </column>
-          <column>
-           <property name="text">
-            <string>Progress</string>
+           <property name="selectionMode">
+            <enum>QAbstractItemView::SingleSelection</enum>
            </property>
-          </column>
-          <column>
-           <property name="text">
-            <string>Left Time</string>
+           <property name="selectionBehavior">
+            <enum>QAbstractItemView::SelectRows</enum>
            </property>
-          </column>
+           <column>
+            <property name="text">
+             <string>Process Name</string>
+            </property>
+           </column>
+           <column>
+            <property name="text">
+             <string>Start Time</string>
+            </property>
+           </column>
+           <column>
+            <property name="text">
+             <string>Statements</string>
+            </property>
+           </column>
+           <column>
+            <property name="text">
+             <string>Progress</string>
+            </property>
+           </column>
+           <column>
+            <property name="text">
+             <string>Left Time</string>
+            </property>
+           </column>
+          </widget>
+          <widget class="QSplitter" name="splitter_3">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <widget class="QTextBrowser" name="activeArguBrowser"/>
+           <widget class="QTextBrowser" name="activeLogBrowser"/>
+          </widget>
          </widget>
         </item>
         <item row="1" column="0">
-         <widget class="QLabel" name="label">
-          <property name="text">
-           <string>Arguments:</string>
-          </property>
-         </widget>
-        </item>
-        <item row="2" column="0">
-         <widget class="QTextBrowser" name="activeArguBrowser"/>
+         <layout class="QHBoxLayout" name="horizontalLayout_2">
+          <item>
+           <widget class="QLabel" name="label">
+            <property name="maximumSize">
+             <size>
+              <width>80</width>
+              <height>16777215</height>
+             </size>
+            </property>
+            <property name="text">
+             <string>File Name:</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="labelActiveName">
+            <property name="text">
+             <string/>
+            </property>
+           </widget>
+          </item>
+         </layout>
         </item>
        </layout>
       </widget>
@@ -778,22 +820,14 @@ selection-background-color: qlineargradient(spread:pad, x1:1, y1:0, x2:0.623398,
     <property name="title">
      <string>File</string>
     </property>
-    <widget class="QMenu" name="menuExport">
-     <property name="title">
-      <string>Export</string>
-     </property>
-     <addaction name="actionExport_Main_File"/>
-     <addaction name="actionExport_Log_File"/>
-    </widget>
     <addaction name="actionImport"/>
-    <addaction name="menuExport"/>
+    <addaction name="actionExport"/>
     <addaction name="actionExit"/>
    </widget>
    <widget class="QMenu" name="menuOption">
     <property name="title">
      <string>Option</string>
     </property>
-    <addaction name="actionStart_Process"/>
     <addaction name="separator"/>
     <addaction name="actionChoose_Field"/>
    </widget>
@@ -841,14 +875,6 @@ selection-background-color: qlineargradient(spread:pad, x1:1, y1:0, x2:0.623398,
     <string>Esc</string>
    </property>
   </action>
-  <action name="actionStart_Process">
-   <property name="checkable">
-    <bool>false</bool>
-   </property>
-   <property name="text">
-    <string>Start Process</string>
-   </property>
-  </action>
   <action name="actionSystemProcess">
    <property name="checkable">
     <bool>true</bool>
@@ -871,16 +897,6 @@ selection-background-color: qlineargradient(spread:pad, x1:1, y1:0, x2:0.623398,
   <action name="actionImport">
    <property name="text">
     <string>Import Index File</string>
-   </property>
-  </action>
-  <action name="actionExport_Main_File">
-   <property name="text">
-    <string>Export Main File</string>
-   </property>
-  </action>
-  <action name="actionExport_Log_File">
-   <property name="text">
-    <string>Export Log File</string>
    </property>
   </action>
   <action name="actionSystem_Monitor">
@@ -931,11 +947,15 @@ selection-background-color: qlineargradient(spread:pad, x1:1, y1:0, x2:0.623398,
     <string>Active Task</string>
    </property>
   </action>
+  <action name="actionExport">
+   <property name="text">
+    <string>Export</string>
+   </property>
+  </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <tabstops>
   <tabstop>historyTable</tabstop>
-  <tabstop>historyArguBrowser</tabstop>
   <tabstop>tableSys</tabstop>
  </tabstops>
  <resources>
