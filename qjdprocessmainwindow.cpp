@@ -116,7 +116,7 @@ qjdProcessMainWindow::qjdProcessMainWindow(QWidget *parent) :
     flagSortCMDLineSave=0;
     flagSortUidSave=0;
     flagSortUsrNameSave=0;
-    //设置右键弹出菜单
+    /// 设置右键发动弹出菜单
     menu=NULL;
     ui->tblMain->setContextMenuPolicy(Qt::CustomContextMenu);
     connect(ui->tblMain, SIGNAL(customContextMenuRequested(const QPoint&)),
@@ -131,15 +131,17 @@ qjdProcessMainWindow::qjdProcessMainWindow(QWidget *parent) :
 
     menuShowLog=NULL;
     ui->historyTable->setContextMenuPolicy(Qt::CustomContextMenu);
-    connect(ui->historyTable, SIGNAL(customContextMenuRequested(const QPoint&)),this, SLOT(prepareToShowLog())); // must run 1st
-    connect(ui->historyTable, SIGNAL(cellClicked(int,int)),this, SLOT(showContextMenuHistoryTable(int,int))); // must run 2nd
+    connect(ui->historyTable, SIGNAL(customContextMenuRequested(const QPoint&)),this, SLOT(showContextMenuHistoryTable()));
 
     menuActiveLogBrowser=NULL;
     ui->activeLogBrowser->setContextMenuPolicy(Qt::CustomContextMenu);
-    connect(ui->activeLogBrowser, SIGNAL(customContextMenuRequested(const QPoint&)),this, SLOT(showActiveLogMenu())); // must run 1st
+    connect(ui->activeLogBrowser, SIGNAL(customContextMenuRequested(const QPoint&)),this, SLOT(showActiveLogMenu()));
 
+    menuActiveTable=NULL;
+    ui->activeTable->setContextMenuPolicy(Qt::CustomContextMenu);
+    connect(ui->activeTable, SIGNAL(customContextMenuRequested(const QPoint&)),this, SLOT(showActiveTableMenu()));
     //设置右键显示的内容,以及执行槽
-    menu = new QMenu(ui->tblMain); //设置为tblMain的菜单
+    menu = new QMenu(ui->tblMain); /// 设置tblMain的右键菜单
     actStop = menu->addAction("Stop");
     actCon = menu->addAction("Continue");
     actTer = menu->addAction("Terminate");
@@ -157,15 +159,21 @@ qjdProcessMainWindow::qjdProcessMainWindow(QWidget *parent) :
 //    connect(actSaveAs, SIGNAL(triggered()), this, SLOT(saveLog()));
 //    connect(actClose, SIGNAL(triggered()), this, SLOT(closeLog()));
 
-    menuShowLog = new QMenu(ui->historyTable); //设置为tableJob的菜单
-//    actShowLog = menuShowLog->addAction("Show Detail Log");
-    actDelLog = menuShowLog->addAction("Delete this Record");
+    menuShowLog = new QMenu(ui->historyTable); /// 设置history table的右键菜单
+    actDelLog = menuShowLog->addAction("Delete this Record");   // 删除记录
     connect(actDelLog, SIGNAL(triggered()), this, SLOT(deleteLog()));
 
-    menuActiveLogBrowser=new QMenu(ui->activeLogBrowser);
-    actRefreshLog=menuActiveLogBrowser->addAction("Refresh this log");
+    menuActiveLogBrowser=new QMenu(ui->activeLogBrowser); /// 设置active table log browser的右键菜单
+    actRefreshLog=menuActiveLogBrowser->addAction("Refresh this log");      // 刷新记录
     connect(actRefreshLog, SIGNAL(triggered()), this, SLOT(refreshActiveLog()));
 
+    menuActiveTable=new QMenu(ui->activeTable);
+    actStopJob=menuActiveTable->addAction("Stop this job");                     // 暂停作业
+    actContinueJob=menuActiveTable->addAction("Continue this job");      // 继续作业
+    actKillJob=menuActiveTable->addAction("Kill this job");                          // 杀掉作业
+    connect(actStopJob, SIGNAL(triggered()), this, SLOT(stopJob()));
+    connect(actContinueJob, SIGNAL(triggered()), this, SLOT(continueJob()));
+    connect(actKillJob, SIGNAL(triggered()), this, SLOT(killJob()));
 
     /// 按要求显示进程名称
     connect(ui->comboProcess,SIGNAL(currentIndexChanged(int)),this,SLOT(autoRefresh()));
@@ -178,10 +186,11 @@ qjdProcessMainWindow::qjdProcessMainWindow(QWidget *parent) :
 
     importFileName="/home/xtf/pathFile.index"; // 默认索引文件位置
 
-    ui->historyTable->setSortingEnabled(false);       //自动排序关闭
-    ui->historyTable->horizontalHeader()->setSortIndicatorShown(true);
-    ui->historyTable->horizontalHeader()->setClickable(true);
-    ui->activeTable->setSortingEnabled(true);  //暂时用自带的，现无法获取cell widget中的value
+    /// 排序全部关闭，影响其他工作
+    //    ui->historyTable->setSortingEnabled(false);       //自动排序关闭
+    //    ui->historyTable->horizontalHeader()->setSortIndicatorShown(true);
+    //    ui->historyTable->horizontalHeader()->setClickable(true);
+    //    ui->activeTable->setSortingEnabled(true);  //暂时用自带的，现无法获取cell widget中的value
 
     historyTableColNumber=0;
     historyTableRowNumber=0;
@@ -855,21 +864,11 @@ void qjdProcessMainWindow::showContextMenuTblMain(QPoint )
 //    rightClick=false;
 //}
 
-void qjdProcessMainWindow::prepareToShowLog()
-{
-    //    qDebug()<<"IN 1";
-    rightClick2=true;
-}
 
-void qjdProcessMainWindow::showContextMenuHistoryTable(int a,int b)
+
+void qjdProcessMainWindow::showContextMenuHistoryTable()
 {
-    //    qDebug()<<"IN 2";
-    //    savedRow=a;
-    if(rightClick2==true)
-    {
-        menuShowLog->exec(QCursor::pos());
-    }
-    rightClick2=false;
+    menuShowLog->exec(QCursor::pos());
 }
 
 void qjdProcessMainWindow::showActiveLogMenu()
@@ -879,6 +878,15 @@ void qjdProcessMainWindow::showActiveLogMenu()
         menuActiveLogBrowser->exec(QCursor::pos());
     }
 }
+
+void qjdProcessMainWindow::showActiveTableMenu()
+{
+    if(menuActiveTable)
+    {
+        menuActiveTable->exec(QCursor::pos());
+    }
+}
+
 void qjdProcessMainWindow::killProcess()
 {
     send_to_selected(SIGKILL);
@@ -2419,13 +2427,13 @@ void qjdProcessMainWindow::keyPress(QKeyEvent *event)
     }
 }
 
-//  shit 这里也要用到这个文件。。。 通用性太差
+//  检查进程中自行作业的提取
 void qjdProcessMainWindow::setFirstActiveTableData()
 {
     qDebug()<<"setFirstActiveTableData";
     QVector<QString> pname;
     bool isPname=false;
-    fp.setFileName("/home/xtf/pathFile.index");
+    fp.setFileName(importFileName);
     fp.open(QFile::ReadOnly);
 
     QXmlStreamReader stream(&fp);
@@ -2458,6 +2466,7 @@ void qjdProcessMainWindow::setFirstActiveTableData()
     fp.close();
 
     QVector<QString> tempCmd;
+    QVector<int> tempCmdPid;  // 用来控制用
     QVector<int> tempPname;
     for(int i=0;i<proc->cmdVector.size();i++)
     {
@@ -2466,7 +2475,9 @@ void qjdProcessMainWindow::setFirstActiveTableData()
             if(proc->cmdVector.at(i).contains(pname[j]))
             {
                 // 返回及时作业中和历史记录中同名作业,会返回很多，而且可能不同名字
+                /// 绝对软肋，需要在整合中添加到可识别范围中
                 tempCmd<<proc->cmdVector.at(i);
+                tempCmdPid<<proc->pidVector.at(i);
                 tempPname<<j;
             }
         }
@@ -2474,10 +2485,12 @@ void qjdProcessMainWindow::setFirstActiveTableData()
 
     // 使用hash，确保进程对应最新的日志
     hashActive.clear();
+    hashActivePid.clear();
 //    ui->activeArguBrowser->clear();
     for(int i=0;i<tempCmd.size();i++)
     {
         hashActive[tempCmd[i]]=tempPname[i];
+        hashActivePid[tempCmd[i]]=tempCmdPid[i];
     }
     /// 设置完毕后才调用设置表格数据
     setActiveTableData();
@@ -2793,6 +2806,9 @@ void qjdProcessMainWindow::on_historyTable_clicked(QModelIndex index)
 void qjdProcessMainWindow::on_activeTable_clicked(QModelIndex index)
 {
     fActArgu.setFileName(argPathJob[hashActive.value(hashActive.keys().at(index.row()))]);
+    savedClickedActivePid=hashActivePid.value(hashActivePid.keys().at(index.row()));
+    qDebug()<<savedClickedActivePid;
+
     if(!fActArgu.open(QFile::ReadOnly))
         qDebug()<<"open act argu failure";
     else
@@ -3048,8 +3064,6 @@ void qjdProcessMainWindow::refreshTable()
     setHistoryTableData();
     ui->historyTable->resizeColumnsToContents();
     ui->activeTable->resizeColumnsToContents();
-
-    setHistoryTableData();
     setFirstActiveTableData();
 }
 
@@ -3303,10 +3317,10 @@ void qjdProcessMainWindow::deleteRecord()
     setHistoryTableData();  // 最后整个刷新一下table
 }
 
-void qjdProcessMainWindow::saveRecord()
-{
-    /// 保存什么捏？
-}
+//void qjdProcessMainWindow::saveRecord()
+//{
+//    /// 保存什么捏？
+//}
 
 /// 导入索引文件
 void qjdProcessMainWindow::on_actionImport_triggered()
@@ -3500,4 +3514,20 @@ void qjdProcessMainWindow::refreshActiveLog()
     QString string = codec->toUnicode(a);
     ui->activeLogBrowser->setText(string);
     showFile.close();
+}
+
+/// 获取进程对应pid，对其实施行动
+void qjdProcessMainWindow::stopJob()
+{
+    sendsig(savedClickedActivePid,SIGSTOP); //暂停
+}
+
+void qjdProcessMainWindow::continueJob()
+{
+    sendsig(savedClickedActivePid,SIGCONT); // 继续
+}
+
+void qjdProcessMainWindow::killJob()
+{
+    sendsig(savedClickedActivePid,SIGKILL);  //杀死
 }

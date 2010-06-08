@@ -68,6 +68,11 @@ public:
     QMenu *menuActiveLogBrowser;
     QAction *actRefreshLog;
 
+    QMenu *menuActiveTable;
+    QAction *actStopJob;
+    QAction *actContinueJob;
+    QAction *actKillJob;
+
     QString aPid;
     QString aCmd;
     QString aStat;
@@ -193,6 +198,7 @@ public:
     bool reportIsShow;
 
     QHash<QString, int> hashActive;
+    QHash<QString, int> hashActivePid;
 
 public slots:
     void setActiveTableData();
@@ -265,6 +271,7 @@ private:
 //    int /*savedRow*/;
 
     QString importFileName; //记录着索引文件的路径
+    int savedClickedActivePid;
 private slots:
     void on_actionExport_triggered();
     void on_actionActive_Task_triggered(bool);
@@ -286,10 +293,10 @@ private slots:
     void autoRefresh();
     void showContextMenuTblMain(QPoint);
 //    void showContextMenuTableJob(int,int);
-    void showContextMenuHistoryTable(int,int);
+    void showContextMenuHistoryTable();
 //    void prepareToShowTableJob();
-    void prepareToShowLog();
     void showActiveLogMenu();
+    void showActiveTableMenu();
 
     void killProcess();
     void terProcess();
@@ -319,7 +326,11 @@ private slots:
     void deleteLog();
 
     void deleteRecord();
-    void saveRecord();
+//    void saveRecord();
     void refreshActiveLog();
+
+    void stopJob();
+    void continueJob();
+    void killJob();
 };
 #endif // QJDPROCESSMAINWINDOW_H

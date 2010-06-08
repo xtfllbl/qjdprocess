@@ -2,7 +2,8 @@
 #include "ui_qjdstarttask.h"
 #include <QDebug>
 
-/// 提供个人便利，马上便会无用化
+// not using any more
+/// 提供个人便利
 qjdStartTask::qjdStartTask(QWidget *parent) :
     QDialog(parent),
     ui(new Ui::qjdStartTask)
@@ -46,7 +47,6 @@ void qjdStartTask::on_btnStart_pressed()
     QString fileName=ui->lineFileName->text();
     process->start(fileName);
     ui->lblStat->setText("Already Start");
-//    setWindowState(Qt::WindowMinimized); //无用
 }
 
 void qjdStartTask::on_btnStop_pressed()

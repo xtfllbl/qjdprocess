@@ -3,6 +3,7 @@
 #include <QDebug>
 #include <QTextCodec>
 
+// 采用内置显示，此方法废弃
 /// 接收参数，显示文件
 qjdShowLog::qjdShowLog(QWidget *parent) :
     QDialog(parent),
