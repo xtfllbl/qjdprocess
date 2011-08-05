@@ -1,7 +1,7 @@
 # -------------------------------------------------
 # Project created by QtCreator 2010-02-20T09:58:50
 # -------------------------------------------------
-TARGET = qjdprocess
+TARGET = Process
 TEMPLATE = app
 CONFIG += warn_off \
     qt \
@@ -10,6 +10,8 @@ CONFIG += warn_off \
 CONFIG += qtestlib
 QT += dbus
 QT += xml
+MOC_DIR = ../qjdProcess/tmp
+OBJECTS_DIR = ../qjdProcess/tmp
 
 SOURCES += main.cpp \
     qjdprocessmainwindow.cpp \
